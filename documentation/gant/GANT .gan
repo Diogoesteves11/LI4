@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="LI4" company="Uminho" webLink="http://" view-date="2026-02-13" view-index="0" gantt-divider-location="658" resource-divider-location="300" version="3.3.3322" locale="en_US">
+    <description/>
+    <view zooming-state="default:0" id="gantt-chart">
+        <field id="tpd15" name="Notes" width="20" order="0"/>
+        <field id="tpd3" name="Name" width="328" order="0"/>
+        <field id="tpd4" name="Begin date" width="164" order="1"/>
+        <field id="tpd5" name="End date" width="165" order="2"/>
+        <option id="filter.completedTasks" value="false"/>
+        <option id="filter.dueTodayTasks" value="false"/>
+        <option id="filter.overdueTasks" value="false"/>
+        <option id="filter.inProgressTodayTasks" value="false"/>
+        <option id="color.recent"><![CDATA[#ccffff #cccccc #eeeeee #66ff33 #66ff66]]></option>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="209" order="0"/>
+        <field id="1" name="Default role" width="85" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="0" uid="545a8487d7984f898c990f7e9112c358" name="Contextualização do Projeto e Levantamento do Caso de Estudo" color="#8cb6ce" shape="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" meeting="false" start="2026-02-12" duration="4" complete="0" expand="true"/>
+        <task id="1" uid="39873db8dae2478eb187e0738f9f584e" name="Análise do Caso de Estudo" color="#8cb6ce" meeting="false" start="2026-02-12" duration="4" complete="0" expand="true"/>
+        <task id="2" uid="cbecef5f6fdc49468af52e74df16ea78" name="Motivação e Objetivos" color="#8cb6ce" meeting="false" start="2026-02-12" duration="4" complete="0" expand="true"/>
+        <task id="3" uid="793ab6b2ff8e4ef897bfa7b11989d9d4" name="Análise da Viabilidade do Projeto" color="#8cb6ce" meeting="false" start="2026-02-12" duration="4" complete="0" expand="true"/>
+        <task id="4" uid="3edd923e99ae4e97b32f3286b7f6cf79" name="Recursos e Equipa de Trabalho" color="#8cb6ce" meeting="false" start="2026-02-12" duration="4" complete="0" expand="true"/>
+        <task id="5" uid="e0c66f1a661b4361b639b02157320afd" name="Definição do Plano de Execução do Projeto" color="#8cb6ce" meeting="false" start="2026-02-12" duration="1" complete="50" expand="true"/>
+        <task id="6" uid="5b22c6fe32eb49d8975f540854e0e6ba" name="Simulação de Entrevistas com Stakeholders" color="#8cb6ce" meeting="false" start="2026-02-17" duration="6" complete="0" expand="true"/>
+        <task id="7" uid="44cdd58393ff4838a9e9d87ee460e4b2" name="Levantamento de Requisitos" color="#8cb6ce" meeting="false" start="2026-02-17" duration="6" complete="0" expand="true"/>
+        <task id="8" uid="deb9b8d7d8e74664aabb4932213cfd10" name="Organização dos Requisitos  (Funcionais e não Funcionais)" color="#8cb6ce" shape="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" meeting="false" start="2026-02-17" duration="6" complete="0" expand="true"/>
+        <task id="9" uid="43535df35ca04e4483a411547d7e65d1" name="Análise e Refinação dos Requisitos" color="#8cb6ce" meeting="false" start="2026-02-23" duration="2" complete="0" expand="true"/>
+        <task id="10" uid="96d4bfeedc0f47b590b5bdb49b60c815" name="Modelação Concetual da Base de Dados do Sistema" color="#8cb6ce" meeting="false" start="2026-02-23" duration="6" complete="0" expand="true"/>
+        <task id="11" uid="81c9d0ed5f8245c7a7943e746b3bb0b0" name="Modelação do Modelo de Domínio (UML)" color="#8cb6ce" meeting="false" start="2026-02-23" duration="6" complete="0" expand="true"/>
+        <task id="12" uid="ce7a119e6f184aef8b3b86d0608f3cb6" name="Identificação e Especificação de Use Cases" color="#8cb6ce" meeting="false" start="2026-02-23" duration="6" complete="0" expand="true"/>
+        <task id="13" uid="910fe94f41654e7a8c5d5be43c5899ea" name="Modelação do Diagrama de Componentes do Sistema" color="#ccffff" meeting="false" start="2026-03-02" duration="6" complete="0" expand="true"/>
+        <task id="14" uid="1acad60cb06e426dba0f0cd802f6fe4f" name="Modelação dos Diagramas de Classes do Sistema" color="#ccffff" meeting="false" start="2026-03-02" duration="12" complete="0" expand="true"/>
+        <task id="17" uid="f396a57e75c84839b9c5017f040bbc3a" name="Modelação de Diagramas de Sequência" color="#ccffff" meeting="false" start="2026-03-09" duration="11" complete="0" expand="true"/>
+        <task id="15" uid="54e21ace21a149d499d494e94379268b" name="Modelação Lógica da Bases de Dados e Respetiva Normalização" color="#ccffff" meeting="false" start="2026-03-09" duration="11" complete="0" expand="true"/>
+        <task id="16" uid="c172dd3ba26e46fa9a3402a90e219138" name="Modelação da Interface do Sistema" color="#ccffff" meeting="false" start="2026-03-02" duration="16" complete="0" expand="true"/>
+        <task id="18" uid="39ac74746e6f4ebea5425adc7f654db2" name="Modelação da Arquitetura WEB do sistema (Servidores WEB e de Dados))" color="#ccffff" meeting="false" start="2026-03-16" duration="6" complete="0" expand="true"/>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <previous>
+        <previous-tasks name="Phase 1 ">
+            <previous-task id="0" start="2026-02-12" duration="4" meeting="false" super="false"/>
+            <previous-task id="1" start="2026-02-12" duration="4" meeting="false" super="false"/>
+            <previous-task id="2" start="2026-02-12" duration="4" meeting="false" super="false"/>
+            <previous-task id="3" start="2026-02-12" duration="4" meeting="false" super="false"/>
+            <previous-task id="4" start="2026-02-12" duration="4" meeting="false" super="false"/>
+            <previous-task id="5" start="2026-02-12" duration="1" meeting="false" super="false"/>
+            <previous-task id="6" start="2026-02-17" duration="6" meeting="false" super="false"/>
+            <previous-task id="7" start="2026-02-17" duration="6" meeting="false" super="false"/>
+            <previous-task id="8" start="2026-02-17" duration="6" meeting="false" super="false"/>
+            <previous-task id="9" start="2026-02-23" duration="2" meeting="false" super="false"/>
+            <previous-task id="10" start="2026-02-23" duration="6" meeting="false" super="false"/>
+            <previous-task id="11" start="2026-02-23" duration="6" meeting="false" super="false"/>
+            <previous-task id="12" start="2026-02-23" duration="6" meeting="false" super="false"/>
+            <previous-task id="13" start="2026-02-12" duration="1" meeting="false" super="false"/>
+        </previous-tasks>
+    </previous>
+    <roles roleset-name="Default"/>
+</project>
