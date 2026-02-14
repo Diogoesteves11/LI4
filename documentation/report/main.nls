@@ -1,0 +1,9 @@
+
+\begin{thenomenclature} 
+\nomgroup{Symbols}
+  \item [{\textbf{BD}}]\begingroup Base de Dados\nomeqref {3.0}\nompageref{6}
+  \item [{DW}]\begingroup Data Warehouse\nomeqref {3.0}\nompageref{6}
+  \item [{OLTP}]\begingroup On-Line Analytical Processing\nomeqref {3.0}\nompageref{6}
+  \item [{LLM}]\begingroup Large Language Model\nomeqref {3.0}\nompageref{6}
+
+\end{thenomenclature}

@@ -81,25 +81,6 @@
 %% smaller footer and header size
 \newgeometry{top=3cm,left=3cm,right=3cm,bottom=4cm}
 
-%==========================================================================
-% BEGIN OPCIONAL DEDICATÓRIA
-%==========================================================================
-
-\clearpage
-\begin{center}
-    \thispagestyle{empty}
-    \vspace*{\fill}
-    
-    $<<$/opcional Dedicatória$>>$
-    
-    \vspace*{\fill}
-\end{center}
-\clearpage
-
-%==========================================================================
-% END OPCIONAL DEDICATÓRIA
-%==========================================================================
-
 
 %==========================================================================
 % BEGIN ABSTRACT PAGE
@@ -114,9 +95,14 @@
 
 \begin{flushleft}
 \begin{abstract}
-    <<O resumo tem como objectivo descrever de forma sucinta o trabalho realizado. Deverá conter uma pequena introdução, seguida por uma breve descrição do trabalho realizado e terminando com uma indicação sumária do seu estado final. Não deverá exceder as 400 palavras.>> 
-    \par \textbf{Área de Aplicação}: <<Identificação da Área de trabalho. Por exemplo: Desenho e arquitectura de Sistemas de Bases de Dados.>> 
-    \par \textbf{Palavras-Chave}: <<Conjunto de palavras-chave que permitirão referenciar domínios de conhecimento, tecnologias, estratégias, etc., directa ou indirectamente referidos no relatório. Por exemplo: Bases de Dados Relacionais, Gestão de Índices, JAVA, Protocolos de Comunicação.>>
+    O presente relatório descreve o processo de engenharia de software aplicado ao desenvolvimento de um sistema de gestão para uma oficina de reparação de trotinetes elétricas. Este projeto insere-se num contexto académico que visa não só a produção de uma solução funcional, mas também a exploração prática da utilização de Grandes Modelos de Linguagem (LLMs) como auxiliares no ciclo de vida de desenvolvimento de software.
+    
+    A solução concebida abrange todo o fluxo operacional da oficina, desde o registo inicial de clientes e equipamentos até à faturação final. O sistema permite a gestão integral de ordens de serviço, incluindo o controlo de diagnósticos, o registo de intervenções, a aplicação de peças e a contabilização de tempos de mão-de-obra. Adicionalmente, a aplicação assegura a gestão de stock de peças e disponibiliza relatórios técnicos e financeiros para apoio à tomada de decisão. O desenvolvimento seguiu metodologias de análise e desenho orientadas a objetos, com a implementação técnica suportada pela plataforma .NET e persistência de dados em SQL.
+    
+    O resultado final é um sistema funcional que responde aos requisitos de gestão de reparações, demonstrando a eficácia da integração de ferramentas de IA generativa na aceleração das etapas de conceção, codificação e documentação de sistemas de informação.
+
+    \par \textbf{Área de Aplicação}: Engenharia de Software, Sistemas de Informação, Gestão de Oficinas.
+    \par \textbf{Palavras-Chave}: LLM, .NET, C\#, SQL, UML, Gestão de Reparações, Bases de Dados Relacionais, Inteligência Artificial Generativa.
 \end{abstract}
 \end{flushleft}
 
@@ -161,9 +147,12 @@
 \pagenumbering{arabic}
 
 \chapter{Introdução}
-    <<Este primeiro capítulo deverá ter obrigatoriamente as subsecções abaixo apresentadas.>>
     \section{Contextualização}
-        <<Nesta secção deverá ser apresentado o contexto no qual se desenvolve o caso de estudo seleccionado.>>
+        Nas últimas décadas, a Engenharia de Software tem vindo a enfrentar uma revolução significativa, impulsionada pelo aumento da complexidade dos sistemas, pela consolidação de arquiteturas distribuídas e, mais recentemente, pela integração de técnicas de Inteligência Artificial. O software deixou de ser um artefacto estático para se tornar num elemento central de sistemas dinâmicos, em evolução contínua e fortemente orientados a dados.
+        
+        Neste cenário, a emergência dos \textit{Large Language Models} (LLM) alterou profundamente os métodos de idealização, especificação, desenvolvimento e validação de software. Estes modelos atuam agora como agentes artificiais ativos, colaborando em tarefas que vão muito além da simples geração de código, abrangendo a Engenharia de Requisitos, a definição arquitetural e o suporte à decisão técnica.
+        
+        O presente trabalho prático insere-se neste novo paradigma, propondo uma abordagem onde o desenvolvimento de software é assistido sistematicamente por agentes artificiais ao longo de todo o ciclo de vida. Este modelo antecipa um futuro onde o engenheiro de software assume um papel mais estratégico e de governação, delegando tarefas cognitivamente intensivas ou repetitivas à Inteligência Artificial Generativa, visando ganhos de produtividade e redução do \textit{time-to-market}.
     \section{Apresentação do Caso de Estudo}
         <<Esta secção acolherá uma descrição concisa do caso de estudo seleccionado.>>
     \section{Motivação e Objectivos}
@@ -246,9 +235,29 @@
     <<Elaborar uma apreciação crítica sobre o trabalho realizado, apontando os seus pontos fortes e fracos. Adicionalmente, caso se aplique, enunciar eventuais tarefas a realizar futuramente ou novas opções para estender o trabalho realizado.>>
 
 
+
 %==========================================================================
-% END CONCLUSÕES DE TRABALHO FUTURO
+% BEGIN LISTA DE SIGLAS E ACRÓNIMOS
 %==========================================================================
+
+%==========================================================================
+% END LISTA DE SIGLAS E ACRÓNIMOS
+%% Portuguese babel does not translate this environment
+
+\renewcommand{\nomname}{Lista de Siglas e Acrónimos}
+
+%% Texto antes da lista
+\renewcommand{\nompreamble}{Apresentar uma lista com todas as siglas e acrónimos utilizados...}
+
+%% Definição das siglas (Exemplos)
+\nomenclature[01]{\textbf{BD}}{Base de Dados}
+\nomenclature[02]{DW}{Data Warehouse}
+\nomenclature[03]{OLTP}{On-Line Analytical Processing}
+\nomenclature[04]{LLM}{Large Language Model}
+
+%% Este comando imprime a lista
+\printnomenclature
+
 
 %==========================================================================
 % BEGIN REFERÊNCIAS
@@ -267,31 +276,6 @@
 
 %==========================================================================
 % END REFERÊNCIAS
-%==========================================================================
-
-%==========================================================================
-% BEGIN LISTA DE SIGLAS E ACRÓNIMOS
-%==========================================================================
-
-%% Portuguese babel does not translate this environment
-\renewcommand{\nomname}{Lista de Siglas e Acrónimos}
-
-%% Text that can be shown before acronyms list
-\renewcommand{\nompreamble}{<<Apresentar uma lista com todas as siglas e acrónimos utilizados durante a realização do trabalho. O formato base para esta lista deverá ser da forma como abaixo se apresenta.>>}
-
-%% acronyms
-\nomenclature[01]{\textbf{BD}}{Base de Dados}
-\nomenclature[02]{DW}{Data Warehouse}
-\nomenclature[03]{OLTP}{On-Line Analytical Processing}
-\nomenclature[04]{...}{...}
-
-%% Show acronyms
-\printnomenclature
-
-
-
-%==========================================================================
-% END LISTA DE SIGLAS E ACRÓNIMOS
 %==========================================================================
 
 
