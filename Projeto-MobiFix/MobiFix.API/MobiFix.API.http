@@ -1,0 +1,6 @@
+@MobiFix.API_HostAddress = http://localhost:5174
+
+GET {{MobiFix.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
