@@ -1,0 +1,29 @@
+/Projeto-MobiFix
+│
+├── MobiFix.sln                 # Ficheiro da Solução .NET (agrega os projetos)
+│
+├── /MobiFix.API                # O teu Backend (API + Lógica de Negócio)
+│   ├── MobiFix.API.csproj      # Ficheiro de configuração do projeto .NET
+│   ├── Program.cs              # Ponto de entrada (arranque da API e injeção de dependências)
+│   ├── appsettings.json        # Configurações (ex: connection string para a Base de Dados)
+│   │
+│   ├── /Controllers            # (Já vem criado) Os teus Endpoints REST que o Frontend vai chamar.
+│   │                           # Ex: TrotinetesController.cs, AlugueresController.cs
+│   │
+│   ├── /Models                 # Classes que representam a Base de Dados.
+│   │   └── .gitkeep            # Ex: Trotinete.cs, Cliente.cs, Avaria.cs
+│   │
+│   ├── /DTOs                   # Data Transfer Objects - Dados formatados para enviar ao Frontend.
+│   │   └── .gitkeep            # Ex: TrotineteResponseDTO.cs (para esconder campos sensíveis)
+│   │
+│   ├── /Services               # LÓGICA DE NEGÓCIO. É aqui que o código "pensa".
+│   │   └── .gitkeep            # Ex: ITrotineteService.cs, TrotineteService.cs
+│   │
+│   ├── /Repositories           # Comunicação direta com a Base de Dados.
+│   │   └── .gitkeep            # Ex: ITrotineteRepository.cs, TrotineteRepository.cs
+│   │
+│   └── /Data                   # Configurações do Entity Framework (ORM).
+│       └── .gitkeep            # Ex: MobiFixDbContext.cs
+│
+└── /Frontend                   # (Pasta onde futuramente vão colocar o código web ou mobile)
+    └── .gitkeep
