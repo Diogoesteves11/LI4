@@ -69,3 +69,63 @@ yarn-error.log*
 *.synctex.gz
 *.synctex(busy)
 *.run.xml
+
+*.vpp.bak*
+
+# =========================================
+# Ficheiros auxiliares do LaTeX
+# =========================================
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+*.brf
+*.nlo
+*.aux
+
+# =========================================
+# Ficheiros de Bibliografia (BibTeX/Biber)
+# =========================================
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# =========================================
+# Utilitários de compilação e sincronização
+# =========================================
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# =========================================
+# Índices e Glossários
+# =========================================
+*.alg
+*.acr
+*.acn
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.ist
+*.idx
+*.ind
+*.ilg
+
+# =========================================
+# EXCEÇÃO: Garantir que o PDF NUNCA é ignorado
+# =========================================
+!*.pdf
