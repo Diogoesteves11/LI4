@@ -20,7 +20,6 @@
 \usepackage{longtable}
 
     %% Changes language of some packages protocols
-    %% e.g., when captioning images: Figure 1. -> Figura 1.
     %% https://ctan.org/pkg/babel?lang=en
     %% Used for special fonts
     %% Cannot be compiled with pdflatex
@@ -3525,8 +3524,180 @@ Abaixo detalham-se os principais \textit{endpoints} expostos por esta \textit{Fa
 \section{Prototipagem das Páginas Web}
 \section{Definição das rotas}
 
+
+
 \chapter{Orquestração dos Servidores e Micro-Serviços}
-\paragraph{}Explicação do Docker e ENVS
+
+Neste capítulo, o foco assenta naquilo que será o ambiente de instalação e execução do sistema \textbf{Fix'n'Ride} (MobiFix). Os micro-serviços descritos anteriormente (interface \textit{web}, lógica de negócios, API de dados e base de dados) serão instalados em contentores \textbf{Docker}. Esta abordagem garante a portabilidade e a compatibilidade entre diferentes ambientes, assegurando que a instalação do sistema será rápida, padronizada e livre de conflitos de dependências na infraestrutura de destino.
+
+A separação da aplicação em múltiplos contentores permite que cada serviço escale de forma independente e partilhe apenas os recursos estritamente necessários, promovendo uma arquitetura de \textit{micro-serviços} resiliente e segura.
+
+\section{Especificação dos Contentores e \textit{Dockerfiles}}
+
+Para a materialização desta arquitetura, foram definidos ficheiros de configuração (\texttt{Dockerfile}) que automatizam a construção das imagens de cada componente customizado. A base de dados e a API de dados recorrem a imagens oficiais otimizadas, enquanto o servidor de lógica de negócios e o \textit{frontend} utilizam construções em múltiplas etapas (\textit{multi-stage builds}) para maximizar a eficiência.
+
+\subsection{Servidor de Lógica de Negócios (.NET)}
+O \textit{backend} que aloja a \textit{Facade} (\texttt{MobiFixService}) é contentorizado utilizando o ecossistema .NET. O \texttt{Dockerfile} recorre a uma abordagem \textit{multi-stage}: a primeira etapa utiliza a imagem completa do SDK para compilar o código fonte e restaurar as dependências, enquanto a etapa final utiliza uma imagem de \textit{runtime} extremamente leve, contendo apenas o estritamente necessário para executar a aplicação compilada.
+
+\begin{lstlisting}[language=bash, caption={Dockerfile do Servidor de Lógica de Negócios (.NET)}, label={lst:dockerfile_dotnet}]
+# Etapa 1: Build (Ambiente de compilacao)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+# Copiar apenas o ficheiro de projeto para otimizar a cache do Docker
+COPY ["MobiFix.Api/MobiFix.Api.csproj", "MobiFix.Api/"]
+RUN dotnet restore "MobiFix.Api/MobiFix.Api.csproj"
+# Copiar o restante codigo e compilar
+COPY . .
+WORKDIR "/src/MobiFix.Api"
+RUN dotnet build "MobiFix.Api.csproj" -c Release -o /app/build
+RUN dotnet publish "MobiFix.Api.csproj" -c Release -o /app/publish
+
+# Etapa 2: Runtime (Ambiente de execucao leve)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "MobiFix.Api.dll"]
+\end{lstlisting}
+
+\subsection{Servidor \textit{Frontend} (React)}
+A interface de utilizador, desenvolvida em \textbf{React}, necessita de um ambiente Node.js para transpilacão e empacotamento (\textit{bundling}), mas em produção consiste apenas em ficheiros estáticos (HTML, CSS, JS). Por conseguinte, o \texttt{Dockerfile} utiliza o Node.js para a construção (gerando a pasta \texttt{build}) e, de seguida, transfere esses ficheiros para um servidor \textit{web} \textbf{Nginx}, garantindo uma entrega rápida e segura ao cliente.
+
+\begin{lstlisting}[language=bash, caption={Dockerfile do Servidor Frontend (React + Nginx)}, label={lst:dockerfile_react}]
+# Etapa 1: Build da aplicacao React
+FROM node:18-alpine AS build
+WORKDIR /app
+# Instalar dependencias
+COPY package.json package-lock.json ./
+RUN npm install
+# Copiar codigo fonte e gerar a build de producao
+COPY . .
+RUN npm run build
+
+# Etapa 2: Servidor Nginx para ficheiros estaticos
+FROM nginx:alpine
+# Copiar os ficheiros compilados da etapa anterior
+COPY --from=build /app/build /usr/share/nginx/html
+# Expor a porta 80 do contentor
+EXPOSE 80
+# Iniciar o servidor Nginx
+CMD ["nginx", "-g", "daemon off;"]
+\end{lstlisting}
+
+\subsection{Base de Dados (SQL Server) e Data API Builder (DAB)}
+Estes dois componentes não necessitam de código fonte customizado para a sua imagem base, sendo instanciados através de imagens oficiais da Microsoft via \texttt{docker-compose.yml}:
+\begin{itemize}
+    \item \textbf{SQL Server}: Utiliza a imagem \texttt{mcr.microsoft.com/mssql/server}, configurada para expor a porta \texttt{1433} na rede interna do Docker. Os dados são persistidos através de \textit{Docker Volumes}, garantindo que nenhuma informação é perdida caso o contentor seja reiniciado ou destruído.
+    \item \textbf{Data API Builder}: Utiliza a imagem \texttt{mcr.microsoft.com/azure-databases/data-api-builder}. A sua única dependência física é a injeção (através de \textit{bind mount}) do ficheiro \texttt{dab-config.json}, que mapeia o esquema da base de dados para \textit{endpoints} GraphQL e REST.
+\end{itemize}
+
+\section{Gestão de Configurações e Variáveis de Ambiente (\texttt{.env})}
+
+A orquestração através do \textit{Docker Compose} permite externalizar configurações sensíveis e específicas do ambiente de execução (Desenvolvimento, Testes, Produção). Esta parametrização é centralizada num ficheiro \texttt{.env}.
+
+Esta prática segue os princípios de \textit{DevSecOps}, garantindo que palavras-passe, chaves criptográficas de segurança (JWT) e \textit{Connection Strings} não são incluídas de forma estática no código fonte (\textit{hardcoded}) nem expostas no repositório de controlo de versões. O motor do Docker encarrega-se de injetar estas variáveis de forma segura no momento de arranque dos contentores.
+
+Abaixo, apresenta-se um exemplo ilustrativo da estrutura e do conteúdo do ficheiro \texttt{.env} utilizado no ambiente da \textbf{Fix'n'Ride}:
+
+\begin{lstlisting}[language=bash, caption={Exemplo da estrutura do ficheiro de configurações globais (.env)}, label={lst:env_file}]
+# ==========================================
+# CONFIGURACOES DA BASE DE DADOS (SQL SERVER)
+# ==========================================
+SA_PASSWORD=MobiFix_SecurePass2026!
+ACCEPT_EULA=Y
+MSSQL_PID=Express
+DB_PORT=1433
+
+# ==========================================
+# CONFIGURACOES DO DATA API BUILDER (DAB)
+# ==========================================
+# O DAB comunica com o SQL Server usando o nome do contentor ('db') na rede interna
+DAB_CONNECTION_STRING=Server=db,1433;Database=MobiFixDB;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+
+# ==========================================
+# CONFIGURACOES DA LOGICA DE NEGOCIOS (.NET)
+# ==========================================
+ASPNETCORE_ENVIRONMENT=Production
+# Chave secreta para assinar os tokens JWT na autenticacao de utilizadores
+JWT_SECRET_KEY=ChaveComplexaMobiFixParaGeracaoDeTokensJWT
+# O servidor .NET consome as rotas diretas do DAB pela rede interna
+DAB_INTERNAL_URL=http://dab:5000 
+
+# ==========================================
+# CONFIGURACOES DO FRONTEND (REACT)
+# ==========================================
+# URLs expostos publicamente para o browser do cliente consumir
+REACT_APP_API_LOGIC_URL=http://localhost:8080/api/logic
+REACT_APP_API_DAB_URL=http://localhost:5000/api
+\end{lstlisting}
+
+\section{Design de Interfaces}
+\subsection{Interface do Cliente}
+\label{subsec:interface_cliente}
+
+A interface do cliente foi projetada seguindo os princípios de \textit{User-Centered Design}, focando-se na simplicidade e na rapidez de acesso às funcionalidades críticas.
+
+\begin{itemize}
+    \item \textbf{Dashboard:} Centraliza as métricas do utilizador, exibindo o número de veículos registados e o estado das intervenções em curso através de um layout responsivo desenvolvido com \texttt{Tailwind CSS}.
+    \begin{figure}[!h]
+        \centering
+        \includegraphics[width=\textwidth]{images/HomeCliente.png} 
+        \caption{Homepage do Cliente}
+    \end{figure}   
+    
+    \item \textbf{Gestão de Ativos:} Conforme ilustrado na figura abaixo, é possível visualizar os registos e adicionar trotinetes através de Marca, Modelo e Número de Série.
+     \begin{figure}[!h]
+        \centering
+        \includegraphics[width=\textwidth]{images/RegistoTrotinete.png} 
+        \caption{Página de Registos de trotinetes}
+    \end{figure}   
+            
+    \item \textbf{Agendamento de Serviços:} O sistema de marcação de diagnósticos permite ao cliente selecionar o veículo afetado e indicar a sintomatologia do problema, integrando-se diretamente com o fluxo de trabalho dos técnicos da oficina.
+     \begin{figure}[!h]
+        \centering
+        \includegraphics[width=\textwidth]{images/AgendarDiagnostico.png} 
+        \caption{Página de Agendamento de Diagnóstico}
+    \end{figure}   
+    \item \textbf{Histórico Financeiro:} A secção de faturas oferece uma visão clara das obrigações financeiras, permitindo ao cliente acompanhar os custos de manutenção e o histórico de pagamentos efetuados.
+    \begin{figure}[!h]
+        \centering
+        \includegraphics[width=\textwidth]{images/FATURAS.png} 
+        \caption{Página de Histórico Financeiro}
+    \end{figure}   
+    
+\end{itemize}
+
+\subsection{Interface do Mecânico}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{images/PAGINADIAGNOSTICO.png} 
+    \caption[Página de preenchimento de diagnóstico]{Página de preenchimento de diagnóstico}
+    \label{fig:PaginaDiagnostico}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{images/PAGINAREPARACOES.png} 
+    \caption[Página de reparações]{Página de reparações}
+    \label{fig:Páginareparações}
+\end{figure}
+\subsection{Interface Operador de Loja}
+\subsection{Interface do Administrador}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth, angle=90]{images/DashBoardADMIN.png} 
+    \caption{Interface do Administrador}
+\end{figure}
+A Figura \ref{fig:dashboard_admin} apresenta o \textbf{Dashboard do Administrador} da plataforma MobiFix, servindo como o centro de controlo exclusivo para a gestão global do sistema.
+
+Neste ecrã, é possível observar:
+\begin{itemize}
+    \item \textbf{Navegação de Gestão:} Um menu lateral esquerdo com acesso direto aos módulos cruciais de administração (Clientes, Reparações, Trotinetes e Definições) e uma barra superior com pesquisa e opções da conta de administrador.
+    \item \textbf{Visão Geral da Operação:} Uma área central desenhada para exibir o estado atual do negócio num relance, contendo indicadores de desempenho e o resumo das atividades ou métricas mais recentes da plataforma.
+\end{itemize}
+
 \renewcommand{\nomname}{Lista de Siglas e Acrónimos}
 
 % Tecnologias e Desenvolvimento
