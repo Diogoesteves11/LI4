@@ -1,3 +1,4 @@
+% !TEX root = main.tex
 \documentclass[a4paper,12pt]{scrreprt}
 
     %% Used for changing geometry of the page
@@ -3134,8 +3135,10 @@ A persistência foi desenhada seguindo o princípio da \textit{Defense in Depth}
 \item \textbf{Cifragem e Proteção de Dados}: Seguindo as normas de segurança do ecossistema .NET, as credenciais dos utilizadores são armazenadas na coluna \texttt{PasswordHash} através de algoritmos de \textit{hashing} irreversíveis, impedindo a exposição de palavras-passe em texto limpo mesmo em caso de acesso indevido à base de dados.
 \end{itemize}
 
-\subsection{Especificação da API}
-A API do sistema \textbf{Fix'n'Ride} foi desenhada para servir de ponte robusta entre o \textit{frontend} React e a base de dados SQL Server, utilizando as capacidades de reflexão de esquema do \textit{.NET Data API Builder} (DAB). Esta abordagem permite expor os dados via REST e GraphQL de forma imediata e segura. \subsubsection{Catálogo de Recursos e Operações}
+\section{Especificação da API de dados (DAB)}
+A API de dados do sistema \textbf{Fix'n'Ride} foi desenhada para servir de ponte robusta entre o \textit{frontend} React e a base de dados SQL Server, utilizando as capacidades de reflexão de esquema do \textit{.NET Data API Builder} (DAB). Esta abordagem permite expor os dados via REST de forma imediata e segura, quer para a interface, quer para a lógica de negócios. 
+
+\subsubsection{Catálogo de Recursos e Operações}
 A API expõe os recursos de forma granular, permitindo operações \textit{CRUD} (Create, Read, Update, Delete) mapeadas nos fluxos de negócio:
 
 \begin{itemize}
@@ -3216,13 +3219,286 @@ A estrutura de componentes da Lógica de Negócios organiza-se da seguinte forma
 Esta modularização não só facilita a testabilidade e manutenção do código \textbf{.NET}, como também permite que os diferentes serviços interajam de forma limpa antes de consolidarem o estado final na base de dados \textbf{SQL Server}.
 
 \section{Módulo de Utilizadores}
-\section{Módulo de Serviços}
-\section{Módulo Financeiro}
-\section{Módulo de Stocks}
-\section{Visão Geral da Lógica de Negócios}
 
-\section{Rotas do Servidor de Lógica de Negócios (Facade \textit{MobiFixService}):}
-\paragraph{} Para expôr a lógica de negócios ao servidor web, responsável pela camada de apresentação,  
+O Módulo de Utilizadores constitui o alicerce de segurança, personalização e rastreabilidade do sistema \textbf{Fix'n'Ride}. Este domínio centraliza toda a lógica de negócio referente à gestão de identidades, controlo de acessos e manutenção de perfis, garantindo que as interações com a plataforma são seguras e restritas às competências de cada interveniente.
+
+A arquitetura deste módulo divide-se em duas vertentes principais. Por um lado, assegura a gestão dos \textbf{Clientes}, fornecendo-lhes autonomia para a criação de conta, edição de dados de faturação e registo dos seus veículos (trotinetes) no sistema. Por outro lado, suporta a operação interna da \textbf{MobiFix} através de um rigoroso sistema de Controlo de Acessos Baseado em Funções (RBAC — \textit{Role-Based Access Control}). Esta lógica permite a autenticação e a segregação de permissões entre os diferentes perfis de \textbf{Funcionários} (Administradores, Mecânicos e Operadores de Loja), garantindo o cumprimento do princípio do menor privilégio.
+
+Nas subsecções seguintes, detalha-se a estrutura interna e o comportamento dinâmico deste módulo. Primeiramente, é apresentado o \textbf{Diagrama de Classes} específico deste domínio, que ilustra as entidades envolvidas e as operações expostas pelo \texttt{UtilizadoresService}. De seguida, expõem-se os \textbf{Diagramas de Sequência} referentes aos fluxos operacionais mais críticos, mapeando a comunicação desde a interação do utilizador até à validação e persistência dos dados na base de dados.
+
+\vskip 0.5cm
+
+\subsection{Diagrama de Classes do Módulo de Utilizadores}
+
+A presente subsecção detalha a arquitetura estática do Módulo de Utilizadores, evidenciando as principais classes, os seus atributos, métodos e os relacionamentos que suportam as regras de negócio deste domínio. O modelo reflete uma separação estrutural clara entre os atores externos (clientes) e os utilizadores internos (equipa da oficina).
+
+Como se pode observar na Figura \ref{fig:diagrama_classes_utilizadores}, o ponto de entrada arquitetural é a interface \texttt{iGestaoUtilizadores}. Este contrato define as operações fundamentais do módulo, sendo implementado concretamente pela classe \texttt{UtilizadoresService}. É este serviço que atua como o orquestrador central, expondo métodos como o registo e autenticação (\texttt{loginCliente}, \texttt{loginFuncionario}), a gestão de perfis (\texttt{registrarFuncionario}, \texttt{desativarFuncionario}) e a gestão de veículos (\texttt{registrarTrotinete}).
+
+No domínio do utilizador externo, a entidade \texttt{Cliente} encapsula as credenciais (com recurso a \texttt{passwordHash} para segurança) e os dados de faturação (como NIF e morada). Estabelece, ainda, uma relação de agregação orientada (1 para 0..*) com a classe \texttt{Trotinete}, o que garante que um cliente pode gerir múltiplos equipamentos no seu portefólio, mantendo o histórico de serviço individualizado.
+
+Para suportar o Controlo de Acessos Baseado em Funções (RBAC), o domínio interno recorre à herança orientada a objetos. A superclasse \texttt{Funcionario} centraliza os dados comuns de acesso corporativo (como o \texttt{numero} mecanográfico e o \textit{hash} da \textit{password}). Desta classe derivam três especializações disjuntas que espelham os perfis da oficina:
+\begin{itemize}
+    \item \textbf{\texttt{Administrador}}: Detém as competências de gestão de recursos humanos, refletidas nos métodos para registar, inativar e alterar o cargo de outros funcionários.
+    \item \textbf{\texttt{Mecanico}}: Expande o perfil base adicionando o atributo \texttt{especializacao}, essencial para a triagem e distribuição de tarefas na oficina.
+    \item \textbf{\texttt{Operador}}: Representa o funcionário de atendimento de balcão e logística.
+\end{itemize}
+
+Esta abordagem orientada a objetos garante um código coeso e seguro, validando as permissões e o contexto de cada interveniente antes da interação com a camada de persistência.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.27]{images/GestaoUtilizadores.jpg}
+    \caption[Diagrama de Classes do Módulo de Utilizadores]{Diagrama de Classes do Módulo de Utilizadores}
+    \label{fig:diagrama_classes_utilizadores}
+\end{figure}
+
+\subsection{Diagramas de Sequência}
+
+Nesta subsecção, explora-se o comportamento dinâmico do Módulo de Utilizadores através da modelação dos seus Casos de Uso (UC) mais críticos. Os diagramas de sequência apresentados ilustram a orquestração de chamadas entre os atores (Clientes), a \textit{Facade} principal da API (\texttt{MobiFixService}), o serviço especialista (\texttt{UtilizadoresService}) e a camada de persistência em \textit{SQL Server}.
+
+\subsubsection{Efetuar Login de Cliente (UC19)}
+
+O processo de autenticação é o ponto de entrada seguro para a área reservada do cliente. Este fluxo garante que as credenciais fornecidas são validadas de forma segura, não expondo dados sensíveis durante a transação.
+
+Como ilustrado na Figura \ref{fig:seq_login_cliente}, o cliente submete o seu \textit{email} e \textit{password} através da interface \textit{frontend}, que invoca o método \texttt{efetuarLogin} exposto pela \textit{Facade}. Esta delega a operação para o \texttt{UtilizadoresService}, que consulta a base de dados em busca do registo correspondente. A validação ocorre internamente no serviço através da comparação criptográfica com a \texttt{PasswordHash} armazenada. Dependendo do resultado, o sistema devolve uma confirmação de sucesso, redirecionando o utilizador, ou uma mensagem de erro genérica ("Credenciais Inválidas") para prevenir ataques de enumeração.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/LoginCliente.png} % Ajusta o nome/extensão da imagem
+    \caption[Diagrama de Sequência: Efetuar Login de Cliente]{Diagrama de Sequência: Efetuar Login de Cliente (UC19)}
+    \label{fig:seq_login_cliente}
+\end{figure}
+
+\subsubsection{Registar Nova Trotinete (UC21)}
+
+A gestão da frota pessoal é uma funcionalidade central do portal do cliente, permitindo-lhe associar novos veículos à sua conta para futuros agendamentos de oficina.
+
+A Figura \ref{fig:seq_registar_trotinete} detalha este fluxo. O cliente invoca a operação fornecendo os dados técnicos do equipamento (marca, modelo, número de série). O \texttt{UtilizadoresService} assume a responsabilidade de garantir a integridade dos dados, efetuando primeiramente uma verificação de unicidade na base de dados (garantindo que o número de série não se encontra já registado no sistema). Após esta validação, o veículo é inserido na tabela \texttt{Trotinete} com a respetiva chave estrangeira associada ao \textit{ID} do cliente, concluindo a agregação definida no diagrama de classes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Registar Trotinete.png} % Ajusta o nome/extensão da imagem
+    \caption[Diagrama de Sequência: Registar Nova Trotinete]{Diagrama de Sequência: Registar Nova Trotinete (UC21)}
+    \label{fig:seq_registar_trotinete}
+\end{figure}
+
+\section{Módulo de Serviços}
+
+O Módulo de Serviços constitui o núcleo operacional da \textbf{MobiFix}, suportando todos os processos \textit{core} da oficina. Este domínio é responsável por orquestrar o ciclo de vida completo de uma reparação, garantindo a rastreabilidade desde o contacto inicial do cliente até à entrega final do veículo.
+
+A arquitetura deste módulo foi desenhada para centralizar a gestão de agendas, a alocação de mecânicos, o registo detalhado de intervenções e o consumo físico de peças. Assegura-se, assim, uma total transparência na elaboração de orçamentos e um controlo rigoroso sobre as transições de estado de cada Ordem de Serviço (Agendado, Em Execução, Concluído e Fechado).
+
+Nas subsecções seguintes, detalha-se a estrutura interna e o comportamento dinâmico deste módulo. Primeiramente, é apresentado o \textbf{Diagrama de Classes}, que ilustra o modelo de domínio operacional. De seguida, expõem-se os \textbf{Diagramas de Sequência} referentes aos fluxos mais críticos, demonstrando a interação entre os intervenientes, a camada lógica (\texttt{ServicosService}) e a base de dados.
+
+\subsection{Diagrama de Classes do Módulo de Serviços}
+
+A presente subsecção expõe a arquitetura estática do Módulo de Serviços. O diagrama detalha as estruturas de dados e os relacionamentos necessários para suportar o rigor técnico e administrativo de cada reparação.
+
+Conforme ilustrado na Figura \ref{fig:diagrama_classes_servicos}, a orquestração da lógica de negócio deste domínio é governada pela interface \texttt{iGestaoServicos}. A sua implementação concreta, o \texttt{ServicosService}, atua como o controlador responsável por executar métodos críticos como o agendamento (\texttt{AgendarDiagnostico}), a alteração de estados da reparação e a elaboração de orçamentos e relatórios (\texttt{PreencherGuiaReparacao}, \texttt{gerarGuiaReparacao}).
+
+No centro do modelo encontra-se a entidade \texttt{Servico} (Ordem de Serviço). Esta classe atua como o registo agregador da intervenção, mantendo associações vitais:
+\begin{itemize}
+    \item \textbf{Associação ao Veículo e Cliente}: Cada \texttt{Servico} está estritamente ligado a uma \texttt{Trotinete} específica, garantindo a rastreabilidade do histórico de manutenção de cada equipamento.
+    \item \textbf{Associação ao Mecânico}: Estabelece-se uma relação com a entidade \texttt{Mecanico} (proveniente do Módulo de Utilizadores), responsabilizando um funcionário específico pela execução técnica.
+\end{itemize}
+
+O detalhe da reparação é modelado através da agregação (relação 1 para 0..*) entre \texttt{Servico} e \texttt{Intervencao}. Cada instância de \texttt{Intervencao} representa uma tarefa específica realizada (ex: substituição de bateria, afinação de travões) e inclui o respetivo tempo despendido e custo de mão-de-obra. Caso a intervenção exija a substituição de componentes, esta associa-se à classe \texttt{Peca} (proveniente do Módulo de Stocks), garantindo o cálculo preciso do valor total e a futura dedução no inventário.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.27]{images/GestaoServicos.jpg} % Confirma a extensão e nome da imagem
+    \caption[Diagrama de Classes do Módulo de Serviços]{Diagrama de Classes do Módulo de Serviços}
+    \label{fig:diagrama_classes_servicos}
+\end{figure}
+
+\subsection{Diagramas de Sequência do Módulo de Serviços}
+
+Nesta subsecção, explora-se o comportamento dinâmico do Módulo de Serviços através da modelação dos seus Casos de Uso (UC) operacionais essenciais. Os diagramas ilustram a orquestração das chamadas aos métodos expostos pelo \texttt{ServicosService} para a concretização das regras de negócio.
+
+\subsubsection{Efetuar Marcação de Serviço (UC01)}
+
+O fluxo de agendamento é despoletado pelo cliente com o intuito de reservar um bloco de tempo para o diagnóstico presencial da sua trotinete. A Figura \ref{fig:seq_marcacao_servico} demonstra como o \texttt{ServicosService} recebe o pedido contendo os identificadores do cliente, do veículo e a data pretendida. O sistema valida internamente a disponibilidade da oficina para a data requerida e, mediante sucesso, procede à inserção de um novo registo na base de dados, atribuindo-lhe o estado inicial de "Agendado".
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Efetuar Marcação.png} % Ajusta nome e extensão
+    \caption[Diagrama de Sequência: Efetuar Marcação de Serviço]{Diagrama de Sequência: Efetuar Marcação de Serviço (UC01)}
+    \label{fig:seq_marcacao_servico}
+\end{figure}
+
+\subsubsection{Preencher Guia de Reparação (UC02)}
+
+Após a receção da trotinete e a realização da triagem (diagnóstico), o mecânico regista as operações necessárias no sistema. A Figura \ref{fig:seq_guia_reparacao} detalha este processo. O mecânico invoca a operação \texttt{PreencherGuiaReparacao}, adicionando as intervenções ao serviço. O \texttt{ServicosService} itera sobre cada tarefa para persistir os dados na tabela de intervenções, calcula o custo total previsto (somatório de mão-de-obra e peças) e gera um documento em formato PDF (\texttt{gerarGuiaReparacao}) para efeitos de aprovação e formalização do orçamento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Preencher Guia Reparação.png} % Ajusta nome e extensão
+    \caption[Diagrama de Sequência: Preencher Guia de Reparação]{Diagrama de Sequência: Preencher Guia de Reparação (UC02)}
+    \label{fig:seq_guia_reparacao}
+\end{figure}
+
+\subsubsection{Alterar Estado da Intervenção (UC23)}
+
+A atualização assíncrona do estado do serviço é vital para a transparência do processo produtivo. Como representado na Figura \ref{fig:seq_alterar_estado}, o mecânico utiliza o método \texttt{AtualizarEstadoServico} para transitar a ordem de serviço ao longo do seu ciclo de vida (por exemplo, de "Em Execução" para "Concluído"). O \texttt{ServicosService} persiste esta transição de estado na base de dados. Adicionalmente, caso o novo estado corresponda a "Concluído", o sistema desencadeia um processo interno de notificação, alertando o cliente de que o seu equipamento se encontra testado e pronto para levantamento em loja.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Alterar Estado Intervencao.png} % Ajusta nome e extensão
+    \caption[Diagrama de Sequência: Alterar Estado da Intervenção]{Diagrama de Sequência: Alterar Estado da Intervenção (UC23)}
+    \label{fig:seq_alterar_estado}
+\end{figure}
+
+
+\section{Módulo Financeiro}
+
+O Módulo Financeiro é a espinha dorsal administrativa e comercial do sistema \textbf{Fix'n'Ride}. Este domínio centraliza a orquestração de todas as transações monetárias da \textbf{MobiFix}, garantindo a emissão correta de documentos fiscais, a cobrança de serviços de oficina e a gestão de vendas diretas ao balcão.
+
+A arquitetura deste módulo foi desenhada com um forte foco no rigor contabilístico e na integridade dos dados. Ele atua frequentemente como o ponto de fecho de processos iniciados noutros módulos, tais como a conclusão de uma reparação (Módulo de Serviços) ou a venda de um artigo avulso (Módulo de Stocks), assegurando que qualquer saída de inventário ou prestação de serviço tem a devida correspondência financeira.
+
+Nas subsecções seguintes, detalha-se a estrutura estática deste módulo através do seu \textbf{Diagrama de Classes}, e o seu comportamento dinâmico através dos \textbf{Diagramas de Sequência} que mapeiam as operações críticas de faturação, vendas e devoluções.
+
+\subsection{Diagrama de Classes do Módulo Financeiro}
+
+A presente subsecção descreve o modelo de domínio focado na componente económica da aplicação. O desenho estrutural garante a conformidade com as regras de negócio de emissão e anulação de faturas, bem como o cálculo rigoroso de montantes.
+
+Conforme ilustrado na Figura \ref{fig:diagrama_classes_financeiro}, a porta de entrada para a lógica contabilística é a interface \texttt{iGestaoFinanceira}, cuja concretização é assumida pela classe \texttt{FinancasService}. Este controlador concentra os métodos responsáveis por gerar faturas de oficina, registar vendas a retalho e processar estornos e anulações.
+
+As principais entidades modeladas neste domínio incluem:
+\begin{itemize}
+    \item \textbf{\texttt{Fatura}}: A entidade central do módulo. Agrega um conjunto de linhas de detalhe (produtos ou serviços) e mantém uma relação forte com o \texttt{Cliente} (para efeitos de identificação e NIF) e, quando aplicável, com um \texttt{Servico} concluído.
+    \item \textbf{\texttt{NotaCredito}}: Uma entidade estritamente ligada a uma \texttt{Fatura} original, gerada em situações de devolução parcial ou total, garantindo a rastreabilidade fiscal e o acerto de contas sem apagar o histórico de vendas.
+    \item \textbf{\texttt{Relatorio}}: Entidade que engloba os dados financeiros do sistema, permitindo a geração de relatórios financeiros e operacionais detalhados.
+\end{itemize}
+
+O diagrama reflete ainda as interdependências entre módulos, evidenciando como o \texttt{FinancasService} processa dados oriundos das intervenções e do catálogo de peças para consolidar o montante final a faturar.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2, angle=90]{images/GestaoFinanceira.jpg} % Confirmar nome/extensão
+    \caption[Diagrama de Classes do Módulo Financeiro]{Diagrama de Classes do Módulo Financeiro}
+    \label{fig:diagrama_classes_financeiro}
+\end{figure}
+
+\subsection{Diagramas de Sequência do Módulo Financeiro}
+
+Nesta subsecção, mapeiam-se os fluxos dinâmicos dos processos transacionais. Estes diagramas evidenciam a complexa orquestração entre a \textit{Facade} principal (\texttt{MobiFixService}), o \texttt{FinancasService} e os restantes serviços necessários para concretizar uma transação económica.
+
+\subsubsection{Venda Direta ao Balcão (UC03)}
+
+Este fluxo descreve a venda de artigos da loja de forma direta. A Figura \ref{fig:seq_venda_direta} ilustra a operação iniciada pelo Operador. A \textit{Facade} coordena o processo inter-módulos: numa primeira fase, invoca o \texttt{StocksService} para validar a disponibilidade dos artigos e proceder ao abate automático no inventário físico. Após confirmação de sucesso, delega no \texttt{FinancasService} a responsabilidade de calcular o montante final, emitir a fatura associada ao cliente e persistir o documento na base de dados.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Realizar Venda Direta} % Ajustar nome e extensão
+    \caption[Diagrama de Sequência: Venda Direta ao Balcão]{Diagrama de Sequência: Venda Direta ao Balcão (UC03)}
+    \label{fig:seq_venda_direta}
+\end{figure}
+
+\subsubsection{Faturar Serviço e Entregar Trotinete (UC05)}
+
+O fecho contabilístico de uma reparação representa o culminar da jornada do cliente na oficina. Como ilustrado na Figura \ref{fig:seq_faturar_servico}, no momento do levantamento do equipamento, o Operador de Loja aciona o método de faturação. O fluxo interage inicialmente com o \texttt{ServicosService} para transitar a ordem de serviço para o seu estado definitivo ("Fechado"). Em seguida, o \texttt{FinancasService} consolida o valor da mão-de-obra e das peças consumidas, gerando um documento final (frequentemente em formato PDF) que comprova a prestação do serviço e o seu respetivo pagamento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Faturar Servico.png} % Ajustar nome e extensão
+    \caption[Diagrama de Sequência: Faturar Serviço e Entregar Trotinete]{Diagrama de Sequência: Faturar Serviço e Entregar Trotinete (UC05)}
+    \label{fig:seq_faturar_servico}
+\end{figure}
+
+\subsubsection{Processar Devolução (UC18)}
+
+A gestão de devoluções requer uma abordagem transacional que preserve a integridade tanto financeira como logística do sistema. A Figura \ref{fig:seq_devolucao} demonstra este mecanismo de compensação. O Operador inicia o fluxo com base no identificador da fatura original e nos artigos a devolver. O \texttt{FinancasService} regista financeiramente a anulação através da inserção de uma Nota de Crédito. Em simultâneo, o sistema orquestra uma chamada ao \texttt{StocksService} para reverter a saída dos produtos, incrementando novamente o \textit{stock} das peças devolvidas, mantendo assim o alinhamento absoluto entre a base de dados e a realidade física da loja.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Processar Devoluçao.png} % Ajustar nome e extensão
+    \caption[Diagrama de Sequência: Processar Devolução]{Diagrama de Sequência: Processar Devolução (UC18)}
+    \label{fig:seq_devolucao}
+\end{figure}
+
+\section{Módulo de Stocks}
+
+O Módulo de Stocks é o pilar logístico do sistema \textbf{Fix'n'Ride}. A sua principal responsabilidade é garantir o alinhamento absoluto entre o inventário digital na base de dados e a realidade física da loja e oficina da \textbf{MobiFix}. Este domínio previne ruturas de \textit{stock}, gere o catálogo de artigos disponíveis e automatiza o processo de reposição junto dos fornecedores.
+
+A arquitetura deste módulo atua de forma transversal, servindo tanto o Módulo de Serviços (fornecendo peças para as reparações) como o Módulo Financeiro (disponibilizando artigos para venda direta). Adicionalmente, implementa lógicas de controlo interno, como a verificação de \textit{stocks} mínimos e a orquestração de encomendas.
+
+Nas subsecções seguintes, detalha-se a estrutura orientada a objetos deste módulo através do \textbf{Diagrama de Classes}, e o seu comportamento em tempo de execução através dos \textbf{Diagramas de Sequência} focados na gestão do ciclo de vida das encomendas de reposição.
+
+\subsection{Diagrama de Classes do Módulo de Stocks}
+
+A presente subsecção apresenta a modelação estática do domínio de inventário. O desenho estrutural foca-se na manutenção do catálogo e na rastreabilidade das entradas e saídas de material.
+
+Conforme ilustrado na Figura \ref{fig:diagrama_classes_stocks}, as operações logísticas são definidas pelo contrato da interface \texttt{iGestaoStocks}, cuja implementação é garantida pela classe \texttt{StocksService}. Este serviço atua como o gestor centralizado para a verificação de disponibilidade, atualização de quantidades e gestão do fluxo de fornecimento.
+
+As entidades centrais deste domínio incluem:
+\begin{itemize}
+    \item \textbf{\texttt{Peca}}: Representa qualquer componente físico, acessório ou consumível gerido pela oficina. Contém atributos críticos como o \texttt{stockAtual}, \texttt{stockMinimo} (utilizado para alertas automáticos de rutura) e o preço base.
+    \item \textbf{\texttt{EncomendaStock}}: Regista os pedidos de reposição efetuados aos parceiros comerciais. Acompanha o ciclo de transição de estados logísticos, desde "Pendente" (aguardando aprovação administrativa), passando por "Em Trânsito", até "Rececionada".
+    \item \textbf{\texttt{ReservasCliente}}: Entidade que representa uma compra realizada online por um cliente e onde ficam reservadas as peças encomendadas.
+\end{itemize}
+
+Esta modelação isola a complexidade da gestão de inventário, garantindo que qualquer alteração de quantidade no armazém é devidamente auditada pelo \texttt{StocksService}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2, angle=90]{images/GestaoStocks.jpg} % Confirmar nome/extensão
+    \caption[Diagrama de Classes do Módulo de Stocks]{Diagrama de Classes do Módulo de Stocks}
+    \label{fig:diagrama_classes_stocks}
+\end{figure}
+
+\subsection{Diagramas de Sequência do Módulo de Stocks}
+
+Nesta subsecção, mapeiam-se os fluxos dinâmicos associados à reposição de material, evidenciando a interação entre os utilizadores internos (Administradores e Operadores), a \textit{Facade} do sistema e o \texttt{StocksService}.
+
+\subsubsection{Aprovar Encomenda de Reposição (UC04)}
+
+Para garantir o controlo financeiro sobre as compras a fornecedores, as sugestões automáticas de reposição de material requerem validação humana. A Figura \ref{fig:seq_aprovar_encomenda} demonstra este processo, desencadeado por um Administrador. Através da interface, o pedido é encaminhado para o \texttt{StocksService}, que atua sobre a entidade \texttt{EncomendaStock} correspondente, alterando o seu estado na base de dados para "Em Trânsito". Esta operação assinala logisticamente que o pedido foi formalizado junto do fornecedor.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Aprovar Encomenda de Reposicao.png} % Ajustar nome e extensão
+    \caption[Diagrama de Sequência: Aprovar Encomenda de Reposição]{Diagrama de Sequência: Aprovar Encomenda de Reposição (UC04)}
+    \label{fig:seq_aprovar_encomenda}
+\end{figure}
+
+\subsubsection{Rececionar Encomenda de Stock (UC16 / UC29)}
+
+A entrada efetiva de novo material no armazém exige a sincronização entre a entrega física e o registo digital. Como ilustrado na Figura \ref{fig:seq_rececionar_encomenda}, o Operador de Loja invoca este fluxo ao receber as caixas do fornecedor. O \texttt{StocksService} orquestra uma dupla operação transacional: primeiramente, atualiza o estado da encomenda para "Rececionada"; de seguida, itera sobre todos os artigos contidos nessa mesma encomenda, invocando a rotina de ajuste de \textit{stock} para incrementar o \texttt{stockAtual} das respetivas peças na base de dados SQL Server.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.07, angle=90]{images/Rececionar encmenda Rep.png} % Ajustar nome e extensão
+    \caption[Diagrama de Sequência: Rececionar Encomenda de Stock]{Diagrama de Sequência: Rececionar Encomenda de Stock (UC16 / UC29)}
+    \label{fig:seq_rececionar_encomenda}
+\end{figure}
+\section{Visão Geral e Consolidação da Lógica de Negócios}
+
+A análise detalhada dos quatro módulos fundamentais — Utilizadores, Serviços, Financeiro e Stocks — demonstra que a arquitetura do sistema \textbf{Fix'n'Ride} foi concebida para operar como um ecossistema altamente coeso e interdependente. Embora cada domínio possua responsabilidades estritamente delimitadas através das suas respetivas interfaces, a verdadeira robustez da plataforma revela-se na orquestração harmoniosa destes componentes.
+
+A Figura \ref{fig:diagrama_classes_global} apresenta o \textbf{Diagrama de Classes Global} da solução, ilustrando a visão macro da arquitetura. No centro desta topologia opera o padrão estrutural \textit{Facade}, materializado na interface \texttt{iMobiFix} e na sua respetiva implementação, a classe \texttt{MobiFixService}. Esta atua como o grande orquestrador do sistema, agregando as dependências dos serviços especialistas e assegurando que uma única ação iniciada no \textit{frontend} seja traduzida numa transação segura que atravessa múltiplos domínios estruturais.
+
+\begin{figure}[H]
+    \centering
+    % Se o diagrama global for muito largo, podes adicionar "angle=90" ou usar a scale ideal
+    \includegraphics[scale=0.4]{images/MobiFixLN.jpg} 
+    \caption[Diagrama de Classes Global do Sistema MobiFix]{Diagrama de Classes Global do Sistema MobiFix}
+    \label{fig:diagrama_classes_global}
+\end{figure}
+
+Um exemplo claro desta sinergia transversal ocorre no momento de entrega de um veículo: a alteração do estado da reparação (\textbf{Módulo de Serviços}) despoleta automaticamente o recálculo do inventário físico (\textbf{Módulo de Stocks}) e culmina na emissão do documento fiscal e registo de pagamento (\textbf{Módulo Financeiro}), tudo isto associado de forma segura à identidade do cliente (\textbf{Módulo de Utilizadores}).
+
+Adicionalmente, a decisão arquitetural de delegar as operações transacionais de leitura e escrita simples para o \textit{Data API Builder} (DAB) revelou-se crucial. Esta abordagem liberta a camada de Lógica de Negócios em \textbf{.NET} do código repetitivo, permitindo que o servidor se dedique inteiramente ao processamento de regras complexas, validação de segurança e automação de tarefas.
+
+Em suma, a modelação orientada a objetos documentada ao longo deste capítulo assegura que a \textbf{MobiFix} dispõe de um \textit{backend} modular, escalável e resiliente, perfeitamente capacitado para suportar as exigências operacionais, logísticas e financeiras da organização.
+
+\section{Rotas do Servidor de Lógica de Negócios (Facade \textit{MobiFixService})}
+
+Para expor a lógica de negócios ao servidor \textit{web} (responsável pela camada de apresentação em React), o sistema disponibiliza um conjunto de \textit{endpoints} RESTful dedicados. Estas rotas são orquestradas pela \textit{Facade} central da aplicação, a classe \texttt{MobiFixService}, que atua como o ponto de entrada único para todas as operações transacionais que exigem orquestração inter-módulos.
+
+Ao contrário das rotas geradas automaticamente pelo \textit{Data API Builder} (DAB) — que se destinam a operações diretas de leitura e escrita (\textit{CRUD}) —, as rotas do Servidor de Lógica de Negócios encapsulam processos críticos. Através de pedidos HTTP estandardizados e troca de dados em formato JSON, a camada de apresentação consegue delegar no \textit{backend} operações complexas como a emissão de faturas, a validação dedutiva de \textit{stocks} e a autenticação segura de utilizadores, mantendo assim um baixo acoplamento entre a interface e o motor de regras da \textbf{MobiFix}.
+
+Abaixo detalham-se os principais \textit{endpoints} expostos por esta \textit{Facade}, agrupados pelos respetivos domínios de atuação:
+
 \begin{itemize}
     \item \textbf{Módulo de Gestão de Utilizadores}:
         \begin{itemize}
@@ -3299,7 +3575,14 @@ Transfer Protocol} }
     \caption{Modelo de Domínio (Versão Ampliada)}
 \end{figure}
 
-\addsec{Anexo 2 - Log de Prompts}
+\addsec{Anexo 2 - Arquitetura Global do sistema} \label{anexo:modelo_dominio_BIG}
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth, angle=90]{images/Arquitetura GLobal.png} 
+    \caption{Esquema gerado por LLM que visa representar a qrquitetura global dos micro-serviços do sistema }
+\end{figure}
+
+\addsec{Anexo 3 - Log de Prompts}
 
 Neste anexo, listam-se os prompts utilizados para a materialização, estruturação e refinamento da documentação técnica presente neste relatório. Como referido na secção 1.8, a IA atuou como agente auxiliar na redação, partindo sempre de dados e regras de negócio definidos pela equipa técnica. 
 % --- Prompt 1 ---
