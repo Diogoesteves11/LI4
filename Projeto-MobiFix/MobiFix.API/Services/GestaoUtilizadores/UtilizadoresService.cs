@@ -20,9 +20,9 @@ public class UtilizadoresService : iGestaoUtilizadores
         _funcRepo = funcRepo;
         _trotiRepo = trotiRepo;
     }
-    public async Task<bool> LoginCliente(string nif, string passwordText)
+    public async Task<bool> LoginCliente(string email, string passwordText)
     {
-        var cliente = await _clienteRepo.ObterPorNifAsync(nif);
+        var cliente = await _clienteRepo.ObterPorEmailAsync(nif);
         if (cliente == null) return false;
 
         return BCrypt.Verify(passwordText, cliente.PasswordHash);
@@ -46,31 +46,35 @@ public class UtilizadoresService : iGestaoUtilizadores
         return await _clienteRepo.RegistarAsync(cliente);
     }
 
-    public async Task<bool> EditarDadosCliente(string nif, string? novoContacto, string? novaMorada, string? novoEmail) 
+    public async Task<bool> EditarDadosCliente(string email, string? novoContacto, string? novaMorada) 
     {
         var campos = new Dictionary<string, object>();
         if (!string.IsNullOrWhiteSpace(novoContacto)) campos.Add("Telefone", novoContacto);
         if (!string.IsNullOrWhiteSpace(novaMorada))   campos.Add("Morada", novaMorada);
-        if (!string.IsNullOrWhiteSpace(novoEmail))     campos.Add("Email", novoEmail);
 
         if (campos.Count == 0) return true;
 
-        return await _clienteRepo.AtualizarParcialAsync(nif, campos);
+        return await _clienteRepo.AtualizarParcialAsync(email, campos);
     }
 
-    public async Task<Cliente?> GetCliente(string nif) => await _clienteRepo.ObterPorNifAsync(nif, true);
+    public async Task<Cliente?> GetCliente(string email) => await _clienteRepo.ObterPorEmailAsync(nif, true);
 
 
-    public async Task<bool> RegistarTrotinete(string nif, string marca, string modelo, string numSerie)
+    public async Task<bool> RegistarTrotinete(string email, string marca, string modelo, string numSerie)
     {
         var dto = new TrotineteDto 
         { 
             Marca = marca, 
             Modelo = modelo, 
-            NumeroSerie = numSerie 
+            NumeroSerie = numSerie,
+            EmServico = false
         };
 
-        return await _trotiRepo.CriarComNifAsync(dto, nif);
+        return await _trotiRepo.CriarComNifAsync(dto, email);
+    }
+
+    public async Task<bool> AlterarEstadoReparacaoTrotinete(string numSerie, bool estado){
+        return _trotiRepo.AlterarEstadoTrotinete(numSerie, estado);
     }
 
 
