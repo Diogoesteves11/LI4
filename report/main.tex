@@ -3521,9 +3521,162 @@ Abaixo detalham-se os principais \textit{endpoints} expostos por esta \textit{Fa
 \end{itemize}
 
 \chapter{Camada de Apresentação}
-\section{Prototipagem das Páginas Web}
-\section{Definição das rotas}
 
+\section{Prototipagem das Páginas}
+
+A camada de apresentação do sistema \textbf{Fix'n'Ride} foi desenvolvida com a \textit{framework} React, utilizando \textit{Tailwind CSS} para a estilização. A arquitetura de \textit{interface} segue rigorosamente os princípios de \textit{User-Centered Design} (Design Centrado no Utilizador) e \textit{Responsive Web Design}, garantindo que a experiência se adapta perfeitamente aos diferentes dispositivos utilizados pelos atores do sistema (computadores de balcão para operadores, \textit{tablets} para mecânicos e \textit{smartphones/desktops} para clientes).
+
+\subsection{Interface do Cliente}
+\label{subsec:interface_cliente}
+
+A interface do utilizador final foca-se na simplicidade, na autonomia e na rapidez de acesso às funcionalidades críticas, reduzindo a necessidade de contacto telefónico com a oficina.
+
+\begin{itemize}
+    \item \textbf{Dashboard (Homepage):} Centraliza as métricas do utilizador, exibindo um resumo da sua atividade, atalhos rápidos para agendamentos e o estado das intervenções em curso através de um \textit{layout} limpo e apelativo.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/HomeCliente.png} 
+        \caption[Homepage do Cliente]{Homepage do Cliente}
+        \label{fig:home_cliente}
+    \end{figure}   
+    
+    \item \textbf{Gestão de Ativos (Trotinetes):} Conforme ilustrado na figura abaixo, o utilizador pode visualizar os seus registos ativos e adicionar novas trotinetes à sua conta de forma intuitiva, introduzindo a Marca, Modelo e o respetivo Número de Série.
+     \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/RegistoTrotinete.png} 
+        \caption[Página de Registo de Trotinetes]{Página de Registos de Trotinetes}
+        \label{fig:registo_trotinete}
+    \end{figure}   
+            
+    \item \textbf{Agendamento de Serviços:} O sistema de marcação de diagnósticos permite ao cliente selecionar o veículo afetado a partir da sua garagem virtual e escolher uma \textit{slot} disponível na agenda. Este fluxo integra-se de imediato com a agenda técnica da oficina.
+     \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/AgendarDiagnostico.png} 
+        \caption[Página de Agendamento de Diagnóstico]{Página de Agendamento de Diagnóstico}
+        \label{fig:agendar_diagnostico_ui}
+    \end{figure}   
+    
+    \item \textbf{Histórico Financeiro (Faturas):} Esta secção oferece uma visão transparente e cronológica das obrigações financeiras, permitindo ao cliente acompanhar os custos de manutenção e efetuar o \textit{download} das faturas (PDF) relativas aos pagamentos efetuados.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/FATURAS.png} 
+        \caption[Página de Histórico Financeiro]{Página de Histórico Financeiro}
+        \label{fig:faturas_cliente}
+    \end{figure}   
+
+    \item \textbf{Catálogo de Peças (Loja Online):} Interface de \textit{Self-Service} comercial que permite a consulta e pesquisa de componentes e acessórios disponíveis na MobiFix. A interface apresenta o preço e o estado do \textit{stock}, permitindo a adição de produtos ao carrinho para compra direta.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{images/CatalogoPecas.png} 
+        \caption[Página do Catálogo de Peças]{Página de Catálogo de Peças}
+        \label{fig:catalogo_pecas}
+    \end{figure}
+\end{itemize}
+
+\subsection{Interface do Mecânico}
+\label{subsec:interface_mecanico}
+
+A interface do mecânico foi desenhada especificamente para uma utilização tátil em \textit{tablets} nas bancadas de reparação, priorizando botões de grande dimensão e a minimização de introdução de texto manual (\textit{typing}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{images/PAGINADIAGNOSTICO.png} 
+    \caption[Página de Preenchimento de Diagnóstico]{Página de preenchimento de diagnóstico (Visão Tablet)}
+    \label{fig:PaginaDiagnostico}
+\end{figure}
+A \textbf{Página de Diagnóstico} (Figura \ref{fig:PaginaDiagnostico}) permite ao mecânico de triagem selecionar as trotinetes agendadas para o dia e assinalar rapidamente as intervenções necessárias recorrendo ao catálogo integrado. Este ecrã gera automaticamente a Guia de Reparação sem necessidade de cálculos manuais.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{images/PAGINAREPARACOES.png} 
+    \caption[Página de Reparações em Curso]{Página de reparações em curso}
+    \label{fig:Páginareparações}
+\end{figure}
+A \textbf{Página de Reparações} (Figura \ref{fig:Páginareparações}) acompanha a execução prática das Ordens de Serviço. Permite ao técnico alterar o estado da intervenção (ex: para "Concluído") e registar os códigos EAN das peças instaladas fisicamente, assegurando a dedução em tempo real no inventário da loja.
+
+\subsection{Interface do Operador de Loja}
+\label{subsec:interface_operador}
+
+A interface da frente de loja (\textit{Point of Sale} e Receção) foi desenhada com foco na eficiência e rapidez do atendimento presencial ao cliente. O seu \textit{layout} é prático e direto, reduzindo o tempo necessário para processar transações comerciais e logísticas ao balcão.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/VendaDireta.png} % Ajusta a extensão caso guardes em .jpg
+    \caption[Interface do Operador de Loja]{Interface do Operador de Loja (Página de Venda Direta)}
+    \label{fig:dashboard_operador}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/TrotinetesReparadas.png} % Ajusta a extensão caso guardes em .jpg
+    \caption[Interface do Operador de Loja]{Interface do Operador de Loja (Página de entrega de trotinetes)}
+    \label{fig:dashboard_operador}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/RececaoEncomenda.png} % Ajusta a extensão caso guardes em .jpg
+    \caption[Interface do Operador de Loja]{Interface do Operador de Loja (Página de receção de encomendas)}
+    \label{fig:dashboard_operador}
+\end{figure}
+
+A Figura \ref{fig:dashboard_operador} ilustra o ecrã principal de \textbf{Venda Direta}, utilizado pelo operador de atendimento. Neste \textit{dashboard} destacam-se os seguintes componentes:
+
+
+\begin{itemize}
+    \item \textbf{Navegação Lateral:} Acesso rápido e intuitivo aos três fluxos operacionais críticos da receção: "Venda Direta" (comercialização rápida), "Trotinetes Prontas" (para localizar reparações concluídas, faturar e entregar ao cliente) e "Receção de Encomendas" (para dar entrada no sistema de mercadoria entregue por fornecedores).
+    \item \textbf{Catálogo \textit{Point of Sale} (POS):} Uma área central equipada com barra de pesquisa para localização rápida de artigos. A grelha exibe os produtos categorizados (Peças ou Acessórios) e apresenta de forma destacada a quantidade de \textit{stock} real disponível, prevenindo vendas de artigos que já não se encontrem fisicamente na loja.
+    \item \textbf{Carrinho de Compras:} Um painel lateral dinâmico que agrega os produtos selecionados pelo operador, calculando os totais e preparando a transação para um \textit{checkout} imediato com emissão de fatura/recibo.
+\end{itemize}
+
+\subsection{Interface do Administrador}
+\label{subsec:interface_administrador}
+
+A interface de administração destina-se à monitorização estratégica e configuração do negócio, oferecendo acesso total e irrestrito aos módulos de gestão.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/DashBoardADMIN.png} 
+    \caption[Dashboard do Administrador]{Interface do Administrador (Dashboard)}
+    \label{fig:dashboard_admin}
+\end{figure}
+A Figura \ref{fig:dashboard_admin} apresenta o \textbf{Dashboard do Administrador} da plataforma MobiFix, servindo como o centro de controlo exclusivo para a gestão global do sistema.
+
+Neste ecrã, é possível observar:
+\begin{itemize}
+    \item \textbf{Navegação de Gestão:} Um menu lateral esquerdo com acesso direto aos módulos cruciais de administração (Clientes, Reparações, Trotinetes, Catálogo e Definições) e uma barra superior com pesquisa global.
+    \item \textbf{Visão Geral da Operação:} Uma área central analítica desenhada para exibir o estado atual do negócio num relance, contendo indicadores de desempenho (KPIs), métricas de faturação e alertas críticos (ex: necessidades de aprovação de \textit{stock}).
+\end{itemize}
+
+\section{Definição de Rotas}
+\label{sec:definicao_rotas_react}
+
+A navegação da aplicação cliente (SPA - \textit{Single Page Application}) é gerida internamente através de uma biblioteca de \textit{routing} (como o \textit{React Router}). Para garantir a segurança e a consistência da experiência do utilizador final, as rotas disponíveis para o perfil de \textbf{Cliente} foram estritamente mapeadas e isoladas das rotas administrativas.
+
+Abaixo apresenta-se o mapa de rotas a que um utilizador com o perfil de Cliente terá acesso:
+
+\subsubsection{Rotas Públicas (Não Autenticadas)}
+\begin{itemize}
+    \item \texttt{/}: \textit{Landing page} institucional e apresentação dos serviços da MobiFix.
+    \item \texttt{/login}: Página de autenticação do cliente.
+    \item \texttt{/registo}: Formulário de criação de nova conta de cliente.
+    \item \texttt{/catalogo}: Visualização pública das peças e acessórios comercializados (sem possibilidade de \textit{checkout}).
+\end{itemize}
+
+\subsubsection{Rotas Privadas (Exigem Autenticação de Cliente)}
+\begin{itemize}
+    \item \texttt{/dashboard}: Página central da área reservada com o resumo da atividade.
+    \item \texttt{/perfil}: Gestão e edição de dados pessoais e de faturação (NIF, Morada).
+    \item \texttt{/trotinetes}: Listagem da garagem virtual do cliente.
+    \item \texttt{/trotinetes/nova}: Formulário para registar uma nova trotinete (Marca, Modelo, Número de Série).
+    \item \texttt{/agendamentos/novo}: Fluxo de marcação de um novo serviço/diagnóstico na agenda da oficina.
+    \item \texttt{/servicos}: Listagem dos serviços em andamento e consulta do estado da reparação em tempo real.
+    \item \texttt{/faturas}: Histórico cronológico de transações e acesso ao \textit{download} de documentos PDF.
+    \item \texttt{/loja}: Acesso ao catálogo interativo com possibilidade de adicionar itens ao carrinho.
+    \item \texttt{/checkout}: Fluxo de revisão de peças escolhidas e pagamento online (\textit{Click \& Collect}).
+\end{itemize}
+
+O acesso indevido a rotas não listadas (como \texttt{/admin} ou \texttt{/oficina}) por parte de um cliente resultará num redirecionamento automático para o \texttt{/dashboard} ou apresentação de uma página de erro 403 (Acesso Negado), garantindo a blindagem da \textit{interface} do utilizador.
 
 
 \chapter{Orquestração dos Servidores e Micro-Serviços}
@@ -3630,74 +3783,6 @@ DAB_INTERNAL_URL=http://dab:5000
 REACT_APP_API_LOGIC_URL=http://localhost:8080/api/logic
 REACT_APP_API_DAB_URL=http://localhost:5000/api
 \end{lstlisting}
-
-\section{Design de Interfaces}
-\subsection{Interface do Cliente}
-\label{subsec:interface_cliente}
-
-A interface do cliente foi projetada seguindo os princípios de \textit{User-Centered Design}, focando-se na simplicidade e na rapidez de acesso às funcionalidades críticas.
-
-\begin{itemize}
-    \item \textbf{Dashboard:} Centraliza as métricas do utilizador, exibindo o número de veículos registados e o estado das intervenções em curso através de um layout responsivo desenvolvido com \texttt{Tailwind CSS}.
-    \begin{figure}[!h]
-        \centering
-        \includegraphics[width=\textwidth]{images/HomeCliente.png} 
-        \caption{Homepage do Cliente}
-    \end{figure}   
-    
-    \item \textbf{Gestão de Ativos:} Conforme ilustrado na figura abaixo, é possível visualizar os registos e adicionar trotinetes através de Marca, Modelo e Número de Série.
-     \begin{figure}[!h]
-        \centering
-        \includegraphics[width=\textwidth]{images/RegistoTrotinete.png} 
-        \caption{Página de Registos de trotinetes}
-    \end{figure}   
-            
-    \item \textbf{Agendamento de Serviços:} O sistema de marcação de diagnósticos permite ao cliente selecionar o veículo afetado e indicar a sintomatologia do problema, integrando-se diretamente com o fluxo de trabalho dos técnicos da oficina.
-     \begin{figure}[!h]
-        \centering
-        \includegraphics[width=\textwidth]{images/AgendarDiagnostico.png} 
-        \caption{Página de Agendamento de Diagnóstico}
-    \end{figure}   
-    \item \textbf{Histórico Financeiro:} A secção de faturas oferece uma visão clara das obrigações financeiras, permitindo ao cliente acompanhar os custos de manutenção e o histórico de pagamentos efetuados.
-    \begin{figure}[!h]
-        \centering
-        \includegraphics[width=\textwidth]{images/FATURAS.png} 
-        \caption{Página de Histórico Financeiro}
-    \end{figure}   
-    
-\end{itemize}
-
-\subsection{Interface do Mecânico}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.4]{images/PAGINADIAGNOSTICO.png} 
-    \caption[Página de preenchimento de diagnóstico]{Página de preenchimento de diagnóstico}
-    \label{fig:PaginaDiagnostico}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.4]{images/PAGINAREPARACOES.png} 
-    \caption[Página de reparações]{Página de reparações}
-    \label{fig:Páginareparações}
-\end{figure}
-\subsection{Interface Operador de Loja}
-\subsection{Interface do Administrador}
-
-\begin{figure}[!h]
-    \centering
-    \includegraphics[width=\textwidth, angle=90]{images/DashBoardADMIN.png} 
-    \caption{Interface do Administrador}
-\end{figure}
-A Figura \ref{fig:dashboard_admin} apresenta o \textbf{Dashboard do Administrador} da plataforma MobiFix, servindo como o centro de controlo exclusivo para a gestão global do sistema.
-
-Neste ecrã, é possível observar:
-\begin{itemize}
-    \item \textbf{Navegação de Gestão:} Um menu lateral esquerdo com acesso direto aos módulos cruciais de administração (Clientes, Reparações, Trotinetes e Definições) e uma barra superior com pesquisa e opções da conta de administrador.
-    \item \textbf{Visão Geral da Operação:} Uma área central desenhada para exibir o estado atual do negócio num relance, contendo indicadores de desempenho e o resumo das atividades ou métricas mais recentes da plataforma.
-\end{itemize}
-
 \renewcommand{\nomname}{Lista de Siglas e Acrónimos}
 
 % Tecnologias e Desenvolvimento
