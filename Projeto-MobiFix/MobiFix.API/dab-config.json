@@ -16,7 +16,15 @@
         { "role": "Administrador", "actions": ["*"] },
         { "role": "Operador", "actions": ["read"] },
         { "role": "Mecanico", "actions": ["read"] }
-      ]
+      ],
+      "relationships": {
+        "intervencoesRealizadas": {
+          "cardinality": "many",
+          "target.entity": "ServicoIntervencao",
+          "source.fields": ["FuncionarioID"],
+          "target.fields": ["MecanicoID"]
+        }
+      }
     },
     "Cliente": {
       "source": "dbo.Clientes",
@@ -28,7 +36,27 @@
             { "action": "update", "policy": { "database": "@item.ClienteID eq @claims.client_id" } }
           ]
         }
-      ]
+      ],
+      "relationships": {
+        "trotinetes": {
+          "cardinality": "many",
+          "target.entity": "Trotinete",
+          "source.fields": ["ClienteID"],
+          "target.fields": ["ClienteID"]
+        },
+        "faturas": {
+          "cardinality": "many",
+          "target.entity": "Fatura",
+          "source.fields": ["ClienteID"],
+          "target.fields": ["ClienteID"]
+        },
+        "encomendas": {
+          "cardinality": "many",
+          "target.entity": "EncomendaCliente",
+          "source.fields": ["ClienteID"],
+          "target.fields": ["ClienteID"]
+        }
+      }
     },
     "Trotinete": {
       "source": "dbo.Trotinetes",
@@ -36,13 +64,27 @@
         { "role": "Administrador", "actions": ["*"] },
         { "role": "Operador", "actions": ["create", "read"] },
         { "role": "Cliente", "actions": ["create", "read"] }
-      ]
+      ],
+      "relationships": {
+        "dono": {
+          "cardinality": "one",
+          "target.entity": "Cliente",
+          "source.fields": ["ClienteID"],
+          "target.fields": ["ClienteID"]
+        },
+        "servicos": {
+          "cardinality": "many",
+          "target.entity": "Servico",
+          "source.fields": ["TrotineteID"],
+          "target.fields": ["TrotineteID"]
+        }
+      }
     },
     "Peca": {
       "source": "dbo.Pecas",
       "permissions": [
         { "role": "Administrador", "actions": ["*"] },
-        { "role": "Operador", "actions": ["read"] },
+        { "role": "Operador", "actions": ["read", "update"] },
         { "role": "Mecanico", "actions": ["read"] },
         { "role": "Cliente", "actions": ["read"] }
       ]
@@ -54,13 +96,49 @@
         { "role": "Mecanico", "actions": ["read", "update"] },
         { "role": "Operador", "actions": ["read", "update"] },
         { "role": "Cliente", "actions": ["create", "read"] }
-      ]
+      ],
+      "relationships": {
+        "trotinete": {
+          "cardinality": "one",
+          "target.entity": "Trotinete",
+          "source.fields": ["TrotineteID"],
+          "target.fields": ["TrotineteID"]
+        },
+        "intervencoesEfetivadas": {
+          "cardinality": "many",
+          "target.entity": "ServicoIntervencao",
+          "source.fields": ["ServicoID"],
+          "target.fields": ["ServicoID"]
+        }
+      }
     },
     "IntervencaoCatalogo": {
       "source": "dbo.IntervencoesCatalogo",
       "permissions": [
         { "role": "Administrador", "actions": ["*"] },
         { "role": "Mecanico", "actions": ["read"] }
+      ]
+    },
+    "ServicoIntervencao": {
+      "source": "dbo.Servico_Intervencoes",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Mecanico", "actions": ["create", "read", "update"] }
+      ],
+      "relationships": {
+        "pecasUtilizadas": {
+          "cardinality": "many",
+          "target.entity": "IntervencaoPeca",
+          "source.fields": ["ServicoID", "IntervencaoID"],
+          "target.fields": ["ServicoID", "IntervencaoID"]
+        }
+      }
+    },
+    "IntervencaoPeca": {
+      "source": "dbo.Intervencao_Pecas",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Mecanico", "actions": ["create", "read"] }
       ]
     },
     "Venda": {
@@ -79,6 +157,36 @@
             { "action": "read", "policy": { "database": "@item.ClienteID eq @claims.client_id" } }
           ]
         }
+      ],
+      "relationships": {
+        "devolucoes": {
+          "cardinality": "many",
+          "target.entity": "Devolucao",
+          "source.fields": ["FaturaID"],
+          "target.fields": ["FaturaID"]
+        }
+      }
+    },
+    "Devolucao": {
+      "source": "dbo.Devolucoes",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["create", "read"] }
+      ],
+      "relationships": {
+        "notaCredito": {
+          "cardinality": "one",
+          "target.entity": "NotaCredito",
+          "source.fields": ["DevolucaoID"],
+          "target.fields": ["DevolucaoID"]
+        }
+      }
+    },
+    "NotaCredito": {
+      "source": "dbo.NotasCredito",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["read"] }
       ]
     },
     "EncomendaStock": {
@@ -93,6 +201,47 @@
       "permissions": [
         { "role": "Administrador", "actions": ["*"] },
         { "role": "Cliente", "actions": ["read"] }
+      ],
+      "relationships": {
+        "pecasEmPromocao": {
+          "cardinality": "many",
+          "target.entity": "PromocaoPeca",
+          "source.fields": ["PromocaoID"],
+          "target.fields": ["PromocaoID"]
+        }
+      }
+    },
+    "PromocaoPeca": {
+      "source": "dbo.Promocao_Pecas",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Cliente", "actions": ["read"] }
+      ]
+    },
+    "EncomendaCliente": {
+      "source": "dbo.EncomendasCliente",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Cliente", "actions": [
+            { "action": "read", "policy": { "database": "@item.ClienteID eq @claims.client_id" } },
+            { "action": "create", "policy": { "database": "@item.ClienteID eq @claims.client_id" } }
+          ]
+        }
+      ],
+      "relationships": {
+        "itens": {
+          "cardinality": "many",
+          "target.entity": "EncomendaClienteItem",
+          "source.fields": ["EncomendaClienteID"],
+          "target.fields": ["EncomendaClienteID"]
+        }
+      }
+    },
+    "EncomendaClienteItem": {
+      "source": "dbo.EncomendaCliente_Itens",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Cliente", "actions": ["read", "create"] }
       ]
     }
   }

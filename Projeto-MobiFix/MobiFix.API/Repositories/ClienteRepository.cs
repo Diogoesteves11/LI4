@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using MobiFix.API.Models.GestaoUtilizadores;
+using MobiFix.API.DTOs;
 
 namespace MobiFix.API.Repositories;
 
@@ -11,20 +12,71 @@ public class ClienteRepository : iClienteRepository
 
     public async Task<Cliente?> ObterPorNifAsync(string nif, bool incluirTrotinetes = false)
     {
-        // Se quisermos as trotinetes, usamos o $expand do DAB
-        string url = $"api/Cliente/nif/{nif}";
-        if (incluirTrotinetes) url += "?$expand=trotinetes";
+        string url = $"api/Cliente?$filter=NIF eq '{nif}'";
+        if (incluirTrotinetes) url += "&$expand=trotinetes";
 
-        var response = await _http.GetFromJsonAsync<DabResponse<Cliente>>(url);
-        return response?.Value?.FirstOrDefault();
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
+        var response = await _http.SendAsync(request);
+        if (!response.IsSuccessStatusCode) return null;
+
+        var result = await response.Content.ReadFromJsonAsync<DabResponse<ClienteDto>>();
+        var dto = result?.Value?.FirstOrDefault();
+
+        if (dto == null) return null;
+
+        var cliente = new Cliente(dto.NIF, dto.Nome, dto.Email, dto.Telefone, dto.PasswordHash);
+        
+        return cliente;
     }
 
     public async Task<bool> RegistarAsync(Cliente cliente)
     {
-        var res = await _http.PostAsJsonAsync("api/Cliente", cliente);
+        var dto = new ClienteDto {
+            Nome = cliente.Nome,
+            NIF = cliente.Nif,
+            Email = cliente.Email,
+            Telefone = cliente.Contacto,
+            PasswordHash = cliente.PasswordHash
+        };
+
+        var res = await _http.PostAsJsonAsync("api/Cliente", dto);
         return res.IsSuccessStatusCode;
     }
-}
 
-// Auxiliar para ler o JSON do DAB
-public class DabResponse<T> { public List<T> Value { get; set; } = new(); }
+    public async Task<bool> AtualizarParcialAsync(string nif, object dados)
+    {
+        string urlBusca = $"api/Cliente?$filter=NIF eq '{nif}'&$select=ClienteID";
+        var resBusca = await _http.GetFromJsonAsync<DabResponse<ClienteDto>>(urlBusca);
+        var clienteId = resBusca?.Value?.FirstOrDefault()?.ClienteID;
+
+        if (clienteId == null) return false;
+
+        string urlPatch = $"api/Cliente/ClienteID/{clienteId}";
+
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+        request.Content = JsonContent.Create(dados);
+
+        var response = await _http.SendAsync(request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> ExisteClienteAsync(string nif)
+    {
+        string url = $"api/Cliente?$filter=NIF eq '{nif}'&$select=ClienteID&$first=1";
+
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
+        var response = await _http.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode) return false;
+
+        var result = await response.Content.ReadFromJsonAsync<DabResponse<ClienteDto>>();
+
+        return result?.Value?.Any() ?? false;
+    }
+
+}

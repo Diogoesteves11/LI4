@@ -39,6 +39,7 @@ CREATE TABLE Trotinetes (
     NumeroSerie NVARCHAR(100) UNIQUE NOT NULL,
     Marca NVARCHAR(100) NOT NULL,
     Modelo NVARCHAR(100) NOT NULL,
+    EmServico BIT DEFAULT 0,
     ClienteID INT NOT NULL FOREIGN KEY REFERENCES Clientes(ClienteID)
 );
 
