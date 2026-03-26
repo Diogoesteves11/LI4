@@ -89,7 +89,7 @@ yarn-error.log*
 *.brf
 *.nlo
 *.aux
-
+.env
 # =========================================
 # Ficheiros de Bibliografia (BibTeX/Biber)
 # =========================================
