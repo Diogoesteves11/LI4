@@ -4,13 +4,6 @@
   font-family: Inter, system-ui, Arial, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #f8fafc;
+  @apply bg-slate-50 min-h-screen m-0;
 }
