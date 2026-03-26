@@ -4,19 +4,19 @@ namespace MobiFix.API.Services.GestaoUtilizadores;
 
 
 public interface iGestaoUtilizadores {
-    public bool LoginCliente(string nif, string password);
+    public async Task<bool> LoginCliente(string nif, string passwordText);
 
-    public bool LoginFuncionario(string numero, string password);
+    public async Task<bool> LoginFuncionario(string numero, string passwordText);
 
-    public bool RegistarCliente(Cliente c);
+    public async Task<bool> RegistarCliente(string nome, string nif, string email, string contacto, string morada, string passwordText);
 
-    public bool EditarDadosCliente(string novoContacto, string novaMorada, string novoEmail);
+    public async Task<bool> EditarDadosCliente(string nif, string? novoContacto, string? novaMorada, string? novoEmail);
 
-    public bool RegistarTrotinete(string nif, string marca, string modelo, string numSerie);
+    public async Task<bool> RegistarTrotinete(string nif, string marca, string modelo, string numSerie);
 
-    public Cliente GetCliente(string nif);
+    public async Task<Cliente?> GetCliente(string nif);
 
-    public Funcionario GetFuncionario(string numero);
+    public async Task<Funcionario?> GetFuncionario(string numero);
 
     public bool RegistarFuncionario(Funcionario f);
 

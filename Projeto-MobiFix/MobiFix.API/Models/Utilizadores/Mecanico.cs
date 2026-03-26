@@ -11,8 +11,8 @@ public enum EspecialidadeTipo {
 public class Mecanico : Funcionario {
     public string Especialidade { get; private set; }
 
-    public Mecanico (string numero, string email, string contacto, string passwordHash, string especialidade)
-                    : base (numero, email, contacto, passwordHash) {
+    public Mecanico (string numero, string email, string contacto, string passwordHash,bool ativo , string? especialidade)
+                    : base (numero, email, contacto, passwordHash, ativo) {
 
         if (!AlterarEspecialidade(especialidade)) {
             throw new ArgumentException($"A especialidade '{especialidade}' não é suportada.");

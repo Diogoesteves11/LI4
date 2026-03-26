@@ -1,3 +1,5 @@
+using System.Net.Http;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Prepara o .NET para usar a pasta Controllers

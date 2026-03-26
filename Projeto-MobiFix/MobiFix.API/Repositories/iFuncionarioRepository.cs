@@ -7,4 +7,6 @@ public interface iClienteRepository{
     public Task<bool> RegistarFuncionarioAsync(Funcionario f);
     public Task<bool> DesativarFuncionarioAsync(string numero);
     public Task<bool> AtivarFuncionarioAsync(string numero);
+
+    public async Task<bool> ExisteFuncionarioAsync(string numero);
 }

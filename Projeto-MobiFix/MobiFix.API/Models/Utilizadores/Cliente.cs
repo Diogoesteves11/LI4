@@ -5,6 +5,7 @@ namespace MobiFix.API.Models.Utilizadores;
 
 public class Cliente 
 {
+    public int Id { get; set; }
     public string Nif { get; private set; }
     public string Nome { get; set; }
     public string Email { get; private set; }
