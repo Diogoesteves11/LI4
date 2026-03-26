@@ -6,7 +6,7 @@ export default function BottomNav() {
     const navigate = useNavigate();
 
     const navItems = [
-        {icon: Home, label: "Início", path: "/"},
+        {icon: Home, label: "Início", path: "/cliente"},
         {icon: Scooter, label: "Trotinetes", path: "/trotinetes"},
         {icon: ShoppingCart, label: "Catálogo", path: "/catalogo"},
         {icon: FileText, label: "Faturas", path: "/faturas" },
