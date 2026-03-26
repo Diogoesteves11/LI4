@@ -6,10 +6,10 @@ export default function BottomNav() {
     const navigate = useNavigate();
 
     const navItems = [
-        {icon: Home, label: "Início", path: "/cliente"},
-        {icon: Scooter, label: "Trotinetes", path: "/trotinetes"},
-        {icon: ShoppingCart, label: "Catálogo", path: "/catalogo"},
-        {icon: FileText, label: "Faturas", path: "/faturas" },
+        {icon: Home, label: "Início", path: "/FixNRide/"},
+        {icon: Scooter, label: "Trotinetes", path: "/FixNRide/trotinetes"},
+        {icon: ShoppingCart, label: "Catálogo", path: "/FixNRide/catalogo"},
+        {icon: FileText, label: "Faturas", path: "/FixNRide/faturas" },
     ];
 
     return (

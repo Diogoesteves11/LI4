@@ -1,4 +1,4 @@
-import { Calendar, ShoppingCart, Wrench } from "lucide-react";
+import { Calendar, Scooter, ShoppingCart, Bell, User,Wrench } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../../components/BottomNav";
 
@@ -11,36 +11,49 @@ export default function HomeClientePage() {
       desc: "Marque um diagnóstico",
       icon: Calendar,
       color: "bg-blue-100 text-blue-600",
-      path: "/agendar"
+      path: "/FixNRide/agendar"
     },
     {
       label: "Catálogo de Peças", 
       desc: "Reserve peças para levantar", 
       icon: ShoppingCart, 
       color: "bg-purple-100 text-purple-600", 
-      path: "/catalogo" 
+      path: "/FixNRide/catalogo" 
     },
   ]
   return (
-    <main className="min-h-screen bg-slate-50 pb-24">
-      {/* Header - Usando tons de Slate e Blue do v4 */}
-      <header className="bg-blue-600 text-white px-5 py-8 rounded-b-3xl shadow-lg">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
-            <Wrench className="w-6 h-6 text-white" />
+      <main className="min-h-screen bg-slate-50 pb-24 font-sans antialiased">
+      {/* Header Estilo Premium */}
+      <header className="relative bg-blue-600 text-white px-6 pt-12 pb-12 rounded-b-[3rem] shadow-2xl shadow-blue-200 overflow-hidden">
+        {/* Elemento Decorativo de Fundo */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 -left-10 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl" />
+
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur-lg rounded-xl flex items-center justify-center border border-white/30 shadow-inner">
+                <Scooter className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-black tracking-tighter leading-none">
+                  FIXN<span className="text-blue-200">RIDE</span>
+                </h1>
+                <p className="text-[10px] text-blue-100 font-bold uppercase tracking-[0.2em] opacity-80">
+                  Service Center
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Fix'n'Ride</h1>
-            <p className="text-xs text-blue-100 opacity-80 uppercase tracking-widest">Oficina de Trotinetes</p>
+
+          <div className="flex items-center gap-4">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Bem vindo,</p>
+              <h2 className="text-2xl font-black tracking-tight">João Silva 👋</h2>
+            </div>
           </div>
-        </div>
-        
-        <div className="mt-2">
-          <p className="text-sm text-blue-100">Bem-vindo de volta,</p>
-          <p className="text-xl font-semibold">João Silva 👋</p>
         </div>
       </header>
-
       {/* Quick Actions - Geradas via Loop */}
       <section className="px-4 py-8">
         <h2 className="text-xs font-bold text-slate-500 mb-4 uppercase tracking-wider ml-1">
