@@ -1,0 +1,99 @@
+{
+  "$schema": "https://github.com/Azure/data-api-builder/releases/download/v1.0.0/dab-config.schema.json",
+  "runtime": {
+    "rest": { "enabled": true, "path": "/api" },
+    "graphql": { "enabled": true, "path": "/graphql" },
+    "host": { "mode": "development", "cors": { "origins": ["http://localhost:3000"] } }
+  },
+  "data-source": {
+    "database-type": "mssql",
+    "connection-string": "@env('DAB_CONNECTION_STRING')"
+  },
+  "entities": {
+    "Funcionario": {
+      "source": "dbo.Funcionarios",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["read"] },
+        { "role": "Mecanico", "actions": ["read"] }
+      ]
+    },
+    "Cliente": {
+      "source": "dbo.Clientes",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["create", "read", "update"] },
+        { "role": "Cliente", "actions": [
+            { "action": "read", "policy": { "database": "@item.ClienteID eq @claims.client_id" } },
+            { "action": "update", "policy": { "database": "@item.ClienteID eq @claims.client_id" } }
+          ]
+        }
+      ]
+    },
+    "Trotinete": {
+      "source": "dbo.Trotinetes",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["create", "read"] },
+        { "role": "Cliente", "actions": ["create", "read"] }
+      ]
+    },
+    "Peca": {
+      "source": "dbo.Pecas",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["read"] },
+        { "role": "Mecanico", "actions": ["read"] },
+        { "role": "Cliente", "actions": ["read"] }
+      ]
+    },
+    "Servico": {
+      "source": "dbo.Servicos",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Mecanico", "actions": ["read", "update"] },
+        { "role": "Operador", "actions": ["read", "update"] },
+        { "role": "Cliente", "actions": ["create", "read"] }
+      ]
+    },
+    "IntervencaoCatalogo": {
+      "source": "dbo.IntervencoesCatalogo",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Mecanico", "actions": ["read"] }
+      ]
+    },
+    "Venda": {
+      "source": "dbo.Vendas",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["create", "read"] }
+      ]
+    },
+    "Fatura": {
+      "source": "dbo.Faturas",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["create", "read"] },
+        { "role": "Cliente", "actions": [
+            { "action": "read", "policy": { "database": "@item.ClienteID eq @claims.client_id" } }
+          ]
+        }
+      ]
+    },
+    "EncomendaStock": {
+      "source": "dbo.EncomendasStock",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Operador", "actions": ["read", "update"] }
+      ]
+    },
+    "Promocao": {
+      "source": "dbo.Promocoes",
+      "permissions": [
+        { "role": "Administrador", "actions": ["*"] },
+        { "role": "Cliente", "actions": ["read"] }
+      ]
+    }
+  }
+}
