@@ -7,10 +7,8 @@ export const mockRepairs = [
     clientName: 'João Silva',
     scheduledTime: '09:00',
     status: 'pending',
-    priority: 'urgent',
     estimatedDuration: 45,
     serialNumber: 'XM2024-A-15678',
-    batteryLevel: 20
   },
   {
     id: 'SCOOT-2402',
@@ -20,10 +18,8 @@ export const mockRepairs = [
     clientName: 'Maria Santos',
     scheduledTime: '10:30',
     status: 'pending',
-    priority: 'normal',
     estimatedDuration: 60,
     serialNumber: 'SG2024-B-28934',
-    batteryLevel: 45
   },
   {
     id: 'SCOOT-2403',
@@ -33,10 +29,8 @@ export const mockRepairs = [
     clientName: 'Pedro Costa',
     scheduledTime: '11:00',
     status: 'diagnosed',
-    priority: 'normal',
     estimatedDuration: 90,
     serialNumber: 'XM2024-C-39201',
-    batteryLevel: 0
   },
   {
     id: 'SCOOT-2404',
@@ -46,10 +40,8 @@ export const mockRepairs = [
     clientName: 'Ana Ferreira',
     scheduledTime: '14:00',
     status: 'pending',
-    priority: 'normal',
     estimatedDuration: 30,
     serialNumber: 'NB2024-D-47812',
-    batteryLevel: 65
   },
   {
     id: 'SCOOT-2405',
@@ -59,10 +51,8 @@ export const mockRepairs = [
     clientName: 'Carlos Oliveira',
     scheduledTime: '15:30',
     status: 'pending',
-    priority: 'urgent',
     estimatedDuration: 120,
     serialNumber: 'XM2024-E-56723',
-    batteryLevel: 10
   },
   {
     id: 'SCOOT-2406',
@@ -72,10 +62,8 @@ export const mockRepairs = [
     clientName: 'Sofia Rodrigues',
     scheduledTime: '16:00',
     status: 'pending',
-    priority: 'normal',
     estimatedDuration: 45,
     serialNumber: 'SG2024-F-64589',
-    batteryLevel: 30
   },
   {
     id: 'SCOOT-2407',
@@ -85,10 +73,8 @@ export const mockRepairs = [
     clientName: 'Ricardo Alves',
     scheduledTime: '17:00',
     status: 'pending',
-    priority: 'normal',
     estimatedDuration: 50,
     serialNumber: 'XM2024-G-72345',
-    batteryLevel: 55
   },
   {
     id: 'SCOOT-2408',
@@ -98,10 +84,8 @@ export const mockRepairs = [
     clientName: 'Beatriz Costa',
     scheduledTime: '17:30',
     status: 'pending',
-    priority: 'urgent',
     estimatedDuration: 75,
     serialNumber: 'XM2024-H-81267',
-    batteryLevel: 5
   }
 ];
 

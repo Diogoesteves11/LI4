@@ -14,8 +14,8 @@ export default function RepairsLayout() {
             <div className="flex items-center gap-3">
               <Wrench className="h-8 w-8" />
               <div>
-                <h1 className="text-2xl font-bold">Sistema de Oficina</h1>
-                <p className="text-sm text-slate-300">Gestão de Trotinetes Elétricas</p>
+                <h1 className="text-2xl font-bold">FIXNREPAIR</h1>
+                <p className="text-sm text-slate-300">Diagnóstico e Reparação de Trotinetes</p>
               </div>
             </div>
 
@@ -32,9 +32,9 @@ export default function RepairsLayout() {
                 Diagnósticos
               </Link>
               <Link
-                to="/FixNRepair/repairs"
+                to="/FixNRepair/reparacoes"
                 className={`flex items-center gap-2 rounded-lg px-6 py-3 font-semibold transition-all ${
-                  location.pathname === '/repairs'
+                  location.pathname === '/reparacoes'
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
                 }`}

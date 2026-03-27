@@ -1,4 +1,4 @@
-import { Clock, AlertCircle, Wrench, Bike, Battery } from 'lucide-react';
+import { Clock, AlertCircle, Wrench, Battery, TestTubeDiagonal, Scooter } from 'lucide-react';
 
 export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
   
@@ -36,7 +36,7 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
       {/* Cabeçalho do Card Lateral */}
       <div className="border-b bg-linear-to-br from-slate-50 to-slate-100 p-6">
         <h2 className="flex items-center gap-3 text-2xl font-bold text-slate-900">
-          <Wrench className="h-7 w-7 text-blue-600" />
+          <TestTubeDiagonal className="h-7 w-7 text-blue-600" />
           Diagnósticos do Dia
         </h2>
         <p className="mt-1 text-slate-600">
@@ -60,7 +60,7 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
               <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-900 font-bold text-white shadow-inner">
-                    <Bike className="h-6 w-6" />
+                    <Scooter className="h-6 w-6" />
                   </div>
                   <div>
                     <div className="text-lg font-bold text-slate-900">
@@ -71,13 +71,6 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
                     </div>
                   </div>
                 </div>
-                
-                {repair.priority === 'urgent' && (
-                  <span className="flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                    <AlertCircle className="h-3 w-3" />
-                    Urgente
-                  </span>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -103,21 +96,6 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
                     {getStatusLabel(repair.status)}
                   </span>
                 </div>
-
-                {repair.batteryLevel !== undefined && (
-                  <div className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-2">
-                    <Battery className={`h-4 w-4 ${getBatteryColor(repair.batteryLevel)}`} />
-                    <div className="h-1.5 w-full max-w-[60px] rounded-full bg-slate-200">
-                       <div 
-                         className={`h-full rounded-full ${repair.batteryLevel <= 20 ? 'bg-red-500' : 'bg-green-500'}`} 
-                         style={{ width: `${repair.batteryLevel}%` }}
-                       />
-                    </div>
-                    <span className={`text-xs font-bold ${getBatteryColor(repair.batteryLevel)}`}>
-                      {repair.batteryLevel}%
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           ))}
