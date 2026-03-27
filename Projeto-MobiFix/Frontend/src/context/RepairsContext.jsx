@@ -6,7 +6,7 @@ const RepairsContext = createContext(undefined);
 export function RepairsProvider({children}){
     const [repairs, setRepairs] = useState(mockRepairs);
 
-    const updateRepairStatus = (repairdId, status) => {
+    const updateRepairStatus = (repairId, status) => {
         setRepairs((prev) =>
             prev.map((r) => (r.id === repairId ? {...r, status} : r))
         );
