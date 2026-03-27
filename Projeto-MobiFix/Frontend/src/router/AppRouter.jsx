@@ -13,6 +13,11 @@ import RececaoEncomendas from '../pages/operator/RececaoEncomendasPage.jsx'
 import RepairsLayout from '../pages/mechanic/RepairsLayout.jsx'
 import Dashboard from '../pages/mechanic/Dashboard.jsx'
 import Repairs from '../pages/mechanic/Repairs.jsx'
+import AdminLayout from '../pages/admin/AdminLayout.jsx'
+import StockOrders from '../pages/admin/EncomendasStock.jsx'
+import AdminDashboard from '../pages/admin/AdminDashboard.jsx'
+import UserManagement from '../pages/admin/GestaoUsers.jsx'
+import Promotions from '../pages/admin/Promocoes.jsx'
 
 export default function AppRouter() {
   return (
@@ -39,6 +44,14 @@ export default function AppRouter() {
           <Route path="diagnosticos" element={<Dashboard />}/>
           <Route path="reparacoes" element={<Repairs />} />
           <Route index element={<Dashboard />} />
+        </Route>
+
+        <Route path="/FixNManage/" element={<AdminLayout/>}>
+          <Route path="encomendas" element={<StockOrders/>}/>
+          <Route path="dashboard" element={<AdminDashboard/>}/>
+          <Route path="users" element={<UserManagement/>}/>
+          <Route path="promocoes" element={<Promotions/>}/>
+          <Route index element={<AdminDashboard />} />
         </Route>
 
       </Routes>
