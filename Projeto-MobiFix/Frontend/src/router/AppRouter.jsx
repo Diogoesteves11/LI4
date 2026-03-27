@@ -10,6 +10,8 @@ import Layout from '../pages/operator/Layout.jsx'
 import TrotinetesProntas from '../pages/operator/TrotinetesProntasPage.jsx'
 import PecasReservadas from '../pages/operator/PecasReservadas.jsx'
 import RececaoEncomendas from '../pages/operator/RececaoEncomendasPage.jsx'
+import RepairsLayout from '../pages/mechanic/RepairsLayout.jsx'
+import Dashboard from '../pages/mechanic/Dashboard.jsx'
 
 export default function AppRouter() {
   return (
@@ -30,6 +32,11 @@ export default function AppRouter() {
           <Route path="rececao-encomendas" element={<RececaoEncomendas />} />
 
           <Route index element={<VendaDireta />} />
+        </Route>
+        
+        <Route path="/FixNRepair/" element={<RepairsLayout/>}>
+          <Route path="diagnosticos" element={<Dashboard/>}/>
+          <Route index element={<Dashboard />} />
         </Route>
 
       </Routes>
