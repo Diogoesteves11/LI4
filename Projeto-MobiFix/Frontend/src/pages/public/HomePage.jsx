@@ -1,8 +1,21 @@
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import FeaturedParts from "./components/FeaturedParts";
+import TrustSection from "./components/TrustSection";
+import Footer  from "./components/Footer";
+import { ServicesSection } from "./components/Services";
+
 export default function HomePage() {
-  return (
-    <div className="min-h-screen p-10">
-      <h1 className="text-4xl font-bold">Home Pública</h1>
-      <p className="mt-4 text-slate-600">Landing page da MobiFix.</p>
+  return(
+    <div className="min-h-screen bg-white antialiased scroll-smooth selection:bg-safety-orange selection:text-white">
+    <Header/>
+    <main>
+      <Hero />
+      <FeaturedParts />
+      <ServicesSection />
+      <TrustSection />
+    </main>
+    <Footer /> 
     </div>
   )
 }
