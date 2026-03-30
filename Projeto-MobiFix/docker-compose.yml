@@ -35,7 +35,7 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       DabSettings__BaseUrl: "http://localhost:5000"
       DAB_CONNECTION_STRING: "Server=sqlserver;Database=fixnride_db;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;"
-      Jwt__Key: "${JWT_SECRET}" 
+      Jwt__Key: "${JWT_SECRET}"
       Jwt__Issuer: "MobiFix.API"
       Jwt__Audience: "MobiFix.Frontend"
 

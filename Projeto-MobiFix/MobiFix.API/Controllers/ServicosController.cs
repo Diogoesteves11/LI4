@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobiFix.API.DTOs;
 using MobiFix.API.Services.GestaoServicos;
@@ -6,6 +7,7 @@ namespace MobiFix.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ServicosController : ControllerBase
 {
     private readonly IGestaoServicos _servicoService;
@@ -13,6 +15,7 @@ public class ServicosController : ControllerBase
     public ServicosController(IGestaoServicos servicoService) => _servicoService = servicoService;
 
     [HttpPost]
+    [Authorize(Roles = "Operador,Cliente")]
     public async Task<IActionResult> CriarServico([FromBody] CriarServicoRequest request)
     {
         var servico = await _servicoService.CriarServico(request.TrotineteID, request.DataAgendamento, request.FeedbackCliente);
@@ -29,6 +32,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrador,Operador,Mecanico")]
     public async Task<IActionResult> ObterTodos()
     {
         return Ok(await _servicoService.ObterTodosServicos());
@@ -41,6 +45,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPatch("{id}/iniciar")]
+    [Authorize(Roles = "Operador,Mecanico")]
     public async Task<IActionResult> IniciarExecucao(int id)
     {
         var ok = await _servicoService.IniciarExecucao(id);
@@ -48,6 +53,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPatch("{id}/diagnostico")]
+    [Authorize(Roles = "Mecanico")]
     public async Task<IActionResult> RegistarDiagnostico(int id, [FromBody] DiagnosticoRequest request)
     {
         var ok = await _servicoService.RegistarDiagnostico(id, request.DescricaoDiagnostico);
@@ -55,6 +61,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPatch("{id}/concluir")]
+    [Authorize(Roles = "Mecanico")]
     public async Task<IActionResult> ConcluirServico(int id)
     {
         var ok = await _servicoService.ConcluirServico(id);
@@ -62,6 +69,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPatch("{id}/fechar")]
+    [Authorize(Roles = "Operador,Administrador")]
     public async Task<IActionResult> FecharServico(int id)
     {
         var ok = await _servicoService.FecharServico(id);
@@ -71,6 +79,7 @@ public class ServicosController : ControllerBase
     // ─── Intervenções ───
 
     [HttpPost("intervencao")]
+    [Authorize(Roles = "Operador,Mecanico")]
     public async Task<IActionResult> AtribuirIntervencao([FromBody] AtribuirIntervencaoRequest request)
     {
         var ok = await _servicoService.AtribuirIntervencao(request.ServicoID, request.IntervencaoID, request.MecanicoID);
@@ -78,6 +87,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPatch("intervencao/{servicoId}/{intervencaoId}/concluir")]
+    [Authorize(Roles = "Mecanico")]
     public async Task<IActionResult> ConcluirIntervencao(int servicoId, int intervencaoId)
     {
         var ok = await _servicoService.ConcluirIntervencao(servicoId, intervencaoId);
@@ -85,6 +95,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpPost("intervencao/peca")]
+    [Authorize(Roles = "Mecanico")]
     public async Task<IActionResult> RegistarPeca([FromBody] RegistarPecaIntervencaoRequest request)
     {
         var ok = await _servicoService.RegistarPecaIntervencao(request.ServicoID, request.IntervencaoID, request.PecaID, request.Quantidade);

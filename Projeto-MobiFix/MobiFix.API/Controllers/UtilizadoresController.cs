@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobiFix.API.DTOs;
 using MobiFix.API.Services.GestaoUtilizadores;
@@ -6,6 +7,7 @@ namespace MobiFix.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UtilizadoresController : ControllerBase
 {
     private readonly IGestaoUtilizadores _userService;
@@ -15,6 +17,7 @@ public class UtilizadoresController : ControllerBase
     // ─── Clientes ───
 
     [HttpGet("cliente/{email}")]
+    [Authorize(Roles = "Administrador,Operador,Cliente")]
     public async Task<IActionResult> GetCliente(string email)
     {
         var cliente = await _userService.GetCliente(email);
@@ -40,6 +43,7 @@ public class UtilizadoresController : ControllerBase
     }
 
     [HttpPatch("cliente/{email}")]
+    [Authorize(Roles = "Administrador,Cliente")]
     public async Task<IActionResult> EditarCliente(string email, [FromBody] EditarClienteRequest request)
     {
         var ok = await _userService.EditarDadosCliente(email, request.Telefone, request.Morada);
@@ -49,15 +53,17 @@ public class UtilizadoresController : ControllerBase
     // ─── Funcionários ───
 
     [HttpGet("funcionario/{numero}")]
+    [Authorize(Roles = "Administrador,Operador,Mecanico")]
     public async Task<IActionResult> GetFuncionario(string numero)
     {
         var func = await _userService.GetFuncionario(numero);
         if (func == null) return NotFound();
 
-        return Ok(new { func.Numero, func.Nome, func.Email, func.Contacto, func.Ativo });
+        return Ok(new {func.Id ,func.Numero, func.Nome, func.Email, func.Contacto, func.Ativo });
     }
 
     [HttpPost("funcionario")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> RegistarFuncionario([FromBody] RegistarFuncionarioRequest request)
     {
         var ok = await _userService.RegistarFuncionario(
@@ -70,6 +76,7 @@ public class UtilizadoresController : ControllerBase
     }
 
     [HttpPatch("funcionario/{numero}")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> EditarFuncionario(string numero, [FromBody] EditarFuncionarioRequest request)
     {
         var ok = await _userService.EditarDadosFuncionario(numero, request.Nome, request.Email, request.Cargo);
@@ -77,6 +84,7 @@ public class UtilizadoresController : ControllerBase
     }
 
     [HttpPatch("funcionario/{numero}/desativar")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> DesativarFuncionario(string numero)
     {
         var ok = await _userService.DesativarFuncionario(numero);
@@ -86,6 +94,7 @@ public class UtilizadoresController : ControllerBase
     // ─── Trotinetes ───
 
     [HttpPost("trotinete")]
+    [Authorize(Roles = "Cliente,Operador")]
     public async Task<IActionResult> RegistarTrotinete([FromBody] RegistarTrotineteRequest request)
     {
         var ok = await _userService.RegistarTrotinete(request.Email, request.Marca, request.Modelo, request.NumeroSerie);

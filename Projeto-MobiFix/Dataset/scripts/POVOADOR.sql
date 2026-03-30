@@ -12,8 +12,8 @@ VALUES
 -- 2. Povoar Clientes
 INSERT INTO Clientes (Nome, Telefone, Morada, NIF, Email, PasswordHash)
 VALUES 
-('Diogo Cliente', '920000001', 'Rua da Universidade, Braga', '250123456', 'diogo.user@gmail.com', 'hash_user_pass'),
-('Ana Silva', '920000002', 'Avenida Central, Guimarães', '260987654', 'ana.silva@outlook.com', 'hash_user_pass');
+('Diogo Cliente', '920000001', 'Rua da Universidade, Braga', '250123456', 'diogo.user@gmail.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu'),
+('Ana Silva', '920000002', 'Avenida Central, Guimarães', '260987654', 'ana.silva@outlook.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu');
 
 -- 3. Povoar Trotinetes (Ligadas aos clientes)
 INSERT INTO Trotinetes (NumeroSerie, Marca, Modelo, ClienteID)
