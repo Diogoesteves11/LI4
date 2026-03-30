@@ -1,0 +1,51 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64 
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "SuaSenhaSegura123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "SuaSenhaSegura123!", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ─── MobiFix.API + DAB ───
+  api:
+    build:
+      context: ./MobiFix.API
+      dockerfile: Dockerfile
+    depends_on:
+      - sqlserver
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+    volumes:
+      - ./MobiFix.API/dab-config.json:/app/dab-config.json
+      - ./Dataset/scripts/init.sql:/app/init.sql
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DabSettings__BaseUrl: "http://localhost:5000"
+      DAB_CONNECTION_STRING: "Server=sqlserver;Database=fixnride_db;User Id=sa;Password=SuaSenhaSegura123!;TrustServerCertificate=True;"
+      Jwt__Key: "MobiFixSecretKey2024MobiFixSecretKey2024"
+      Jwt__Issuer: "MobiFix.API"
+      Jwt__Audience: "MobiFix.Frontend"
+
+  # ─── Frontend (React + Nginx) ───
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+
+volumes:
+  sqldata:

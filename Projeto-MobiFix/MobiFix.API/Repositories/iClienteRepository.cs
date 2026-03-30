@@ -1,11 +1,12 @@
-using MobiFix.API.Models.GestaoUtilizadores;
+using MobiFix.API.Models.Utilizadores;
 
 namespace MobiFix.API.Repositories;
 
-public interface iClienteRepository
+public interface IClienteRepository
 {
-    Task<Cliente?> ObterPorEmailAsync(string nif, bool incluirTrotinetes = false);
+    Task<Cliente?> ObterPorEmailAsync(string email, bool incluirTrotinetes = false);
     Task<bool> RegistarAsync(Cliente cliente);
-    public async Task<bool> AtualizarParcialAsync(string email, object dados);
-    public async Task<bool> ExisteClienteAsync(string email);
+    Task<bool> AtualizarParcialPorEmailAsync(string email, object dados);
+    Task<bool> ExisteClientePorEmailAsync(string email);
+    Task<int?> ObterIdPorEmailAsync(string email);
 }
