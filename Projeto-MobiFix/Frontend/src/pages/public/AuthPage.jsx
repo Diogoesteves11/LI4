@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, User, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, CheckCircle2, Loader2, Hash, MapPin, Phone } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router'; // Adicionei useNavigate para redirecionar
-import { useLoginCliente } from '../../hooks/useAuth';
+import { useLoginCliente, useRegistoCliente } from '../../hooks/useAuth';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,13 +9,19 @@ export default function AuthPage() {
   // 1. Estados para os campos do formulário
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [nome, setNome] = useState(''); // Para o caso de registo
+  const [nome, setNome] = useState('');
+  const [nif, setNif] = useState('');
+  const [morada, setMorada] = useState('');
+  const [telefone, setTelefone] = useState('');
 
   const location = useLocation();
   const navigate = useNavigate();
 
   // 2. Inicializar o Hook de Login
   const loginMutation = useLoginCliente();
+  const registerMutation = useRegistoCliente();
+
+  const isPending = loginMutation.isPending || registerMutation.isPending;
 
   useEffect(() => {
     if (location.state?.mode === 'register') {
@@ -28,18 +34,24 @@ export default function AuthPage() {
   // 3. Função para lidar com o envio do formulário
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("botão foi clicado na buceta da tua mae")
     
     if (isLogin) {
       // Dispara a mutation de login
       loginMutation.mutate({ email, password }, {
         onSuccess: () => {
           // Se o login der certo, podes redirecionar para a dashboard
-          navigate('/dashboard'); 
+          navigate('/FixNRide/'); 
         }
       });
     } else {
-      console.log("Lógica de registo ainda por implementar!");
+      registerMutation.mutate({
+        nome, nif, telefone, morada, email, password
+      }, {
+        onSuccess: () => {
+          alert("Conta criada!");
+          setIsLogin(true);
+        }
+      });
     }
   };
 
@@ -102,22 +114,74 @@ export default function AuthPage() {
           {/* Alterado para usar o handleSubmit */}
           <form className="space-y-5" onSubmit={handleSubmit}>
             
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-bold text-deep-slate mb-2">Nome Completo</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                  <input 
-                    type="text" 
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="João Silva"
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
-                    required={!isLogin}
-                  />
-                </div>
+          {!isLogin && (
+          <>
+            {/* NOME COMPLETO */}
+            <div>
+              <label className="block text-sm font-bold text-deep-slate mb-2">Nome Completo</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="text" 
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="João Silva"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required={!isLogin}
+                />
               </div>
-            )}
+            </div>
+
+            {/* NIF */}
+            <div>
+              <label className="block text-sm font-bold text-deep-slate mb-2">NIF</label>
+              <div className="relative">
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="text" 
+                  maxLength={9}
+                  value={nif}
+                  onChange={(e) => setNif(e.target.value.replace(/\D/g, ""))} // Apenas números
+                  placeholder="123456789"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required={!isLogin}
+                />
+              </div>
+            </div>
+
+            {/* TELEFONE */}
+            <div>
+              <label className="block text-sm font-bold text-deep-slate mb-2">Telefone</label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="tel" 
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  placeholder="912 345 678"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required={!isLogin}
+                />
+              </div>
+            </div>
+
+            {/* MORADA */}
+            <div>
+              <label className="block text-sm font-bold text-deep-slate mb-2">Morada</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="text" 
+                  value={morada}
+                  onChange={(e) => setMorada(e.target.value)}
+                  placeholder="Rua da MobiFix, nº 10"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required={!isLogin}
+                />
+              </div>
+            </div>
+          </>
+        )} 
 
             <div>
               <label className="block text-sm font-bold text-deep-slate mb-2">Email</label>
@@ -156,16 +220,22 @@ export default function AuthPage() {
             )}
 
             {/* Botão com estado de carregamento */}
+                     
+            
             <button 
               type="submit"
-              disabled={loginMutation.isPending}
+              disabled={isPending}
               className={`w-full flex items-center justify-center gap-2 text-white font-bold py-4 rounded-xl shadow-xl transition-all active:scale-[0.98] mt-4 ${
-                loginMutation.isPending ? 'bg-slate-400 cursor-not-allowed' : 'bg-deep-slate hover:bg-black cursor-pointer'
+                isPending ? 'bg-slate-400 cursor-not-allowed' : 'bg-deep-slate hover:bg-black cursor-pointer'
               }`}
             >
-              {loginMutation.isPending && <Loader2 className="animate-spin" size={20} />}
-              {isLogin ? (loginMutation.isPending ? 'A entrar...' : 'Entrar') : 'Finalizar Registo'}
-            </button>
+              {isPending && <Loader2 className="animate-spin" size={20} />}
+              
+              {isLogin 
+                ? (loginMutation.isPending ? 'A entrar...' : 'Entrar') 
+                : (registerMutation.isPending ? 'A criar conta...' : 'Finalizar Registo')
+              }
+            </button>        
           </form>
 
           <div className="mt-8 text-center">

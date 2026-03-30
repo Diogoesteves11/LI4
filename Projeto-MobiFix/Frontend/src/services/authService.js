@@ -11,5 +11,12 @@ export const authService = {
             numeroMecanografico, password 
             });
         return response.data;
+    },
+
+    registoCliente: async(nome, nif, telefone, morada, email, password) => {
+        const response = await api.post('/Auth/registar/cliente', {
+            nome, nif, telefone, morada, email, password
+        });
+        return response.data;
     }
 }
