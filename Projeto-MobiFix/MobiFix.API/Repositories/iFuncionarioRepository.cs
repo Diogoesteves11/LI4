@@ -1,4 +1,4 @@
-using MobiFix.API.Models.GestaoUtilizadores;
+using MobiFix.API.Models.Utilizadores;
 
 namespace MobiFix.API.Repositories;
 
@@ -9,4 +9,6 @@ public interface iClienteRepository{
     public Task<bool> AtivarFuncionarioAsync(string numero);
 
     public async Task<bool> ExisteFuncionarioAsync(string numero);
+
+    public async Task<bool> AtualizarParcialAsync(string numero, object dados);
 }

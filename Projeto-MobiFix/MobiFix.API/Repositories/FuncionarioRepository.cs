@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using MobiFix.API.Models.GestaoUtilizadores;
+using MobiFix.API.Models.Utilizadores;
 using MobiFix.API.DTOs;
 
 namespace MobiFix.API.Repositories;
@@ -110,5 +110,24 @@ public class FuncionarioRepository : iFuncionarioRepository {
         var result = await response.Content.ReadFromJsonAsync<DabResponse<FuncionarioDto>>();
 
         return result?.Value?.Any() ?? false;
+    }
+
+
+    public async Task<bool> AtualizarParcialAsync(string numero, object dados)
+    {
+        string urlBusca = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID";
+        var resBusca = await _http.GetFromJsonAsync<DabResponse<ClienteDto>>(urlBusca);
+        var funcionarioId = resBusca?.Value?.FirstOrDefault()?.FuncionarioID;
+
+        if (funcionarioId == null) return false;
+
+        string urlPatch = $"api/Funcionario/FuncionarioID/{funcionarioId}";
+
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+        request.Content = JsonContent.Create(dados);
+
+        var response = await _http.SendAsync(request);
+        return response.IsSuccessStatusCode;
     }
 }
