@@ -1,0 +1,69 @@
+services:
+
+  # ─── Azure SQL Edge (ARM64 / Apple Silicon) ───
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "SuaSenhaSegura123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+
+  # ─── Inicializar a BD ───
+  db-init:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./Dataset/scripts/init.sql:/init.sql
+    entrypoint: /bin/bash
+    command: >
+      -c "
+        echo 'A esperar pelo SQL Server (40s)...' &&
+        sleep 40 &&
+        apt-get update -qq > /dev/null 2>&1 &&
+        apt-get install -y -qq curl gnupg2 > /dev/null 2>&1 &&
+        curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg &&
+        echo 'deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main' > /etc/apt/sources.list.d/mssql.list &&
+        apt-get update -qq > /dev/null 2>&1 &&
+        apt-get install -y -qq sqlcmd > /dev/null 2>&1 &&
+        echo 'A executar init.sql...' &&
+        sqlcmd -S sqlserver -U sa -P 'SuaSenhaSegura123!' -C -i /init.sql &&
+        echo 'BD inicializada com sucesso!'
+      "
+
+  # ─── MobiFix.API + DAB ───
+  api:
+    build:
+      context: ./MobiFix.API
+      dockerfile: Dockerfile
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    ports:
+      - "5001:5001"
+      - "5000:5000"
+    volumes:
+      - ./MobiFix.API/dab-config.json:/app/dab-config.json
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DabSettings__BaseUrl: "http://localhost:5000"
+      DAB_CONNECTION_STRING: "Server=sqlserver;Database=fixnride_db;User Id=sa;Password=SuaSenhaSegura123!;TrustServerCertificate=True;"
+      Jwt__Key: "MobiFixSecretKey2024MobiFixSecretKey2024"
+      Jwt__Issuer: "MobiFix.API"
+      Jwt__Audience: "MobiFix.Frontend"
+
+  # ─── Frontend (React + Nginx) ───
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+
+volumes:
+  sqldata:

@@ -1,11 +1,11 @@
-using MobiFix.API.Models.GestaoServicos;
+using MobiFix.API.DTOs;
 
 namespace MobiFix.API.Repositories;
 
-public interface iTrotineteRepository
+public interface ITrotineteRepository
 {
-    Task<Trotinete?> ObterPorIdAsync(string id);
-    Task<IEnumerable<Trotinete>> ObterPorClienteAsync(string clienteNif);
-    Task<bool> CriarAsync(Trotinete trotinete);
-    public async Task<bool> AlterarEstadoTrotinete(string numSerie, bool estado);
+    Task<TrotineteDto?> ObterPorSerieAsync(string numSerie);
+    Task<bool> CriarComEmailAsync(TrotineteDto dto, string email);
+    Task<bool> AtualizarPorSerieAsync(string numSerie, object dados);
+    Task<bool> AlterarEstadoTrotinete(string numSerie, bool estado);
 }

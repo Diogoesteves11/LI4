@@ -1,10 +1,10 @@
 using System.Net.Http.Json;
-using MobiFix.API.Models.GestaoUtilizadores;
+using MobiFix.API.Models.Utilizadores;
 using MobiFix.API.DTOs;
 
 namespace MobiFix.API.Repositories;
 
-public class ClienteRepository : iClienteRepository
+public class ClienteRepository : IClienteRepository
 {
     private readonly HttpClient _http;
 
@@ -23,38 +23,41 @@ public class ClienteRepository : iClienteRepository
 
         var result = await response.Content.ReadFromJsonAsync<DabResponse<ClienteDto>>();
         var dto = result?.Value?.FirstOrDefault();
-
         if (dto == null) return null;
 
-        var cliente = new Cliente(dto.NIF, dto.Nome, dto.Email, dto.Telefone, dto.PasswordHash);
-        
-        return cliente;
+        return new Cliente(dto.NIF, dto.Nome, dto.Email, dto.Telefone, dto.PasswordHash)
+        {
+            Id = dto.ClienteID,
+            Morada = dto.Morada
+        };
     }
 
     public async Task<bool> RegistarAsync(Cliente cliente)
     {
-        var dto = new ClienteDto {
+        var dto = new ClienteDto
+        {
             Nome = cliente.Nome,
             NIF = cliente.Nif,
             Email = cliente.Email,
             Telefone = cliente.Contacto,
+            Morada = cliente.Morada,
             PasswordHash = cliente.PasswordHash
         };
 
-        var res = await _http.PostAsJsonAsync("api/Cliente", dto);
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/Cliente");
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+        request.Content = JsonContent.Create(dto);
+
+        var res = await _http.SendAsync(request);
         return res.IsSuccessStatusCode;
     }
 
-    public async Task<bool> AtualizarParcialAsync(string email, object dados)
+    public async Task<bool> AtualizarParcialPorEmailAsync(string email, object dados)
     {
-        string urlBusca = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID";
-        var resBusca = await _http.GetFromJsonAsync<DabResponse<ClienteDto>>(urlBusca);
-        var clienteId = resBusca?.Value?.FirstOrDefault()?.ClienteID;
-
+        var clienteId = await ObterIdPorEmailAsync(email);
         if (clienteId == null) return false;
 
         string urlPatch = $"api/Cliente/ClienteID/{clienteId}";
-
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
         request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dados);
@@ -63,20 +66,29 @@ public class ClienteRepository : iClienteRepository
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> ExisteClienteAsync(string email)
+    public async Task<bool> ExisteClientePorEmailAsync(string email)
     {
         string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID&$first=1";
-
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
-
         if (!response.IsSuccessStatusCode) return false;
 
         var result = await response.Content.ReadFromJsonAsync<DabResponse<ClienteDto>>();
-
         return result?.Value?.Any() ?? false;
     }
 
+    public async Task<int?> ObterIdPorEmailAsync(string email)
+    {
+        string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID&$first=1";
+        var req = new HttpRequestMessage(HttpMethod.Get, url);
+        req.Headers.Add("X-MS-API-ROLE", "Administrador");
+
+        var res = await _http.SendAsync(req);
+        if (!res.IsSuccessStatusCode) return null;
+
+        var envelope = await res.Content.ReadFromJsonAsync<DabResponse<ClienteDto>>();
+        return envelope?.Value?.FirstOrDefault()?.ClienteID;
+    }
 }

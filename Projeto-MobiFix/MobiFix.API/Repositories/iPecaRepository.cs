@@ -1,9 +1,12 @@
-namespace MobiFix.API.Repositories;
-
+using MobiFix.API.DTOs;
 using MobiFix.API.Models.Stocks;
 
-public interface iPecaRepository {
+namespace MobiFix.API.Repositories;
+
+public interface IPecaRepository
+{
     Task<Peca?> GetByEAN(string EAN);
+    Task<List<PecaDto>> GetAllAsync();
     Task<bool> AtualizarStock(string EAN, int stock);
     Task<bool> DesativarPeca(string EAN);
     Task<bool> AtivarPeca(string EAN);

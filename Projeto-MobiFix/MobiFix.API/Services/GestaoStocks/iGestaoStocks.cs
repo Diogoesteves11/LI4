@@ -1,17 +1,29 @@
-namespace MobiFix.API.Repositories;
-
+using MobiFix.API.DTOs;
 using MobiFix.API.Models.Stocks;
 
-public interface iGestaoStocks {
-    Task<bool> CriarEncomendaAsync(EncomendaStock encomenda);
-    Task<bool> AtualizarEstadoEncomendaAsync(string idEncomenda, string estado, string idRececao, DateTime dataRececao);
-    Task<EncomendaStock?> ObterPorIdAsync(string idEncomenda);
+namespace MobiFix.API.Services.GestaoStocks;
 
-    Task<bool> CriarPromocaoAsync(Promocao promocao);
-    Task<bool> DesativarPromocaoAsync(string idPromocao);
-    Task<Promocao?> ObterPromocaoAtivaAsync(string idPromocao);
+public interface IGestaoStocks
+{
+    // Peças
+    Task<Peca?> ObterPeca(string ean);
+    Task<List<PecaDto>> ObterTodasPecas();
+    Task<bool> AtualizarStockPeca(string ean, int novoStock);
+    Task<bool> EditarPeca(string ean, object dados);
+    Task<bool> DesativarPeca(string ean);
 
-    Task<bool> CriarReservaAsync(ReservasCliente reserva);
-    Task<bool> AtualizarStatusReservaAsync(string idReserva, string novoStatus);
-    Task<ReservasCliente?> ObterReservaAsync(string idReserva);
-} 
+    // Encomendas Stock
+    Task<EncomendaStockDto?> CriarEncomendaStock(int pecaId, int quantidade, int adminId);
+    Task<List<EncomendaStockDto>> ObterEncomendasStock();
+    Task<bool> RececionarEncomendaStock(int encomendaId, int operadorId);
+
+    // Promoções
+    Task<PromocaoDto?> CriarPromocao(CriarPromocaoRequest request);
+    Task<List<PromocaoDto>> ObterPromocoes();
+    Task<bool> EliminarPromocao(int promocaoId);
+
+    // Encomendas Cliente (Click & Collect)
+    Task<EncomendaClienteDto?> CriarEncomendaCliente(CriarEncomendaClienteRequest request);
+    Task<List<EncomendaClienteDto>> ObterEncomendasCliente(int clienteId);
+    Task<bool> LevantarEncomendaCliente(int encomendaId);
+}
