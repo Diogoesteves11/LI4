@@ -10,7 +10,9 @@ public interface iGestaoUtilizadores {
 
     public async Task<bool> RegistarCliente(string nome, string nif, string email, string contacto, string morada, string passwordText);
 
-    public async Task<bool> EditarDadosCliente(string nif, string? novoContacto, string? novaMorada, string? novoEmail);
+    public async Task<bool> EditarDadosCliente(string nif, string? novoContacto, string? novaMorada);
+
+    public async Task<bool> EditarDadosFuncionario(string numero, string? nome, string? email, string? cargo);
 
     public async Task<bool> RegistarTrotinete(string nif, string marca, string modelo, string numSerie);
 
@@ -18,9 +20,9 @@ public interface iGestaoUtilizadores {
 
     public async Task<Funcionario?> GetFuncionario(string numero);
 
-    public bool RegistarFuncionario(Funcionario f);
+    public async Task<bool> RegistarFuncionario(Funcionario f);
 
-    public bool DesativarFuncionario(string numero);
+    public async DesativarFuncionario(string numero);
 
-    public bool AlterarCargoFuncionario(string numeroFunc, string novoCargo);
+    public async Task<bool> AlterarCargoFuncionario(string numeroFunc, string novoCargo);
 }

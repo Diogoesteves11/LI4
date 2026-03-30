@@ -20,9 +20,9 @@ public class UtilizadoresService : iGestaoUtilizadores
         _funcRepo = funcRepo;
         _trotiRepo = trotiRepo;
     }
-    public async Task<bool> LoginCliente(string nif, string passwordText)
+    public async Task<bool> LoginCliente(string email, string passwordText)
     {
-        var cliente = await _clienteRepo.ObterPorNifAsync(nif);
+        var cliente = await _clienteRepo.ObterPorEmailAsync(email);
         if (cliente == null) return false;
 
         return BCrypt.Verify(passwordText, cliente.PasswordHash);
@@ -36,49 +36,58 @@ public class UtilizadoresService : iGestaoUtilizadores
         return BCrypt.Verify(passwordText, funcionario.PasswordHash);
     }
 
-
     public async Task<bool> RegistarCliente(string nome, string nif, string email, string contacto, string morada, string passwordText) 
     {   
-        if(_clienteRepo.ExisteClienteAsync(nif)) return false;
+        if (await _clienteRepo.ExisteClientePorEmailAsync(email)) return false;
+        
         string hash = BCrypt.HashPassword(passwordText);
         var cliente = new Cliente(nif, nome, email, contacto, hash);
         
         return await _clienteRepo.RegistarAsync(cliente);
     }
 
-    public async Task<bool> EditarDadosCliente(string nif, string? novoContacto, string? novaMorada, string? novoEmail) 
+    public async Task<bool> EditarDadosCliente(string email, string? novoContacto, string? novaMorada) 
     {
         var campos = new Dictionary<string, object>();
         if (!string.IsNullOrWhiteSpace(novoContacto)) campos.Add("Telefone", novoContacto);
         if (!string.IsNullOrWhiteSpace(novaMorada))   campos.Add("Morada", novaMorada);
-        if (!string.IsNullOrWhiteSpace(novoEmail))     campos.Add("Email", novoEmail);
 
         if (campos.Count == 0) return true;
 
-        return await _clienteRepo.AtualizarParcialAsync(nif, campos);
+        return await _clienteRepo.AtualizarParcialPorEmailAsync(email, campos);
     }
 
-    public async Task<Cliente?> GetCliente(string nif) => await _clienteRepo.ObterPorNifAsync(nif, true);
+    public async Task<Cliente?> GetCliente(string email) 
+    {
+        return await _clienteRepo.ObterPorEmailAsync(email, true);
+    }
 
-
-    public async Task<bool> RegistarTrotinete(string nif, string marca, string modelo, string numSerie)
+    public async Task<bool> RegistarTrotinete(string email, string marca, string modelo, string numSerie)
     {
         var dto = new TrotineteDto 
         { 
             Marca = marca, 
             Modelo = modelo, 
-            NumeroSerie = numSerie 
+            NumeroSerie = numSerie
         };
 
-        return await _trotiRepo.CriarComNifAsync(dto, nif);
+        return await _trotiRepo.CriarComEmailAsync(dto, email); 
     }
 
+    public async Task<bool> AlterarEstadoReparacaoTrotinete(string numSerie, bool estado)
+    {
+        return await _trotiRepo.AlterarEstadoTrotinete(numSerie, estado);
+    }
 
-    public async Task<Funcionario?> GetFuncionario(string numero) => await _funcRepo.GetByNumeroAsync(numero);
+    public async Task<Funcionario?> GetFuncionario(string numero) 
+    {
+        return await _funcRepo.GetByNumeroAsync(numero);
+    }
 
     public async Task<bool> RegistarFuncionario(string numero, string nome, string email, string contacto, string cargo, string? especialidade, string passwordText) 
     {   
-        if(_funcRepo.ExisteFuncionarioAsync(numero)) return false;
+        if (await _funcRepo.ExisteFuncionarioAsync(numero)) return false;
+        
         string hash = BCrypt.HashPassword(passwordText);
 
         Funcionario novoFuncionario = cargo switch
@@ -92,15 +101,38 @@ public class UtilizadoresService : iGestaoUtilizadores
         return await _funcRepo.RegistarFuncionarioAsync(novoFuncionario);
     }
 
-    public async Task<bool> DesativarFuncionario(string numero) => await _funcRepo.DesativarFuncionarioAsync(numero);
+    public async Task<bool> EditarDadosFuncionario(string numero, string? nome, string? email, string? cargo) 
+    {
+        var campos = new Dictionary<string, object>();
 
-    public async Task<bool> AlterarCargoFuncionario(string numeroFunc, string novoCargo)
+        if (!string.IsNullOrWhiteSpace(nome))  campos.Add("Nome", nome);
+        if (!string.IsNullOrWhiteSpace(email)) campos.Add("Email", email);
+        
+        if (!string.IsNullOrWhiteSpace(cargo)) 
+        {
+            var cargosValidos = new[] { "Mecanico", "Administrador", "Operador" };
+            if (!cargosValidos.Contains(cargo)) return false; 
+            
+            campos.Add("Cargo", cargo);
+        }
+
+        if (campos.Count == 0) return true;
+
+        return await _funcRepo.AtualizarParcialAsync(numero, campos);
+    }
+
+    public async Task<bool> DesativarFuncionario(string numero) 
+    {
+        return await _funcRepo.DesativarFuncionarioAsync(numero);
+    }
+
+    public async Task<bool> AlterarCargoFuncionario(string numero, string novoCargo)
     {
         var cargosValidos = new[] { "Mecanico", "Administrador", "Operador" };
         if (!cargosValidos.Contains(novoCargo)) return false;
 
-        var dados = new Dictionary<string, object> { { "Cargo", novoCargo } };
+        var campos = new Dictionary<string, object> { { "Cargo", novoCargo } };
         
-        return await _funcRepo.AtualizarCargoAsync(numeroFunc, novoCargo);
+        return await _funcRepo.AtualizarParcialAsync(numero, campos);
     }
 }

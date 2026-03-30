@@ -10,9 +10,9 @@ public class ClienteRepository : iClienteRepository
 
     public ClienteRepository(HttpClient http) => _http = http;
 
-    public async Task<Cliente?> ObterPorNifAsync(string nif, bool incluirTrotinetes = false)
+    public async Task<Cliente?> ObterPorEmailAsync(string email, bool incluirTrotinetes = false)
     {
-        string url = $"api/Cliente?$filter=NIF eq '{nif}'";
+        string url = $"api/Cliente?$filter=Email eq '{email}'";
         if (incluirTrotinetes) url += "&$expand=trotinetes";
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -45,9 +45,9 @@ public class ClienteRepository : iClienteRepository
         return res.IsSuccessStatusCode;
     }
 
-    public async Task<bool> AtualizarParcialAsync(string nif, object dados)
+    public async Task<bool> AtualizarParcialAsync(string email, object dados)
     {
-        string urlBusca = $"api/Cliente?$filter=NIF eq '{nif}'&$select=ClienteID";
+        string urlBusca = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID";
         var resBusca = await _http.GetFromJsonAsync<DabResponse<ClienteDto>>(urlBusca);
         var clienteId = resBusca?.Value?.FirstOrDefault()?.ClienteID;
 
@@ -63,9 +63,9 @@ public class ClienteRepository : iClienteRepository
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> ExisteClienteAsync(string nif)
+    public async Task<bool> ExisteClienteAsync(string email)
     {
-        string url = $"api/Cliente?$filter=NIF eq '{nif}'&$select=ClienteID&$first=1";
+        string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID&$first=1";
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-MS-API-ROLE", "Administrador");

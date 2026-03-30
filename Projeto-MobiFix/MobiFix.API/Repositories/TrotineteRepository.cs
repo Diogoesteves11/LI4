@@ -60,9 +60,36 @@ public class TrotineteRepository : iTrotineteRepository
         return response.IsSuccessStatusCode;
     }
 
-    private async Task<int?> ObterIdClientePorNif(string nif)
+    public async Task<bool> AlterarEstadoTrotinete(string numSerie, bool estado)
     {
-        string url = $"api/Cliente?$filter=NIF eq '{nif}'&$select=ClienteID";
+        string urlBusca = $"api/Trotinete?$filter=NumeroSerie eq '{numSerie}'&$select=TrotineteID";
+
+        var reqBusca = new HttpRequestMessage(HttpMethod.Get, urlBusca);
+        reqBusca.Headers.Add("X-MS-API-ROLE", "Administrador");
+
+        var resBusca = await _http.SendAsync(reqBusca);
+        if (!resBusca.IsSuccessStatusCode) return false;
+
+        var envelope = await resBusca.Content.ReadFromJsonAsync<DabResponse<TrotineteDto>>();
+        var idTecnico = envelope?.Value?.FirstOrDefault()?.TrotineteID;
+
+        if (idTecnico == null) return false;
+
+        string urlPatch = $"api/Trotinete/TrotineteID/{idTecnico}";
+
+        var dadosParaMudar = new { EmServico = estado }; 
+
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
+        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+        request.Content = JsonContent.Create(dadosParaMudar);
+
+        var response = await _http.SendAsync(request);
+        return response.IsSuccessStatusCode;
+    }
+
+    private async Task<int?> ObterIdClientePorEmail(string email)
+    {
+        string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID";
         
         var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Headers.Add("X-MS-API-ROLE", "Administrador");

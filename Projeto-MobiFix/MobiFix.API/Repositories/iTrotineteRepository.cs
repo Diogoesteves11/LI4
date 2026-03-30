@@ -7,4 +7,5 @@ public interface iTrotineteRepository
     Task<Trotinete?> ObterPorIdAsync(string id);
     Task<IEnumerable<Trotinete>> ObterPorClienteAsync(string clienteNif);
     Task<bool> CriarAsync(Trotinete trotinete);
+    public async Task<bool> AlterarEstadoTrotinete(string numSerie, bool estado);
 }
