@@ -18,11 +18,10 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobiFix.API", Version = "v1" });
 
-    // 1. Define a segurança do Swagger (Como o token é injetado)
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Autenticação JWT usando o esquema Bearer. \n\n" +
-                      "Escreve a palavra 'Bearer' seguida de um espaço e do teu token.\n\n" +
+        Description = "Autenticação JWT usandcom o esquema Bearer. \n\n" +
+                      "Escreva a palavra 'Bearer' seguida de um espaço e do teu token.\n\n" +
                       "Exemplo: \"Bearer eyJhbGciOiJIUzI1Ni...\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
@@ -30,7 +29,6 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    // 2. Aplica essa segurança globalmente a todas as rotas
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -79,7 +77,9 @@ builder.Services.AddScoped<IGestaoFinancas, FinancasService>();
 builder.Services.AddScoped<IGestaoAgenda, AgendaService>();
 
 // ─── JWT Authentication ───
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "MobiFixSecretKey2024MobiFixSecretKey2024";
+var jwtKey = builder.Configuration["Jwt:Key"] 
+    ?? throw new InvalidOperationException("A Chave JWT (Jwt:Key) não foi encontrada nas configurações ou variáveis de ambiente! (verificar existência do .env)");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
