@@ -4,10 +4,10 @@ GO
 -- 1. Povoar Funcionários (Um de cada cargo para testar RBAC)
 INSERT INTO Funcionarios (NumeroMecanografico, Nome, Email, Contacto, Cargo, PasswordHash, Especialidade)
 VALUES 
-('ADM001', 'Admin Principal', 'admin@fixnride.pt', '910000001', 'Administrador', 'hash_secure_password', NULL),
-('OP001', 'João Operador', 'joao.op@fixnride.pt', '910000002', 'Operador', 'hash_secure_password', NULL),
-('MEC001', 'Carlos Mecânico', 'carlos.mec@fixnride.pt', '910000003', 'Mecanico', 'hash_secure_password', 'Eletrónica e Baterias'),
-('MEC002', 'Sofia Técnica', 'sofia.tec@fixnride.pt', '910000004', 'Mecanico', 'hash_secure_password', 'Mecânica Estrutural');
+('ADM001', 'Admin Principal', 'admin@fixnride.pt', '910000001', 'Administrador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
+('OP001', 'João Operador', 'joao.op@fixnride.pt', '910000002', 'Operador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
+('MEC001', 'Carlos Mecânico', 'carlos.mec@fixnride.pt', '910000003', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'Eletrónica e Baterias'),
+('MEC002', 'Sofia Técnica', 'sofia.tec@fixnride.pt', '910000004', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'Mecânica Estrutural');
 
 -- 2. Povoar Clientes
 INSERT INTO Clientes (Nome, Telefone, Morada, NIF, Email, PasswordHash)

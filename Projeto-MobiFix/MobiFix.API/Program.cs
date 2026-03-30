@@ -6,13 +6,46 @@ using MobiFix.API.Services.GestaoFinanceira;
 using MobiFix.API.Services.GestaoAgenda;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ─── Controllers ───
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobiFix.API", Version = "v1" });
+
+    // 1. Define a segurança do Swagger (Como o token é injetado)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Autenticação JWT usando o esquema Bearer. \n\n" +
+                      "Escreve a palavra 'Bearer' seguida de um espaço e do teu token.\n\n" +
+                      "Exemplo: \"Bearer eyJhbGciOiJIUzI1Ni...\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // 2. Aplica essa segurança globalmente a todas as rotas
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // ─── DAB HttpClient (base URL do Data API Builder) ───
 var dabBaseUrl = builder.Configuration["DabSettings:BaseUrl"] ?? "http://localhost:5000";
@@ -79,7 +112,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseCors();

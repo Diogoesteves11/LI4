@@ -1,0 +1,424 @@
+========================================
+  MobiFix.API - Testes Postman
+  Base URL: http://localhost:5001
+========================================
+
+Nota: A password dos funcionários no POVOADOR é o hash
+$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu
+que corresponde à password "12345".
+
+Os clientes no POVOADOR têm "hash_user_pass" (não é BCrypt válido).
+Usa o endpoint de registo para criar um cliente com password válida.
+
+
+========================================
+1. AUTENTICAÇÃO
+========================================
+
+--- 1.1 Registar Cliente ---
+POST http://localhost:5001/api/Auth/registar/cliente
+Headers: Content-Type: application/json
+Body:
+{
+  "nome": "Teste User",
+  "nif": "999888777",
+  "email": "teste@gmail.com",
+  "telefone": "911111111",
+  "morada": "Rua de Teste, Braga",
+  "password": "12345"
+}
+Esperado: 201 Created
+
+--- 1.2 Login Cliente ---
+POST http://localhost:5001/api/Auth/login/cliente
+Headers: Content-Type: application/json
+Body:
+{
+  "email": "teste@gmail.com",
+  "password": "12345"
+}
+Esperado: 200 OK com { token, nome, email, clienteId }
+>> GUARDAR O TOKEN PARA OS PRÓXIMOS PEDIDOS <<
+
+--- 1.3 Login Funcionário (Admin) ---
+POST http://localhost:5001/api/Auth/login/funcionario
+Headers: Content-Type: application/json
+Body:
+{
+  "numeroMecanografico": "ADM001",
+  "password": "12345"
+}
+Esperado: 200 OK com { token, nome, numero, cargo: "Administrador" }
+
+--- 1.4 Login Funcionário (Mecânico) ---
+POST http://localhost:5001/api/Auth/login/funcionario
+Headers: Content-Type: application/json
+Body:
+{
+  "numeroMecanografico": "MEC001",
+  "password": "12345"
+}
+Esperado: 200 OK com { token, nome, numero, cargo: "Mecanico" }
+
+--- 1.5 Login com credenciais erradas ---
+POST http://localhost:5001/api/Auth/login/cliente
+Headers: Content-Type: application/json
+Body:
+{
+  "email": "teste@gmail.com",
+  "password": "errada"
+}
+Esperado: 401 Unauthorized
+
+
+========================================
+2. UTILIZADORES
+========================================
+
+--- 2.1 Obter dados do Cliente ---
+GET http://localhost:5001/api/Utilizadores/cliente/teste@gmail.com
+Esperado: 200 OK com dados do cliente + trotinetes
+
+--- 2.2 Editar dados do Cliente ---
+PATCH http://localhost:5001/api/Utilizadores/cliente/teste@gmail.com
+Headers: Content-Type: application/json
+Body:
+{
+  "telefone": "922222222",
+  "morada": "Nova Morada, Guimarães"
+}
+Esperado: 200 OK
+
+--- 2.3 Registar Funcionário ---
+POST http://localhost:5001/api/Utilizadores/funcionario
+Headers: Content-Type: application/json
+Body:
+{
+  "numeroMecanografico": "MEC099",
+  "nome": "Novo Mecânico",
+  "email": "novo.mec@fixnride.pt",
+  "contacto": "919999999",
+  "cargo": "Mecanico",
+  "especialidade": "ELETRICISTA",
+  "password": "12345"
+}
+Esperado: 201 Created
+
+--- 2.4 Obter Funcionário ---
+GET http://localhost:5001/api/Utilizadores/funcionario/MEC001
+Esperado: 200 OK
+
+--- 2.5 Desativar Funcionário ---
+PATCH http://localhost:5001/api/Utilizadores/funcionario/MEC099/desativar
+Esperado: 200 OK
+
+--- 2.6 Registar Trotinete ---
+POST http://localhost:5001/api/Utilizadores/trotinete
+Headers: Content-Type: application/json
+Body:
+{
+  "email": "teste@gmail.com",
+  "numeroSerie": "SN-TESTE-001",
+  "marca": "Xiaomi",
+  "modelo": "Pro 4"
+}
+Esperado: 201 Created
+
+
+========================================
+3. PEÇAS / STOCK
+========================================
+
+--- 3.1 Listar todas as peças ---
+GET http://localhost:5001/api/Pecas
+Esperado: 200 OK com array de peças
+
+--- 3.2 Obter peça por EAN ---
+GET http://localhost:5001/api/Pecas/EAN001
+Esperado: 200 OK com dados da peça
+
+--- 3.3 Atualizar stock ---
+PATCH http://localhost:5001/api/Pecas/EAN001/stock
+Headers: Content-Type: application/json
+Body: 30
+Esperado: 200 OK
+
+--- 3.4 Editar peça ---
+PATCH http://localhost:5001/api/Pecas/EAN002
+Headers: Content-Type: application/json
+Body:
+{
+  "nome": "Pastilhas de Travão Premium",
+  "pvp": 12.00
+}
+Esperado: 200 OK
+
+--- 3.5 Desativar peça ---
+PATCH http://localhost:5001/api/Pecas/EAN003/desativar
+Esperado: 200 OK
+
+
+========================================
+4. SERVIÇOS (Oficina)
+========================================
+
+--- 4.1 Criar Serviço (agendar reparação) ---
+POST http://localhost:5001/api/Servicos
+Headers: Content-Type: application/json
+Body:
+{
+  "trotineteID": 1,
+  "dataAgendamento": "2026-04-05T10:00:00",
+  "feedbackCliente": "A trotinete faz um barulho estranho na roda traseira"
+}
+Esperado: 201 Created com { servicoID, estado: "Agendado" }
+>> GUARDAR servicoID <<
+
+--- 4.2 Listar todos os serviços ---
+GET http://localhost:5001/api/Servicos
+Esperado: 200 OK
+
+--- 4.3 Obter serviço por ID ---
+GET http://localhost:5001/api/Servicos/1
+Esperado: 200 OK
+
+--- 4.4 Iniciar execução ---
+PATCH http://localhost:5001/api/Servicos/1/iniciar
+Esperado: 200 OK (estado passa a "Em Execução")
+
+--- 4.5 Registar diagnóstico ---
+PATCH http://localhost:5001/api/Servicos/1/diagnostico
+Headers: Content-Type: application/json
+Body:
+{
+  "servicoID": 1,
+  "descricaoDiagnostico": "Rolamento da roda traseira danificado. Necessita substituição."
+}
+Esperado: 200 OK
+
+--- 4.6 Atribuir intervenção a mecânico ---
+POST http://localhost:5001/api/Servicos/intervencao
+Headers: Content-Type: application/json
+Body:
+{
+  "servicoID": 1,
+  "intervencaoID": 1,
+  "mecanicoID": 3
+}
+Esperado: 201 Created
+(intervencaoID=1 = "Substituição de Pneu", mecanicoID=3 = Carlos Mecânico)
+
+--- 4.7 Registar peça usada na intervenção ---
+POST http://localhost:5001/api/Servicos/intervencao/peca
+Headers: Content-Type: application/json
+Body:
+{
+  "servicoID": 1,
+  "intervencaoID": 1,
+  "pecaID": 1,
+  "quantidade": 1
+}
+Esperado: 201 Created
+
+--- 4.8 Concluir intervenção ---
+PATCH http://localhost:5001/api/Servicos/intervencao/1/1/concluir
+Esperado: 200 OK
+
+--- 4.9 Concluir serviço (calcula preço) ---
+PATCH http://localhost:5001/api/Servicos/1/concluir
+Esperado: 200 OK (estado "Concluido", preço calculado)
+
+--- 4.10 Fechar serviço ---
+PATCH http://localhost:5001/api/Servicos/1/fechar
+Esperado: 200 OK (estado "Fechado")
+
+--- 4.11 Obter catálogo de intervenções ---
+GET http://localhost:5001/api/Servicos/catalogo
+Esperado: 200 OK com lista de intervenções disponíveis
+
+--- 4.12 Obter intervenções de um serviço ---
+GET http://localhost:5001/api/Servicos/1/intervencoes
+Esperado: 200 OK
+
+
+========================================
+5. FATURAS / FINANÇAS
+========================================
+
+--- 5.1 Emitir fatura ---
+POST http://localhost:5001/api/Faturas
+Headers: Content-Type: application/json
+Body:
+{
+  "clienteID": 1,
+  "servicoID": 1,
+  "valorTotal": 40.00,
+  "metodoPagamento": "MBWay"
+}
+Esperado: 201 Created com { faturaID, numeroFatura }
+
+--- 5.2 Obter fatura por ID ---
+GET http://localhost:5001/api/Faturas/1
+Esperado: 200 OK
+
+--- 5.3 Faturas de um cliente ---
+GET http://localhost:5001/api/Faturas/cliente/1
+Esperado: 200 OK
+
+--- 5.4 Registar devolução ---
+POST http://localhost:5001/api/Faturas/devolucao
+Headers: Content-Type: application/json
+Body:
+{
+  "faturaID": 1,
+  "motivo": "Cliente insatisfeito com a reparação"
+}
+Esperado: 201 Created (cria devolução + nota de crédito automática)
+
+--- 5.5 Relatório financeiro ---
+GET http://localhost:5001/api/Faturas/relatorio?inicio=2026-01-01&fim=2026-12-31
+Esperado: 200 OK com { receitaTotal, totalServicos, totalVendas, ticketMedio }
+
+--- 5.6 Inventário ---
+GET http://localhost:5001/api/Faturas/inventario
+Esperado: 200 OK com lista de peças + valorEmStock
+
+
+========================================
+6. ENCOMENDAS
+========================================
+
+--- 6.1 Criar encomenda de stock (reposição) ---
+POST http://localhost:5001/api/Encomendas/stock
+Headers: Content-Type: application/json
+Body:
+{
+  "pecaID": 3,
+  "quantidade": 10,
+  "adminValidadorID": 1
+}
+Esperado: 201 Created
+
+--- 6.2 Listar encomendas de stock ---
+GET http://localhost:5001/api/Encomendas/stock
+Esperado: 200 OK
+
+--- 6.3 Rececionar encomenda ---
+PATCH http://localhost:5001/api/Encomendas/stock/1/rececionar
+Headers: Content-Type: application/json
+Body: 2
+(2 = OperadorID do João Operador)
+Esperado: 200 OK
+
+--- 6.4 Criar encomenda cliente (Click & Collect) ---
+POST http://localhost:5001/api/Encomendas/cliente
+Headers: Content-Type: application/json
+Body:
+{
+  "clienteID": 1,
+  "itens": [
+    { "pecaID": 1, "quantidade": 2 },
+    { "pecaID": 2, "quantidade": 1 }
+  ]
+}
+Esperado: 201 Created com { total calculado }
+
+--- 6.5 Encomendas de um cliente ---
+GET http://localhost:5001/api/Encomendas/cliente/1
+Esperado: 200 OK
+
+--- 6.6 Levantar encomenda ---
+PATCH http://localhost:5001/api/Encomendas/cliente/1/levantar
+Esperado: 200 OK
+
+
+========================================
+7. PROMOÇÕES
+========================================
+
+--- 7.1 Criar promoção ---
+POST http://localhost:5001/api/Promocoes
+Headers: Content-Type: application/json
+Body:
+{
+  "descricao": "Promoção de Primavera",
+  "percentagemDesconto": 15.00,
+  "dataInicio": "2026-04-01T00:00:00",
+  "dataFim": "2026-04-30T23:59:59",
+  "administradorID": 1,
+  "pecaIDs": [1, 2]
+}
+Esperado: 201 Created
+
+--- 7.2 Listar promoções ---
+GET http://localhost:5001/api/Promocoes
+Esperado: 200 OK
+
+--- 7.3 Eliminar promoção ---
+DELETE http://localhost:5001/api/Promocoes/1
+Esperado: 200 OK
+
+
+========================================
+8. AGENDA DE MECÂNICOS
+========================================
+
+--- 8.1 Agendar slot de diagnóstico ---
+POST http://localhost:5001/api/Agenda
+Headers: Content-Type: application/json
+Body:
+{
+  "mecanicoID": 3,
+  "servicoID": 1,
+  "tipoSlot": "Diagnostico",
+  "dataHoraInicio": "2026-04-05T10:00:00"
+}
+Esperado: 201 Created
+
+--- 8.2 Agendar slot de reparação ---
+POST http://localhost:5001/api/Agenda
+Headers: Content-Type: application/json
+Body:
+{
+  "mecanicoID": 4,
+  "servicoID": 1,
+  "tipoSlot": "Reparacao",
+  "intervencaoID": 1,
+  "dataHoraInicio": "2026-04-05T14:00:00"
+}
+Esperado: 201 Created
+
+--- 8.3 Obter agenda de um mecânico ---
+GET http://localhost:5001/api/Agenda/mecanico/3
+Esperado: 200 OK
+
+--- 8.4 Obter agenda de um serviço ---
+GET http://localhost:5001/api/Agenda/servico/1
+Esperado: 200 OK
+
+--- 8.5 Concluir slot ---
+PATCH http://localhost:5001/api/Agenda/1/concluir
+Esperado: 200 OK
+
+
+========================================
+FLUXO COMPLETO DE TESTE
+========================================
+
+Ordem recomendada para testar o fluxo completo:
+
+1. Login Admin (1.3) -> guardar token
+2. Registar Cliente (1.1)
+3. Login Cliente (1.2) -> guardar token
+4. Registar Trotinete (2.6)
+5. Criar Serviço (4.1)
+6. Agendar Diagnóstico (8.1)
+7. Iniciar Execução (4.4)
+8. Registar Diagnóstico (4.5)
+9. Atribuir Intervenção (4.6)
+10. Registar Peça (4.7)
+11. Concluir Intervenção (4.8)
+12. Concluir Serviço (4.9)
+13. Emitir Fatura (5.1)
+14. Fechar Serviço (4.10)
+15. Ver Relatório (5.5)
