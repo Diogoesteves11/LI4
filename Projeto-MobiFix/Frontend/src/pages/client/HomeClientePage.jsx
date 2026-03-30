@@ -21,6 +21,8 @@ export default function HomeClientePage() {
       path: "/FixNRide/catalogo" 
     },
   ]
+
+  const nome = localStorage.getItem('user_name');
   return (
       <main className="min-h-screen bg-slate-50 pb-24 font-sans antialiased">
       {/* Header Estilo Premium */}
@@ -49,7 +51,7 @@ export default function HomeClientePage() {
           <div className="flex items-center gap-4">
             <div>
               <p className="text-blue-100 text-sm font-medium">Bem vindo,</p>
-              <h2 className="text-2xl font-black tracking-tight">João Silva 👋</h2>
+              <h2 className="text-2xl font-black tracking-tight">{nome} 👋</h2>
             </div>
           </div>
         </div>

@@ -1,36 +1,18 @@
 import { Lock, ShoppingBag, Eye } from 'lucide-react';
-
-const parts = [
-  {
-    id: 1,
-    title: 'Premium E-Bike Battery',
-    price: '149.99€',
-    image: 'https://images.unsplash.com/photo-1579117668079-bc683eb1c57c?auto=format&fit=crop&q=80&w=600',
-  },
-  {
-    id: 2,
-    title: 'All-Terrain Tire Set',
-    price: '89.99€',
-    image: 'https://images.unsplash.com/photo-1594399829399-330e4bfe6c70?auto=format&fit=crop&q=80&w=600',
-  },
-  {
-    id: 3,
-    title: 'Hydraulic Brake Pads',
-    price: '34.99€',
-    image: 'https://images.unsplash.com/photo-1656232976683-7b688560e427?auto=format&fit=crop&q=80&w=600',
-  },
-  {
-    id: 4,
-    title: 'Reinforced Chain Kit',
-    price: '54.99€',
-    image: 'https://images.unsplash.com/photo-1758470132700-02d7371a70c2?auto=format&fit=crop&q=80&w=600',
-  },
-  // ... podes adicionar os restantes aqui
-];
+import { usePecas } from '../../../hooks/usePecas';
 
 export default function FeaturedParts() {
-  // Simulação de estado (No futuro, isto viria de um AuthContext)
-  const isLoggedIn = false;
+  const {data: parts, isLoading, isError, error} = usePecas();
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  if (parts) {
+    console.log("Dados que vieram da API:", parts);
+    console.log("Caminho da primeira imagem:", `../../../assets/${parts[0]?.imagem}`);
+  }
+
+  if (isLoading) return <div className="py-24 text-center">A carregar peças...</div>;
+  
+  if (isError) return <div className="py-24 text-center text-red-500">Erro: {error.message}</div>;
 
   return (
     <section className="py-24 bg-light-gray" id="parts-catalog">
@@ -51,14 +33,14 @@ export default function FeaturedParts() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {parts.map((part) => (
             <div
-              key={part.id}
+              key={part.ean}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border border-slate-100"
             >
               {/* Product Image Container */}
               <div className="relative aspect-square overflow-hidden bg-slate-50">
                 <img
-                  src={part.image}
-                  alt={part.title}
+                  src={`/public/${part.imagem}`}
+                  alt={part.nome}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute top-3 left-3">
@@ -71,10 +53,10 @@ export default function FeaturedParts() {
               {/* Product Info */}
               <div className="p-6">
                 <h3 className="text-lg font-bold text-deep-slate mb-1 group-hover:text-corporate-blue transition-colors">
-                  {part.title}
+                  {part.nome}
                 </h3>
                 <p className="text-2xl font-black text-corporate-blue mb-6">
-                  {part.price}
+                  {part.pvp}€
                 </p>
 
                 {/* Action Buttons */}

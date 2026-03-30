@@ -23,11 +23,11 @@ VALUES
 ('SN-XIAOMI-002', 'Xiaomi', 'Essential', 1);
 
 -- 4. Povoar Catálogo de Peças
-INSERT INTO Pecas (CodigoEAN, Nome, Descricao, CustoAquisicao, PVP, StockAtual, StockMinimo)
+INSERT INTO Pecas (CodigoEAN, Nome, Descricao, CustoAquisicao, PVP, StockAtual, StockMinimo, Imagem)
 VALUES 
-('EAN001', 'Pneu 8.5 Polegadas', 'Pneu reforçado para Xiaomi', 12.50, 25.00, 20, 5),
-('EAN002', 'Pastilhas de Travão', 'Compatível com vários modelos', 3.00, 8.50, 50, 10),
-('EAN003', 'Bateria 36V 12Ah', 'Bateria de substituição alta performance', 85.00, 150.00, 3, 2);
+('EAN001', 'Pneu 8.5 Polegadas', 'Pneu reforçado para Xiaomi', 12.50, 25.00, 20, 5, "pneu.jpg"),
+('EAN002', 'Pastilhas de Travão', 'Compatível com vários modelos', 3.00, 8.50, 50, 10, "pastilha.jpg"),
+('EAN003', 'Bateria 36V 12Ah', 'Bateria de substituição alta performance', 85.00, 150.00, 3, 2, "bateria.jpg");
 
 -- 5. Catálogo de Intervenções (Mão de obra fixa)
 INSERT INTO IntervencoesCatalogo (Descricao, PrecoFixoMaoDeObra, Especialidade)
