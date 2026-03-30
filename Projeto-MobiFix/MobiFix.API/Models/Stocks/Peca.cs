@@ -4,15 +4,14 @@ public class Peca
 {
     public string Codigo { get; private set; }
     public string Descricao { get; private set; }
-    public string Nome { get; private set; } // Mantido do teu código original
+    public string Nome { get; private set; }
     public int Stock { get; private set; }
     public float Pvp { get; private set; }
     public float Custo { get; private set; }
-    public int QuantMinima { get; private set; } // Mapeado do teu StockMinimo
+    public int QuantMinima { get; private set; } 
     public int PadraoRep { get; private set; }
     public bool Ativo { get; private set; }
 
-    // Construtor corrigido com os tipos corretos (float e int em vez de string)
     public Peca(string codigo, string descricao, string nome, int stock, float pvp, float custo, int quantMinima, int padraoRep) 
     {
         Codigo = codigo;
