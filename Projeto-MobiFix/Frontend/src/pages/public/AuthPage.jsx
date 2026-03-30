@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, User, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Se usares router, senão usa <a>
-import { useLocation } from 'react-router';
+import { Mail, Lock, User, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router'; // Adicionei useNavigate para redirecionar
+import { useLoginCliente } from '../../hooks/useAuth';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  
+  // 1. Estados para os campos do formulário
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nome, setNome] = useState(''); // Para o caso de registo
 
-  const location = useLocation(); // Hook para ler o estado vindo do Header
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // 2. Inicializar o Hook de Login
+  const loginMutation = useLoginCliente();
 
   useEffect(() => {
     if (location.state?.mode === 'register') {
@@ -16,12 +25,29 @@ export default function AuthPage() {
     }
   }, [location.state]);
 
+  // 3. Função para lidar com o envio do formulário
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("botão foi clicado na buceta da tua mae")
+    
+    if (isLogin) {
+      // Dispara a mutation de login
+      loginMutation.mutate({ email, password }, {
+        onSuccess: () => {
+          // Se o login der certo, podes redirecionar para a dashboard
+          navigate('/dashboard'); 
+        }
+      });
+    } else {
+      console.log("Lógica de registo ainda por implementar!");
+    }
+  };
+
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-safety-orange selection:text-white">
       
-      {/* LADO ESQUERDO: Visual / Branding (Oculto em Mobile) */}
+      {/* LADO ESQUERDO: Visual / Branding */}
       <div className="hidden lg:flex relative bg-deep-slate items-center justify-center p-12 overflow-hidden">
-        {/* Background Decorativo */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-corporate-blue rounded-full blur-3xl"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-safety-orange rounded-full blur-3xl"></div>
@@ -44,7 +70,6 @@ export default function AuthPage() {
               : 'Crie a sua conta hoje e comece a usufruir de peças exclusivas e assistência prioritária.'}
           </p>
 
-          {/* Lista de Benefícios (Apenas no Registo) */}
           {!isLogin && (
             <div className="mt-10 space-y-4 text-left inline-block">
               {['Reservas Instantâneas', 'Histórico Digital', 'Descontos Premium'].map((text) => (
@@ -60,8 +85,6 @@ export default function AuthPage() {
 
       {/* LADO DIREITO: Formulário */}
       <div className="flex items-center justify-center p-8 sm:p-12 lg:p-20 relative">
-        
-        {/* Botão Voltar */}
         <a href="/" className="absolute top-8 left-8 flex items-center gap-2 text-slate-400 hover:text-deep-slate transition-colors font-bold text-sm">
           <ArrowLeft size={18} /> Voltar ao Início
         </a>
@@ -72,11 +95,12 @@ export default function AuthPage() {
               {isLogin ? 'Login de Cliente' : 'Criar Conta Cliente'}
             </h1>
             <p className="text-slate-500">
-              {isLogin ? 'Introduza os seus dados para entrar.' : 'Preencha o formulário para se registar.'}
+              {isLogin ? 'Introduza os seus dados pirata para entrar.' : 'Preencha o formulário para se registar.'}
             </p>
           </div>
 
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          {/* Alterado para usar o handleSubmit */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
             
             {!isLogin && (
               <div>
@@ -85,8 +109,11 @@ export default function AuthPage() {
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                   <input 
                     type="text" 
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
                     placeholder="João Silva"
                     className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                    required={!isLogin}
                   />
                 </div>
               </div>
@@ -98,8 +125,11 @@ export default function AuthPage() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="exemplo@email.com"
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required
                 />
               </div>
             </div>
@@ -110,8 +140,11 @@ export default function AuthPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input 
                   type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                  required
                 />
               </div>
             </div>
@@ -122,12 +155,19 @@ export default function AuthPage() {
               </div>
             )}
 
-            <button className="w-full bg-deep-slate hover:bg-black text-white font-bold py-4 rounded-xl shadow-xl transition-all active:scale-[0.98] cursor-pointer mt-4">
-              {isLogin ? 'Entrar' : 'Finalizar Registo'}
+            {/* Botão com estado de carregamento */}
+            <button 
+              type="submit"
+              disabled={loginMutation.isPending}
+              className={`w-full flex items-center justify-center gap-2 text-white font-bold py-4 rounded-xl shadow-xl transition-all active:scale-[0.98] mt-4 ${
+                loginMutation.isPending ? 'bg-slate-400 cursor-not-allowed' : 'bg-deep-slate hover:bg-black cursor-pointer'
+              }`}
+            >
+              {loginMutation.isPending && <Loader2 className="animate-spin" size={20} />}
+              {isLogin ? (loginMutation.isPending ? 'A entrar...' : 'Entrar') : 'Finalizar Registo'}
             </button>
           </form>
 
-          {/* Toggle entre Login e Sign Up */}
           <div className="mt-8 text-center">
             <p className="text-slate-500 font-medium">
               {isLogin ? 'Ainda não tem conta?' : 'Já faz parte da MobiFix?'}
