@@ -18,12 +18,15 @@ import StockOrders from '../pages/admin/EncomendasStock.jsx'
 import AdminDashboard from '../pages/admin/AdminDashboard.jsx'
 import UserManagement from '../pages/admin/GestaoUsers.jsx'
 import Promotions from '../pages/admin/Promocoes.jsx'
+import LoginPage from '../pages/staff/LoginPage.jsx'
+import AuthPage from '../pages/public/AuthPage.jsx'
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage/>} />
+        <Route path="/auth" element={<AuthPage />} />
         
         <Route path="/FixNRide/" element={<HomeClientePage/>} />
         <Route path="/FixNRide/trotinetes" element={<Trotinetes/>} />
@@ -53,6 +56,8 @@ export default function AppRouter() {
           <Route path="promocoes" element={<Promotions/>}/>
           <Route index element={<AdminDashboard />} />
         </Route>
+
+        <Route path="/staff" element={<LoginPage/>} />
 
       </Routes>
     </BrowserRouter>
