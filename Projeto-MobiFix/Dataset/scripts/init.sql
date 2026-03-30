@@ -201,15 +201,15 @@ IF NOT EXISTS (SELECT 1 FROM Funcionarios)
 BEGIN
     INSERT INTO Funcionarios (NumeroMecanografico, Nome, Email, Contacto, Cargo, PasswordHash, Especialidade)
     VALUES
-    ('ADM001', 'Admin Principal', 'admin@fixnride.pt', '910000001', 'Administrador', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G', NULL),
-    ('OP001', 'João Operador', 'joao.op@fixnride.pt', '910000002', 'Operador', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G', NULL),
-    ('MEC001', 'Carlos Mecânico', 'carlos.mec@fixnride.pt', '910000003', 'Mecanico', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G', 'ELETRICISTA'),
-    ('MEC002', 'Sofia Técnica', 'sofia.tec@fixnride.pt', '910000004', 'Mecanico', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G', 'MECANICA_GERAL');
+    ('ADM001', 'Admin Principal', 'admin@fixnride.pt', '910000001', 'Administrador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
+    ('OP001', 'João Operador', 'joao.op@fixnride.pt', '910000002', 'Operador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
+    ('MEC001', 'Carlos Mecânico', 'carlos.mec@fixnride.pt', '910000003', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'ELETRICISTA'),
+    ('MEC002', 'Sofia Técnica', 'sofia.tec@fixnride.pt', '910000004', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'MECANICA_GERAL');
 
     INSERT INTO Clientes (Nome, Telefone, Morada, NIF, Email, PasswordHash)
     VALUES
-    ('Diogo Cliente', '920000001', 'Rua da Universidade, Braga', '250123456', 'diogo.user@gmail.com', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G'),
-    ('Ana Silva', '920000002', 'Avenida Central, Guimarães', '260987654', 'ana.silva@outlook.com', '$2a$11$K4Gx5/j3xQxGx5Gx5Gx5GOxGx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5Gx5G');
+    ('Diogo Cliente', '920000001', 'Rua da Universidade, Braga', '250123456', 'diogo.user@gmail.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu'),
+    ('Ana Silva', '920000002', 'Avenida Central, Guimarães', '260987654', 'ana.silva@outlook.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu');
 
     INSERT INTO Trotinetes (NumeroSerie, Marca, Modelo, ClienteID)
     VALUES

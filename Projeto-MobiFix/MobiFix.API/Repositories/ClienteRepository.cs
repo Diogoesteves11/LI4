@@ -34,7 +34,7 @@ public class ClienteRepository : IClienteRepository
 
     public async Task<bool> RegistarAsync(Cliente cliente)
     {
-        var dto = new ClienteDto
+        var body = new
         {
             Nome = cliente.Nome,
             NIF = cliente.Nif,
@@ -45,8 +45,7 @@ public class ClienteRepository : IClienteRepository
         };
 
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Cliente");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
-        request.Content = JsonContent.Create(dto);
+        request.Content = JsonContent.Create(body);
 
         var res = await _http.SendAsync(request);
         return res.IsSuccessStatusCode;
