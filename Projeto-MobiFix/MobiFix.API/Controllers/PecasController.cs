@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobiFix.API.DTOs;
 using MobiFix.API.Services.GestaoStocks;
@@ -6,6 +7,7 @@ namespace MobiFix.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PecasController : ControllerBase
 {
     private readonly IGestaoStocks _stockService;
@@ -26,6 +28,7 @@ public class PecasController : ControllerBase
     }
 
     [HttpPatch("{ean}/stock")]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<IActionResult> AtualizarStock(string ean, [FromBody] int novoStock)
     {
         var ok = await _stockService.AtualizarStockPeca(ean, novoStock);
@@ -33,6 +36,7 @@ public class PecasController : ControllerBase
     }
 
     [HttpPatch("{ean}")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> EditarPeca(string ean, [FromBody] EditarPecaRequest request)
     {
         var campos = new Dictionary<string, object>();
@@ -50,6 +54,7 @@ public class PecasController : ControllerBase
     }
 
     [HttpPatch("{ean}/desativar")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> DesativarPeca(string ean)
     {
         var ok = await _stockService.DesativarPeca(ean);

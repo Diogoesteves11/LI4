@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobiFix.API.DTOs;
 using MobiFix.API.Services.GestaoAgenda;
@@ -6,6 +7,7 @@ namespace MobiFix.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AgendaController : ControllerBase
 {
     private readonly IGestaoAgenda _agendaService;
@@ -13,6 +15,7 @@ public class AgendaController : ControllerBase
     public AgendaController(IGestaoAgenda agendaService) => _agendaService = agendaService;
 
     [HttpPost]
+    [Authorize(Roles = "Operador,Mecanico")]
     public async Task<IActionResult> AgendarSlot([FromBody] AgendarSlotRequest request)
     {
         var slot = await _agendaService.AgendarSlot(request);
@@ -20,6 +23,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpGet("mecanico/{mecanicoId}")]
+    [Authorize(Roles = "Mecanico,Operador,Administrador")]
     public async Task<IActionResult> ObterAgendaMecanico(int mecanicoId)
     {
         return Ok(await _agendaService.ObterAgendaMecanico(mecanicoId));
@@ -32,6 +36,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpPatch("{agendaId}/concluir")]
+    [Authorize(Roles = "Mecanico")]
     public async Task<IActionResult> ConcluirSlot(int agendaId)
     {
         var ok = await _agendaService.ConcluirSlot(agendaId);

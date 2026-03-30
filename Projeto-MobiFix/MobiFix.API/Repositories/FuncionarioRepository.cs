@@ -27,15 +27,15 @@ public class FuncionarioRepository : IFuncionarioRepository
         {
             "Mecanico" => new Mecanico(
                 dados.NumeroMecanografico, dados.Nome, dados.Email, dados.Contacto,
-                dados.PasswordHash, dados.Ativo, dados.Especialidade
+                dados.PasswordHash, dados.Ativo, dados.Especialidade, dados.FuncionarioID
             ),
             "Administrador" => new Administrador(
                 dados.NumeroMecanografico, dados.Nome, dados.Email, dados.Contacto,
-                dados.PasswordHash, dados.Ativo
+                dados.PasswordHash, dados.Ativo, dados.FuncionarioID
             ),
             "Operador" => new Operador(
                 dados.NumeroMecanografico, dados.Nome, dados.Email, dados.Contacto,
-                dados.PasswordHash, dados.Ativo
+                dados.PasswordHash, dados.Ativo, dados.FuncionarioID
             ),
             _ => null
         };

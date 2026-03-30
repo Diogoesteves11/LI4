@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MobiFix.API.DTOs;
 using MobiFix.API.Models.Utilizadores;
@@ -11,6 +12,7 @@ namespace MobiFix.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly IGestaoUtilizadores _userService;
@@ -47,7 +49,7 @@ public class AuthController : ControllerBase
         };
 
         var token = GerarToken(func.Numero, cargo, func.Id.ToString());
-        return Ok(new { token, nome = func.Nome, numero = func.Numero, cargo });
+        return Ok(new { token, nome = func.Nome, numero = func.Numero, cargo, funcionarioId = func.Id });
     }
 
     [HttpPost("registar/cliente")]
