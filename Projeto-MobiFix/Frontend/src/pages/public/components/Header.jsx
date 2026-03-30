@@ -65,7 +65,6 @@ export default function Header() {
                 Entrar
               </Link>
 
-              {/* Passamos 'register' no state */}
               <Link 
                 to="/auth" 
                 state={{ mode: 'register' }} 

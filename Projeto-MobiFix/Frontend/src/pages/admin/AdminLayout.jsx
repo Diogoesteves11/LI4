@@ -31,7 +31,7 @@ export default function AdminLayout() {
         <div className="flex items-center gap-3 p-6 border-b border-gray-800">
           <Wrench className="w-8 h-8 text-blue-400" />
           <div>
-            <h1 className="font-bold text-xl">MobiFix</h1>
+            <h1 className="font-bold text-xl">FixNManage</h1>
             <p className="text-xs text-gray-400">Painel Administrativo</p>
           </div>
         </div>
