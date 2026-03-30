@@ -2,7 +2,7 @@
 
 SQL_SERVER="sqlserver"
 SQL_USER="sa"
-SQL_PASS="SuaSenhaSegura123!"
+SQL_PASS="${DB_PASSWORD}"
 
 # 1. Esperar pelo SQL Server
 echo "A esperar pelo SQL Server..."
