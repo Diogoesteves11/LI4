@@ -53,6 +53,7 @@ CREATE TABLE Pecas (
     StockAtual INT DEFAULT 0,
     StockMinimo INT DEFAULT 5,
     PadraoReposicao INT DEFAULT 5,
+    Imagem NVARCHAR(MAX) NULL,
     Ativo BIT DEFAULT 1,
     -- Constraints de Integridade de Inventário 
     CONSTRAINT CK_Peca_Precos CHECK (PVP >= 0 AND CustoAquisicao >= 0),
@@ -189,5 +190,20 @@ CREATE TABLE EncomendasStock (
     AdminValidadorID INT NULL FOREIGN KEY REFERENCES Funcionarios(FuncionarioID),
     CONSTRAINT CK_StockEnc_Qtd CHECK (Quantidade > 0),
     CONSTRAINT CK_StockEnc_Estado CHECK (Estado IN ('Pendente', 'Em Trânsito', 'Rececionada'))
+);
+
+CREATE TABLE AgendaMecanicos (
+    AgendaID INT PRIMARY KEY IDENTITY(1,1),
+    MecanicoID INT NOT NULL FOREIGN KEY REFERENCES Funcionarios(FuncionarioID),
+    ServicoID INT NOT NULL FOREIGN KEY REFERENCES Servicos(ServicoID),
+    
+    TipoSlot NVARCHAR(20) NOT NULL,
+    
+    IntervencaoID INT NULL FOREIGN KEY REFERENCES IntervencoesCatalogo(IntervencaoID),
+    
+    DataHoraInicio DATETIME2 NOT NULL,
+    Estado NVARCHAR(20) DEFAULT 'Reservado',
+    
+    CONSTRAINT CK_TipoSlot CHECK (TipoSlot IN ('Diagnostico', 'Reparacao'))
 );
 GO
