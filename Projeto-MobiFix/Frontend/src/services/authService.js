@@ -7,9 +7,9 @@ export const authService = {
     },
 
     loginFuncionario: async(numeroMecanografico, password) => {
-        const response = await api.post('/Auth/login/cliente', {
+        const response = await api.post('/Auth/login/funcionario', {
             numeroMecanografico, password 
-            });
+        });
         return response.data;
     },
 

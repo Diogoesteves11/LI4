@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Navigate, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Navigate, Route, Outlet } from 'react-router-dom'
 import HomePage from '../pages/public/HomePage.jsx'
 import HomeClientePage from '../pages/client/HomeClientePage.jsx'
 import Trotinetes from '../pages/client/MinhasTrotinetesPage.jsx'
@@ -45,6 +45,7 @@ export default function AppRouter() {
         {/* ROTAS PÚBLICAS */}
         <Route path="/" element={<HomePage/>} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/staff" element={<LoginPage/>} />
 
         {/* ÁREA DO CLIENTE - Só para 'Cliente' */}
         <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
@@ -56,8 +57,7 @@ export default function AppRouter() {
         </Route>
 
         {/* ÁREA DO OPERADOR - Operador e Admin podem entrar */}
-        <Route element={<ProtectedRoute allowedRoles={['Operador', 'Administrador']} />}>
-          <Route path="/staff" element={<LoginPage/>} />
+        <Route element={<ProtectedRoute allowedRoles={['Cliente', 'Operador', 'Administrador']} />}>
           <Route path="/FixNSell" element={<Layout />}>
             <Route path="vendadireta" element={<VendaDireta />} />
             <Route path="trotinetes-prontas" element={<TrotinetesProntas />} />

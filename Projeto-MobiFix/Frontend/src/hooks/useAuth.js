@@ -18,6 +18,23 @@ export function useLoginCliente(){
     });
 }
 
+export function useLoginFuncionario() {
+    return useMutation({
+        mutationFn: ({numeroMecanografico, password}) => authService.loginFuncionario(numeroMecanografico, password),
+        onSuccess: (data) => {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user_name', data.nome);
+            localStorage.setItem('user_role', data.cargo);
+
+            console.log('Login de funcionário efetuado com sucesso');
+        },
+        onError: (error) => {
+            const msg = error.response?.data?.message || "Erro ao fazer login do funcionário";
+            alert(msg);
+        }
+    })
+}
+
 export function useRegistoCliente() {
     return useMutation({
         mutationFn: (data) => authService.registoCliente(

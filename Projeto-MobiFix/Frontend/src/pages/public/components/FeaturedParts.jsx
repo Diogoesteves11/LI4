@@ -33,7 +33,7 @@ export default function FeaturedParts() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {parts.map((part) => (
             <div
-              key={part.ean}
+              key={part.codigoEAN}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border border-slate-100"
             >
               {/* Product Image Container */}
