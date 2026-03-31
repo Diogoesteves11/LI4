@@ -63,14 +63,14 @@ public class UtilizadoresService : IGestaoUtilizadores
 
     public async Task<bool> RegistarTrotinete(string email, string marca, string modelo, string numSerie)
     {
-        var dto = new TrotineteDto
+        var body = new TrotineteDto
         {
             Marca = marca,
             Modelo = modelo,
             NumeroSerie = numSerie
         };
 
-        return await _trotiRepo.CriarComEmailAsync(dto, email);
+        return await _trotiRepo.CriarComEmailAsync(body, email);
     }
 
     public async Task<Funcionario?> GetFuncionario(string numero)
@@ -116,6 +116,11 @@ public class UtilizadoresService : IGestaoUtilizadores
     public async Task<bool> DesativarFuncionario(string numero)
     {
         return await _funcRepo.DesativarFuncionarioAsync(numero);
+    }
+        
+    public async Task<bool> AtivarFuncionario(string numero)
+    {
+        return await _funcRepo.AtivarFuncionarioAsync(numero);
     }
 
     public async Task<bool> AlterarCargoFuncionario(string numero, string novoCargo)

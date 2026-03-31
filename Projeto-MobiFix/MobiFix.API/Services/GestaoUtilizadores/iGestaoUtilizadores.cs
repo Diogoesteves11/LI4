@@ -14,5 +14,6 @@ public interface IGestaoUtilizadores
     Task<Funcionario?> GetFuncionario(string numero);
     Task<bool> RegistarFuncionario(string numero, string nome, string email, string contacto, string cargo, string? especialidade, string passwordText);
     Task<bool> DesativarFuncionario(string numero);
+    Task<bool> AtivarFuncionario(string numero);
     Task<bool> AlterarCargoFuncionario(string numero, string novoCargo);
 }

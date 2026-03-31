@@ -14,7 +14,6 @@ public class UtilizadoresController : ControllerBase
 
     public UtilizadoresController(IGestaoUtilizadores userService) => _userService = userService;
 
-    // ─── Clientes ───
 
     [HttpGet("cliente/{email}")]
     [Authorize(Roles = "Administrador,Operador,Cliente")]
@@ -89,6 +88,14 @@ public class UtilizadoresController : ControllerBase
     {
         var ok = await _userService.DesativarFuncionario(numero);
         return ok ? Ok(new { message = "Funcionário desativado." }) : NotFound();
+    }
+
+    [HttpPatch("funcionario/{numero}/ativar")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> AtivarFuncionario(string numero)
+    {
+        var ok = await _userService.AtivarFuncionario(numero);
+        return ok ? Ok(new { message = "Funcionário ativado." }) : NotFound();
     }
 
     // ─── Trotinetes ───
