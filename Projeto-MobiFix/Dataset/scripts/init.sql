@@ -8,6 +8,10 @@ GO
 USE fixnride_db;
 GO
 
+-- CUIDADO: Isto apaga os dados das peças!
+DROP TABLE IF EXISTS Intervencao_Pecas; -- Apagar primeiro as tabelas com FK
+DROP TABLE IF EXISTS Pecas;
+
 -- 2. Módulo de Utilizadores e Funcionários (Hierarquia com RBAC)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Funcionarios')
 BEGIN
@@ -217,11 +221,12 @@ BEGIN
     ('SN-NINEBOT-99', 'Segway-Ninebot', 'Max G30', 2),
     ('SN-XIAOMI-002', 'Xiaomi', 'Essential', 1);
 
-    INSERT INTO Pecas (CodigoEAN, Nome, Descricao, CustoAquisicao, PVP, StockAtual, StockMinimo)
+    INSERT INTO Pecas (CodigoEAN, Nome, Descricao, CustoAquisicao, PVP, StockAtual, StockMinimo, Imagem)
     VALUES
-    ('EAN001', 'Pneu 8.5 Polegadas', 'Pneu reforçado para Xiaomi', 12.50, 25.00, 20, 5),
-    ('EAN002', 'Pastilhas de Travão', 'Compatível com vários modelos', 3.00, 8.50, 50, 10),
-    ('EAN003', 'Bateria 36V 12Ah', 'Bateria de substituição alta performance', 85.00, 150.00, 3, 2);
+    ('EAN001', 'Pneu 8.5 Polegadas', 'Pneu reforçado para Xiaomi', 12.50, 25.00, 20, 5, 'pneu.jpg'),
+    ('EAN002', 'Pastilhas de Travão', 'Compatível com vários modelos', 3.00, 8.50, 50, 10, 'pastilha.jpg'),
+    ('EAN003', 'Bateria 36V 12Ah', 'Bateria de substituição alta performance', 85.00, 150.00, 3, 2, 'bateria.jpg'),
+    ('EAN004', 'Manete de Travão', 'Manete de travão com muita potência', 47.99, 97.33, 6, 2, 'travao.jpg');
 
     INSERT INTO IntervencoesCatalogo (Descricao, PrecoFixoMaoDeObra, Especialidade)
     VALUES
