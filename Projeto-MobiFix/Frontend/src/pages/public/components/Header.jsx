@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import LogoMobifix from '../../../assets/mobifix_logo.png'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,8 +30,8 @@ export default function Header() {
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-lg bg-corporate-blue flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
-            <span className="text-white text-xl font-bold italic">M</span>
+          <div className="w-30 h-30 flex items-center justify-center transition-transform group-hover:scale-110">
+            <img src={LogoMobifix}/>
           </div>
           <span className={`text-2xl font-bold tracking-tight transition-colors ${
             isScrolled || isAuthPage ? 'text-deep-slate' : 'text-white'

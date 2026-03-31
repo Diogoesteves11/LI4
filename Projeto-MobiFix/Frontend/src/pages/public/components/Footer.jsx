@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
+import LogoMobifix from '../../../assets/mobifix_logo.png'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -18,10 +19,9 @@ export default function Footer() {
           {/* Company Info - Ocupa 5 colunas no desktop */}
           <div className="md:col-span-5">
             <div className="flex items-center gap-3 mb-6 group cursor-pointer w-fit">
-              <div className="w-12 h-12 rounded-xl bg-corporate-blue flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12">
-                <span className="text-white text-2xl font-black italic">M</span>
+              <div className="w-90 h-50 flex items-center  transition-transform group-hover:scale-110">
+                <img src={LogoMobifix}/>
               </div>
-              <span className="text-3xl font-black tracking-tighter">MobiFix</span>
             </div>
             
             <p className="text-slate-400 mb-8 max-w-sm leading-relaxed text-lg">
