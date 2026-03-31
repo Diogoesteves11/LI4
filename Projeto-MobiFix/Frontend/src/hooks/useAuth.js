@@ -26,6 +26,9 @@ export function useLoginFuncionario() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user_name', data.nome);
             localStorage.setItem('user_role', data.cargo);
+            localStorage.setItem('funcionarioId', data.funcionarioId);
+
+            console.log(data);
 
             console.log('Login de funcionário efetuado com sucesso');
         },
