@@ -1,4 +1,4 @@
-import { Wrench, Battery, Zap, Bike, ShieldCheck, Clock } from 'lucide-react';
+import { Wrench, Battery, Zap, Scooter, ShieldCheck, Clock } from 'lucide-react';
 
 const services = [
   {
@@ -22,9 +22,9 @@ const services = [
     icon: Wrench,
   },
   {
-    title: 'Aluguer de Longa Duração',
-    description: 'Soluções flexíveis de aluguer para quem precisa de mobilidade diária sem compromisso.',
-    icon: Bike,
+    title: 'Serviço Personalizado',
+    description: 'Recomendação de peças tendo em conta a sua trotinete.',
+    icon: Scooter,
   },
   {
     title: 'Serviço Expresso',

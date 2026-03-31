@@ -57,7 +57,7 @@ export default function AppRouter() {
         </Route>
 
         {/* ÁREA DO OPERADOR - Operador e Admin podem entrar */}
-        <Route element={<ProtectedRoute allowedRoles={['Cliente', 'Operador', 'Administrador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Operador', 'Administrador']} />}>
           <Route path="/FixNSell" element={<Layout />}>
             <Route path="vendadireta" element={<VendaDireta />} />
             <Route path="trotinetes-prontas" element={<TrotinetesProntas />} />
