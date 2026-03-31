@@ -9,11 +9,12 @@ public class Trotinete
     public string Modelo { get; private set; }
     public bool EmServico { get; set; }
 
-    public Trotinete(string numSerie, string marca, string modelo)
+    public Trotinete(string numSerie, string marca, string modelo, bool emServico = false, int id = 0)
     {
         NumeroSerie = numSerie;
         Marca = marca;
         Modelo = modelo;
-        EmServico = false;
+        EmServico = emServico;
+        Id = id;
     }
 }

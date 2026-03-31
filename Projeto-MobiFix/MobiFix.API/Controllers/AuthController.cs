@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
         if (cliente == null) return Unauthorized(new { message = "Credenciais inválidas." });
 
         var token = GerarToken(cliente.Email, "Cliente", cliente.Id.ToString());
-        return Ok(new { token, nome = cliente.Nome, email = cliente.Email, clienteId = cliente.Id });
+        return Ok(new { token, nome = cliente.Nome, email = cliente.Email, clienteId = cliente.Id});
     }
 
     [HttpPost("login/funcionario")]

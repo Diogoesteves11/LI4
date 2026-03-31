@@ -13,11 +13,8 @@ public class ClienteRepository : IClienteRepository
     public async Task<Cliente?> ObterPorEmailAsync(string email, bool incluirTrotinetes = false)
     {
         string url = $"api/Cliente?$filter=Email eq '{email}'";
-        if (incluirTrotinetes) url += "&$expand=trotinetes";
 
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
-
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
 
@@ -25,11 +22,30 @@ public class ClienteRepository : IClienteRepository
         var dto = result?.Value?.FirstOrDefault();
         if (dto == null) return null;
 
-        return new Cliente(dto.NIF, dto.Nome, dto.Email, dto.Telefone, dto.PasswordHash)
+        var cliente = new Cliente(dto.NIF, dto.Nome, dto.Email, dto.Telefone, dto.PasswordHash)
         {
             Id = dto.ClienteID,
             Morada = dto.Morada
         };
+
+        if (incluirTrotinetes)
+        {
+            var tUrl = $"api/Trotinete?$filter=ClienteID eq {dto.ClienteID}";
+            var tReq = new HttpRequestMessage(HttpMethod.Get, tUrl);
+            var tRes = await _http.SendAsync(tReq);
+            if (tRes.IsSuccessStatusCode)
+            {
+                var tResult = await tRes.Content.ReadFromJsonAsync<DabResponse<TrotineteDto>>();
+                if (tResult?.Value != null)
+                {
+                    foreach (var t in tResult.Value)
+                        cliente.Trotinetes.Add(new Models.Utilizadores.Trotinete(
+                            t.NumeroSerie, t.Marca, t.Modelo, t.EmServico, t.TrotineteID));
+                }
+            }
+        }
+
+        return cliente;
     }
 
     public async Task<bool> RegistarAsync(Cliente cliente)

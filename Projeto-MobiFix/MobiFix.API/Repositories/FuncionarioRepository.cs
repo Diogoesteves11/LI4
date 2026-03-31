@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using MobiFix.API.Models.Utilizadores;
 using MobiFix.API.DTOs;
+using System.Text.Json;
 
 namespace MobiFix.API.Repositories;
 
@@ -43,7 +44,7 @@ public class FuncionarioRepository : IFuncionarioRepository
 
     public async Task<bool> RegistarFuncionarioAsync(Funcionario f)
     {
-        var dto = new FuncionarioDto
+        var body = new
         {
             NumeroMecanografico = f.Numero,
             Nome = f.Nome,
@@ -57,15 +58,26 @@ public class FuncionarioRepository : IFuncionarioRepository
                 Operador => "Operador",
                 _ => throw new ArgumentException("Tipo de funcionário desconhecido")
             },
-            Especialidade = f is Mecanico m ? m.Especialidade : null
+            Especialidade = f is Mecanico m ? m.Especialidade : (string?)null,
+            Ativo = f.Ativo
         };
 
+        
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Funcionario");
         request.Headers.Add("X-MS-API-ROLE", "Administrador");
-        request.Content = JsonContent.Create(dto);
+
+        var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
+        request.Content = JsonContent.Create(body, options: options);
 
         var res = await _http.SendAsync(request);
-        return res.IsSuccessStatusCode;
+
+        if (!res.IsSuccessStatusCode)
+        {
+            var erroDab = await res.Content.ReadAsStringAsync();
+
+            throw new Exception($"FALHA NO DAB: Código {res.StatusCode} | Detalhe: {erroDab}");
+        }
+        return true;
     }
 
     public async Task<bool> DesativarFuncionarioAsync(string numero) => await MudarStatusAsync(numero, false);
@@ -87,7 +99,7 @@ public class FuncionarioRepository : IFuncionarioRepository
 
     public async Task<bool> ExisteFuncionarioAsync(string numero)
     {
-        string url = $"api/Funcionario?$filter=NumeroMecanografico eq '{numero}'&$select=FuncionarioID&$first=1";
+        string url = $"api/Funcionario?$select=FuncionarioID&$filter=NumeroMecanografico eq '{numero}'";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
