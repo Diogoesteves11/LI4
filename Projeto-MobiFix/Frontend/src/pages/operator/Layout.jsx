@@ -13,6 +13,9 @@ export default function Layout() {
     { path: '/FixNSell/rececao-encomendas', label: 'Receção de Encomendas', icon: Package },
   ];
 
+  const nome = localStorage.getItem('user_name');
+  const role = localStorage.getItem('user_role');
+
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans antialiased">
       <aside
@@ -82,11 +85,10 @@ export default function Layout() {
         {/* Footer da Sidebar (Opcional - Ex: Perfil ou Logout) */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
           <div className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} p-2`}>
-            <div className="w-8 h-8 rounded-full bg-slate-300 flex-shrink-0 border-2 border-white shadow-sm" />
             {sidebarOpen && (
               <div className="flex flex-col overflow-hidden animate-in fade-in">
-                <span className="text-xs font-bold text-slate-800 truncate">Operador Loja</span>
-                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">Turno Ativo</span>
+                <span className="text-xs font-bold text-slate-800 truncate">{nome}</span>
+                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{role}</span>
               </div>
             )}
           </div>

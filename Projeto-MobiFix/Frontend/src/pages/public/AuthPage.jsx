@@ -3,6 +3,8 @@ import { Mail, Lock, User, ArrowLeft, CheckCircle2, Loader2, Hash, MapPin, Phone
 import { useLocation, useNavigate } from 'react-router'; // Adicionei useNavigate para redirecionar
 import { useLoginCliente, useRegistoCliente } from '../../hooks/useAuth';
 
+import LogoMobifix from "../../assets/mobifix_logo.png";
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   
@@ -67,10 +69,9 @@ export default function AuthPage() {
 
         <div className="relative z-10 max-w-md text-center">
           <div className="inline-flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-corporate-blue flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl font-black italic">M</span>
+            <div className="w-60 h-35 flex ">
+              <img src={LogoMobifix}/>
             </div>
-            <span className="text-4xl font-black text-white tracking-tighter">MobiFix</span>
           </div>
           
           <h2 className="text-4xl font-bold text-white mb-6 leading-tight">

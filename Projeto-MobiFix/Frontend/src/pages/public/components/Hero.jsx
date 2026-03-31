@@ -27,15 +27,20 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+            <a 
+              href={'#parts-catalog'}
+            >
             <button
               className="w-full sm:w-auto px-10 py-4 rounded-xl text-lg font-bold text-white bg-safety-orange hover:bg-orange-600 shadow-xl shadow-orange-900/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              Explore Catalog
+              Explore o Catálogo
             </button>
-            
+            </a>
+            <a href={'#services'}>
             <button className="w-full sm:w-auto px-10 py-4 rounded-xl text-lg font-bold text-white border-2 border-white/20 hover:bg-white/10 backdrop-blur-sm transition-all cursor-pointer">
-              Our Services
+              Nossos Serviços
             </button>
+            </a>
           </div>
         </div>
       </div>

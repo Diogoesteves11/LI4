@@ -3,17 +3,17 @@ import { Wrench, Shield, Clock } from 'lucide-react';
 const features = [
   {
     icon: Wrench,
-    title: 'Expert Mechanics',
+    title: 'Técnicos Certificados',
     description: 'Técnicos certificados pela MobiFix com anos de experiência em reparação de micromobilidade elétrica.',
   },
   {
     icon: Shield,
-    title: 'Genuine Parts',
+    title: 'Partes Originais',
     description: 'Todas as peças são provenientes diretamente dos fabricantes, garantindo total compatibilidade e garantia.',
   },
   {
     icon: Clock,
-    title: 'Quick Turnaround',
+    title: 'Manutenção Speedy',
     description: 'Serviço de reparação expresso disponível para a maioria das intervenções e instalações de acessórios.',
   },
 ];

@@ -8,6 +8,7 @@ export function useLoginCliente(){
             localStorage.setItem('token', data.token);
             localStorage.setItem('user_name', data.nome);
             localStorage.setItem('user_role', 'Cliente');
+            localStorage.setItem('id', data.clienteId);
 
             console.log('Login efetuado com sucesso!');
         },

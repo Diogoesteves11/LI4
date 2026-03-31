@@ -30,14 +30,9 @@ export default function Header() {
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-30 h-30 flex items-center justify-center transition-transform group-hover:scale-110">
+          <div className="w-40 h-40 flex items-center justify-center transition-transform group-hover:scale-110">
             <img src={LogoMobifix}/>
           </div>
-          <span className={`text-2xl font-bold tracking-tight transition-colors ${
-            isScrolled || isAuthPage ? 'text-deep-slate' : 'text-white'
-          }`}>
-            MobiFix
-          </span>
         </Link>
 
         {/* Desktop Nav */}
