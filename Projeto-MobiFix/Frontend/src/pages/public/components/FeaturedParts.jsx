@@ -4,6 +4,7 @@ import { usePecas } from '../../../hooks/usePecas';
 export default function FeaturedParts() {
   const {data: parts, isLoading, isError, error} = usePecas();
   const isLoggedIn = !!localStorage.getItem('token');
+  
 
   if (parts) {
     console.log("Dados que vieram da API:", parts);
@@ -21,10 +22,10 @@ export default function FeaturedParts() {
         {/* Section Header */}
         <div className="text-center mb-20">
           <h2 className="text-4xl sm:text-5xl font-black text-deep-slate mb-4 tracking-tight">
-            Featured Parts <span className="text-corporate-blue">Catalog</span>
+            Produtos do <span className="text-corporate-blue">Momento</span>
           </h2>
           <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-            Explore a nossa seleção premium de componentes para veículos de micromobilidade. 
+            Explore a nossa seleção premium de componentes. 
             Qualidade garantida pela MobiFix.
           </p>
         </div>
@@ -61,31 +62,13 @@ export default function FeaturedParts() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3">
-                  <button className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-slate-100 text-deep-slate font-bold text-sm hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer">
-                    <Eye size={18} />
-                    Ver Detalhes
-                  </button>
-
-                  {/* Dynamic Reserve Button */}
                   <button
-                    disabled={!isLoggedIn}
+                    disabled={true}
                     className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all shadow-lg cursor-pointer active:scale-95 ${
-                      isLoggedIn
-                        ? 'bg-safety-orange text-white hover:bg-orange-600 shadow-orange-500/20'
-                        : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                         'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
                     }`}
                   >
-                    {isLoggedIn ? (
-                      <>
-                        <ShoppingBag size={18} />
-                        Reservar Peça
-                      </>
-                    ) : (
-                      <>
-                        <Lock size={16} />
-                        Login para Reservar
-                      </>
-                    )}
+                    <Lock size={16} />Login para Reservar
                   </button>
                 </div>
               </div>
@@ -95,7 +78,7 @@ export default function FeaturedParts() {
 
         {/* Ver Mais Link */}
         <div className="mt-16 text-center">
-           <a href="/catalog" className="inline-flex items-center gap-2 text-corporate-blue font-bold hover:gap-4 transition-all">
+           <a href="/FixNRide/catalogo" className="inline-flex items-center gap-2 text-corporate-blue font-bold hover:gap-4 transition-all">
              Ver Catálogo Completo 
              <span className="text-xl">→</span>
            </a>

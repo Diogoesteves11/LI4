@@ -32,7 +32,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     console.warn("Acesso negado: Role insuficiente.");
-    return <Navigate to="/" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
   return <Outlet />; // Renderiza as rotas filhas

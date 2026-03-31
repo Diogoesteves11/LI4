@@ -1,79 +1,70 @@
-import { useState } from "react";
-import { Check, X, Package, Calendar, Clock, User, Euro, History } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { 
+  Check, X, Package, Calendar, Clock, User, 
+  Euro, History, Loader2, AlertCircle 
+} from "lucide-react";
+import { useEncomendaStock } from "../../hooks/useEncomendas";
 
 export default function StockOrders() {
-  // Removida a interface StockOrder e a tipagem do useState
-  const [orders, setOrders] = useState([
-    {
-      id: "1",
-      item: "Ecrã LCD iPhone 13",
-      quantidade: 15,
-      fornecedor: "TechParts Ltd",
-      solicitante: "João Silva",
-      data: "2026-03-20",
-      custo: 1250,
-      status: "pendente",
-    },
-    {
-      id: "2",
-      item: "Bateria Samsung Galaxy S22",
-      quantidade: 20,
-      fornecedor: "Mobile Parts Pro",
-      solicitante: "Maria Santos",
-      data: "2026-03-21",
-      custo: 680,
-      status: "pendente",
-    },
-    {
-      id: "3",
-      item: "Conector de Carga USB-C",
-      quantidade: 50,
-      fornecedor: "Universal Parts",
-      solicitante: "Pedro Costa",
-      data: "2026-03-22",
-      custo: 175,
-      status: "pendente",
-    },
-    {
-      id: "4",
-      item: "Câmera Traseira iPhone 14 Pro",
-      quantidade: 10,
-      fornecedor: "Apple Parts Direct",
-      solicitante: "Ana Rodrigues",
-      data: "2026-03-23",
-      custo: 950,
-      status: "pendente",
-    },
-    {
-      id: "5",
-      item: "Alto-falante Xiaomi Mi 11",
-      quantidade: 25,
-      fornecedor: "Asia Components",
-      solicitante: "Carlos Mendes",
-      data: "2026-03-23",
-      custo: 320,
-      status: "pendente",
-    },
-  ]);
+  // 1. Chamada ao Hook Real
+  const { data: apiOrders, isLoading, isError } = useEncomendaStock();
+  
+  // 2. Estado local para gerir as decisões (Aprovar/Rejeitar) na UI
+  const [orders, setOrders] = useState([]);
+
+  // Sincroniza os dados da API com o estado local assim que carregam
+  useEffect(() => {
+    if (apiOrders) {
+      setOrders(apiOrders.map(o => ({
+        id: o.encomendaID,
+        item: `Peça #${o.pecaID}`, // Idealmente aqui farias um JOIN com a tabela Pecas
+        quantidade: o.quantidade,
+        fornecedor: "Fornecedor Padrão", // Placeholder (não existe na tabela EncomendasStock)
+        solicitante: `Admin #${o.adminValidadorID}`,
+        data: new Date(o.dataPedido).toLocaleDateString('pt-PT'),
+        custo: o.quantidade * 15, // Estimativa (Podes cruzar com o PVP da peça depois)
+        status: o.estado.toLowerCase() // 'pendente', 'em trânsito', 'rececionada'
+      })));
+    }
+  }, [apiOrders]);
 
   const handleApprove = (id) => {
-    setOrders(
-      orders.map((order) =>
+    // Aqui no futuro chamarias uma Mutation para mudar para 'Em Trânsito'
+    setOrders(prev =>
+      prev.map((order) =>
         order.id === id ? { ...order, status: "aprovado" } : order
       )
     );
   };
 
   const handleReject = (id) => {
-    setOrders(
-      orders.map((order) =>
+    // Aqui no futuro chamarias uma Mutation para cancelar a encomenda
+    setOrders(prev =>
+      prev.map((order) =>
         order.id === id ? { ...order, status: "rejeitado" } : order
       )
     );
   };
 
+  // Filtros baseados no estado local
   const pendingOrders = orders.filter((order) => order.status === "pendente");
-  const processedOrders = orders.filter((order) => order.status !== "pendente");
+  const processedOrders = orders.filter((order) => 
+    order.status === "aprovado" || order.status === "rejeitado" || order.status === "rececionada"
+  );
+
+  if (isLoading) return (
+    <div className="min-h-[400px] flex flex-col items-center justify-center">
+      <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
+      <p className="text-slate-500 font-bold">A carregar pedidos de stock...</p>
+    </div>
+  );
+
+  if (isError) return (
+    <div className="p-8 bg-red-50 text-red-600 rounded-2xl flex items-center gap-3">
+      <AlertCircle />
+      <p className="font-bold">Erro ao ligar ao servidor de gestão de stock.</p>
+    </div>
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -83,14 +74,13 @@ export default function StockOrders() {
           Encomendas de Stock
         </h1>
         <p className="text-lg font-medium text-slate-500">
-          Gestão e aprovação de pedidos de componentes
+          Aprovação de pedidos pendentes da base de dados
         </p>
       </div>
 
-      {/* Grid de Estatísticas (Cartões) */}
+      {/* Grid de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Pendentes */}
-        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6">
           <div className="flex items-center gap-4">
             <div className="bg-amber-100 p-3 rounded-xl">
               <Package className="w-8 h-8 text-amber-600" />
@@ -102,8 +92,7 @@ export default function StockOrders() {
           </div>
         </div>
 
-        {/* Aprovadas */}
-        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6">
           <div className="flex items-center gap-4">
             <div className="bg-emerald-100 p-3 rounded-xl">
               <Check className="w-8 h-8 text-emerald-600" />
@@ -111,20 +100,19 @@ export default function StockOrders() {
             <div>
               <p className="text-sm font-bold uppercase tracking-wider text-slate-400">Aprovadas</p>
               <p className="text-3xl font-black text-slate-900">
-                {orders.filter((o) => o.status === "aprovado").length}
+                {orders.filter((o) => o.status === "aprovado" || o.status === "rececionada").length}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Custo Total Pendente */}
-        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-100 p-6">
           <div className="flex items-center gap-4">
             <div className="bg-blue-100 p-3 rounded-xl">
               <Euro className="w-8 h-8 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-bold uppercase tracking-wider text-slate-400">Total em Aberto</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-slate-400">Total Pendente</p>
               <p className="text-3xl font-black text-slate-900">
                 €{pendingOrders.reduce((acc, curr) => acc + curr.custo, 0).toLocaleString()}
               </p>
@@ -133,9 +121,9 @@ export default function StockOrders() {
         </div>
       </div>
 
-      {/* Secção de Encomendas Pendentes (Tabela principal) */}
+      {/* Tabela de Pedidos Pendentes */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="p-6 bg-linear-to-r from-slate-50 to-white border-b border-slate-200">
+        <div className="p-6 bg-slate-50 border-b border-slate-200">
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <Clock className="w-5 h-5 text-amber-500" />
             Pedidos Aguardando Revisão
@@ -146,19 +134,18 @@ export default function StockOrders() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 text-slate-500 text-xs font-black uppercase tracking-widest border-b border-slate-200">
-                <th className="px-6 py-4">Item / Peça</th>
-                <th className="px-6 py-4">Quantidade</th>
-                <th className="px-6 py-4">Fornecedor</th>
+                <th className="px-6 py-4">ID / Peça</th>
+                <th className="px-6 py-4 text-center">Quantidade</th>
                 <th className="px-6 py-4">Solicitante</th>
-                <th className="px-6 py-4">Custo</th>
-                <th className="px-6 py-4 text-center">Decisão</th>
+                <th className="px-6 py-4">Data Pedido</th>
+                <th className="px-6 py-4 text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {pendingOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 font-medium italic">
-                    Não existem encomendas pendentes de aprovação.
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 italic font-medium">
+                    Não existem encomendas pendentes.
                   </td>
                 </tr>
               ) : (
@@ -166,36 +153,23 @@ export default function StockOrders() {
                   <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-100 rounded-lg">
-                          <Package className="w-5 h-5 text-slate-600" />
-                        </div>
-                        <span className="font-bold text-slate-900">{order.item}</span>
+                        <span className="font-bold text-slate-900">#{order.id} - {order.item}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 font-mono text-slate-600">{order.quantidade} un.</td>
-                    <td className="px-6 py-5 text-slate-500">{order.fornecedor}</td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2 font-semibold text-slate-700">
-                        <User className="w-4 h-4" />
-                        {order.solicitante}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="text-lg font-black text-slate-900">
-                        €{order.custo.toLocaleString()}
-                      </span>
-                    </td>
+                    <td className="px-6 py-5 text-center font-mono font-bold text-blue-600">{order.quantidade} un.</td>
+                    <td className="px-6 py-5 font-semibold text-slate-700">{order.solicitante}</td>
+                    <td className="px-6 py-5 text-slate-500 text-sm">{order.data}</td>
                     <td className="px-6 py-5">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleApprove(order.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-200"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-100"
                         >
                           <Check className="w-4 h-4" /> Aprovar
                         </button>
                         <button
                           onClick={() => handleReject(order.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 active:scale-95 transition-all shadow-lg shadow-red-200"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 active:scale-95 transition-all shadow-lg shadow-red-100"
                         >
                           <X className="w-4 h-4" /> Rejeitar
                         </button>
@@ -209,9 +183,9 @@ export default function StockOrders() {
         </div>
       </div>
 
-      {/* Histórico Recente (Apenas se houver processadas) */}
+      {/* Histórico Recente */}
       {processedOrders.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden opacity-90">
           <div className="p-6 border-b border-slate-200 flex items-center justify-between">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
               <History className="w-5 h-5 text-blue-500" />
@@ -222,27 +196,24 @@ export default function StockOrders() {
             <table className="w-full text-left">
               <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
                 <tr>
-                  <th className="px-6 py-3">Item</th>
-                  <th className="px-6 py-3">Fornecedor</th>
-                  <th className="px-6 py-3 text-right">Custo</th>
+                  <th className="px-6 py-3">ID Pedido</th>
+                  <th className="px-6 py-3">Peça</th>
                   <th className="px-6 py-3 text-center">Resultado</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {processedOrders.map((order) => (
-                  <tr key={order.id} className="opacity-80">
+                  <tr key={order.id}>
+                    <td className="px-6 py-4 font-mono text-xs">#{order.id}</td>
                     <td className="px-6 py-4 font-bold text-slate-800">{order.item}</td>
-                    <td className="px-6 py-4 text-slate-500 text-sm">{order.fornecedor}</td>
-                    <td className="px-6 py-4 text-right font-black">€{order.custo.toLocaleString()}</td>
                     <td className="px-6 py-4 flex justify-center">
                       <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                          order.status === "aprovado"
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                          order.status === "aprovado" || order.status === "rececionada"
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-red-100 text-red-700"
                         }`}
                       >
-                        {order.status === "aprovado" ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                         {order.status}
                       </span>
                     </td>

@@ -233,5 +233,32 @@ BEGIN
     ('Substituição de Pneu', 15.00, 'MECANICA_GERAL'),
     ('Diagnóstico Elétrico', 20.00, 'ELETRICISTA'),
     ('Revisão Geral', 30.00, 'MECANICA_GERAL');
+    
+    INSERT INTO Vendas (OperadorID, DataVenda, Total)
+    VALUES (2, GETDATE(), 33.50); 
+    
+    INSERT INTO Faturas (NumeroFatura, ClienteID, VendaID, ValorTotal, MetodoPagamento)
+    VALUES ('FAT-2024-001', 1, 1, 33.50, 'MBWay');
+
+    INSERT INTO EncomendasStock (PecaID, Quantidade, Estado, DataPedido, OperadorRececaoID, AdminValidadorID)
+    VALUES 
+    (3, 10, 'Pendente', DATEADD(DAY, -1, GETDATE()), NULL, 1),
+    (1, 50, 'Em Trânsito', DATEADD(DAY, -3, GETDATE()), NULL, 1),
+    (2, 100, 'Rececionada', DATEADD(DAY, -7, GETDATE()), 2, 1),
+    (4, 15, 'Pendente', GETDATE(), NULL, 1),
+    (3, 5, 'Rececionada', DATEADD(DAY, -15, GETDATE()), 2, 1);
+
+    INSERT INTO Promocoes (Descricao, PercentagemDesconto, DataInicio, DataFim, AdministradorID)
+    VALUES 
+    ('Campanha de Páscoa 2026', 15.00, '2026-03-20', '2026-04-10', 1),
+    ('Limpeza de Stock - Inverno', 40.00, '2026-01-01', '2026-02-28', 1),
+    ('Preparação de Verão 2026', 10.00, '2026-06-01', '2026-08-31', 1);
+    -- Promoção 1 (Páscoa): Desconto em Baterias (PecaID 3) e Manetes (PecaID 4)
+    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (1, 3);
+    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (1, 4);
+    -- Promoção 2 (Inverno - Já passou): Desconto agressivo em Pastilhas (PecaID 2)
+    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (2, 2);
+    -- Promoção 3 (Verão - Futura): Desconto em Pneus (PecaID 1)
+    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (3, 1);
 END
 GO
