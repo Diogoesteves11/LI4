@@ -1,0 +1,26 @@
+[
+    {
+    "_id": 3,
+    "descricao": "Dianóstico",
+    "precoFixoMaoDeObra": 10,
+    "especialidade": "DIAGNOSTICO"
+  },
+  {
+    "_id": 1,
+    "descricao": "Substituição de Pneu",
+    "precoFixoMaoDeObra": 15.00,
+    "especialidade": "MECANICA GERAL"
+  },
+  {
+    "_id": 2,
+    "descricao": "Diagnóstico Elétrico",
+    "precoFixoMaoDeObra": 20.00,
+    "especialidade": "ELETRONICA"
+  },
+  {
+    "_id": 3,
+    "descricao": "Revisão Geral",
+    "precoFixoMaoDeObra": 30.00,
+    "especialidade": "MECANICA GERAL"
+  }
+]

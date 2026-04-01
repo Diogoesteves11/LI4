@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "EAN001",
+    "nome": "Pneu 8.5 Polegadas",
+    "descricao": "Pneu reforçado para Xiaomi",
+    "categoria": "PNEU",
+    "custoAquisicao": 12.50,
+    "pvp": 25.00,
+    "stockAtual": 20,
+    "stockMinimo": 5,
+    "ativo": true
+  },
+  {
+    "_id": "EAN002",
+    "nome": "Pastilhas de Travão",
+    "descricao": "Compatível com vários modelos",
+    "categoria": "TRAVAGEM",
+    "custoAquisicao": 3.00,
+    "pvp": 8.50,
+    "stockAtual": 50,
+    "stockMinimo": 10,
+    "ativo": true
+  },
+  {
+    "_id": "EAN003",
+    "nome": "Bateria 36V 12Ah",
+    "descricao": "Bateria de substituição alta performance",
+    "categoria": "ELETRONICA",
+    "custoAquisicao": 85.00,
+    "pvp": 150.00,
+    "stockAtual": 3,
+    "stockMinimo": 2,
+    "ativo": true
+  }
+]

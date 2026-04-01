@@ -1,57 +1,66 @@
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    platform: linux/amd64 
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${DB_PASSWORD}" # Lida do .env
-    ports:
-      - "1433:1433"
+  mongodb:
+    build:
+      context: ./Database
+      dockerfile: mongo-config/Dockerfile 
+    container_name: mobifix_mongodb
     volumes:
-      - sqldata:/var/opt/mssql
-    healthcheck:
-      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${DB_PASSWORD}", "-Q", "SELECT 1", "-No"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=fixnride_db
 
-  # ─── MobiFix.API + DAB ───
-  api:
+  data-api:
+    build:
+      context: ./Database
+      dockerfile: Dockerfile
+    container_name: mobifix_data_api
+    depends_on:
+      - mongodb
+    ports:
+      - "${DATA_API_PORT}:3001" 
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/fixnride_db
+      - DATA_API_PORT=3001
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
+
+  # ─── LN API (C# .NET) ───
+  ln:
     build:
       context: ./MobiFix.API
       dockerfile: Dockerfile
+    container_name: mobifix_ln_api
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      - data-api
     ports:
-      - "5001:5001"
-      - "5002:5002"
-    volumes:
-      - ./MobiFix.API/dab-config.json:/app/dab-config.json
-      - ./Dataset/scripts/init.sql:/app/init.sql
+      - "${LN_API_PORT}:5001"
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      DB_PASSWORD: "${DB_PASSWORD}"
-      DabSettings__BaseUrl: "http://localhost:5000"
-      DAB_CONNECTION_STRING: "Server=sqlserver;Database=fixnride_db;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;"
-      Jwt__Key: "${JWT_SECRET}"
-      Jwt__Issuer: "MobiFix.API"
-      Jwt__Audience: "MobiFix.Frontend"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DataApiSettings__BaseUrl=http://data-api:3001
+      - Jwt__Key=${JWT_SECRET}
+      - Jwt__Issuer=MobiFix.API
+      - Jwt__Audience=MobiFix.Frontend
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    env_file:
+      - .env
 
+  # ─── FRONTEND (Vite/React) ───
   frontend:
-      image: node:22-alpine
-      working_dir: /app
-      ports:
-        - "3000:3000" # Porta do servidor de desenvolvimento (Vite/React)
-      volumes:
-        - ./Frontend:/app
-        - /app/node_modules # Importante: não apaga os módulos do container
-      environment:
-        - CHOKIDAR_USEPOLLING=true # Força o Hot Reload a funcionar no Windows
-      command: sh -c "npm install && npm run dev" # Executa o modo desenvolvimento em vez do Nginx
-      depends_on:
-        - api
+    image: node:22-alpine
+    container_name: mobifix_frontend
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - ln
 
 volumes:
-  sqldata:
+  mongodb_data: # Volume persistente para o Mongo
