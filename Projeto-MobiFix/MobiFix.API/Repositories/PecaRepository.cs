@@ -14,7 +14,6 @@ public class PecaRepository : IPecaRepository
     {
         string url = $"api/Peca?$filter=CodigoEAN eq '{EAN}'";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -34,7 +33,6 @@ public class PecaRepository : IPecaRepository
     {
         string url = "api/Peca?$filter=Ativo eq true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -50,7 +48,6 @@ public class PecaRepository : IPecaRepository
 
         string urlPatch = $"api/Peca/PecaID/{pecaId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dados);
 
         var response = await _http.SendAsync(request);
@@ -70,7 +67,6 @@ public class PecaRepository : IPecaRepository
     {
         string url = $"api/Peca?$filter=CodigoEAN eq '{EAN}'&$select=PecaID&$first=1";
         var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var res = await _http.SendAsync(req);
         if (!res.IsSuccessStatusCode) return null;

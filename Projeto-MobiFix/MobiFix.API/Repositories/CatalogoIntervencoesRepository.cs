@@ -12,7 +12,6 @@ public class CatalogoIntervencoesRepository : ICatalogoIntervencoesRepository
     public async Task<List<IntervencaoCatalogoDto>> ObterTodosAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "api/IntervencaoCatalogo");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();

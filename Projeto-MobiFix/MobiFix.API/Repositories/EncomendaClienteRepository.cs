@@ -12,7 +12,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     public async Task<EncomendaClienteDto?> CriarAsync(EncomendaClienteDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/EncomendaCliente");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -24,7 +24,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     public async Task<bool> AdicionarItemAsync(EncomendaClienteItemDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/EncomendaClienteItem");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -35,7 +35,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     {
         string url = $"api/EncomendaCliente?$filter=ClienteID eq {clienteId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -48,7 +48,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     {
         string url = $"api/EncomendaCliente/EncomendaClienteID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -60,7 +60,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     {
         string url = $"api/EncomendaCliente/EncomendaClienteID/{id}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(new { Estado = estado });
 
         var response = await _http.SendAsync(request);
@@ -71,7 +71,7 @@ public class EncomendaClienteRepository : IEncomendaClienteRepository
     {
         string url = $"api/EncomendaCliente/EncomendaClienteID/{encomendaId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(new { FaturaID = faturaId });
 
         var response = await _http.SendAsync(request);

@@ -74,7 +74,7 @@ public class ClienteRepository : IClienteRepository
 
         string urlPatch = $"api/Cliente/ClienteID/{clienteId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dados);
 
         var response = await _http.SendAsync(request);
@@ -85,7 +85,7 @@ public class ClienteRepository : IClienteRepository
     {
         string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID&$first=1";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return false;
@@ -98,7 +98,6 @@ public class ClienteRepository : IClienteRepository
     {
         string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID&$first=1";
         var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var res = await _http.SendAsync(req);
         if (!res.IsSuccessStatusCode) return null;

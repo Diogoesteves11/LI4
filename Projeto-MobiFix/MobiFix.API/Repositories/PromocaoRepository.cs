@@ -12,7 +12,7 @@ public class PromocaoRepository : IPromocaoRepository
     public async Task<PromocaoDto?> CriarAsync(PromocaoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Promocao");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -24,7 +24,7 @@ public class PromocaoRepository : IPromocaoRepository
     public async Task<bool> AdicionarPecaPromocaoAsync(PromocaoPecaDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/PromocaoPeca");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -34,7 +34,7 @@ public class PromocaoRepository : IPromocaoRepository
     public async Task<List<PromocaoDto>> ObterTodasAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "api/Promocao");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -47,7 +47,7 @@ public class PromocaoRepository : IPromocaoRepository
     {
         string url = $"api/Promocao/PromocaoID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -59,7 +59,7 @@ public class PromocaoRepository : IPromocaoRepository
     {
         string url = $"api/Promocao/PromocaoID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Delete, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         return response.IsSuccessStatusCode;

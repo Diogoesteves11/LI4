@@ -12,7 +12,6 @@ public class NotaCreditoRepository : INotaCreditoRepository
     public async Task<NotaCreditoDto?> CriarAsync(NotaCreditoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/NotaCredito");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -25,7 +24,6 @@ public class NotaCreditoRepository : INotaCreditoRepository
     {
         string url = $"api/NotaCredito?$filter=DevolucaoID eq {devolucaoId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;

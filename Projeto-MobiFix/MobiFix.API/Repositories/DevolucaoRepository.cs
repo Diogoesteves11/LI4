@@ -12,7 +12,6 @@ public class DevolucaoRepository : IDevolucaoRepository
     public async Task<DevolucaoDto?> CriarAsync(DevolucaoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Devolucao");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -25,7 +24,6 @@ public class DevolucaoRepository : IDevolucaoRepository
     {
         string url = $"api/Devolucao/DevolucaoID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;

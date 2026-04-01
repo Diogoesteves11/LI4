@@ -12,7 +12,7 @@ public class AgendaRepository : IAgendaRepository
     public async Task<AgendaMecanicoDto?> CriarSlotAsync(AgendaMecanicoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/AgendaMecanicos");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -25,7 +25,7 @@ public class AgendaRepository : IAgendaRepository
     {
         string url = $"api/AgendaMecanicos?$filter=MecanicoID eq {mecanicoId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -38,7 +38,7 @@ public class AgendaRepository : IAgendaRepository
     {
         string url = $"api/AgendaMecanicos?$filter=ServicoID eq {servicoId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -51,7 +51,7 @@ public class AgendaRepository : IAgendaRepository
     {
         string url = $"api/AgendaMecanicos/AgendaID/{agendaId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(new { Estado = estado });
 
         var response = await _http.SendAsync(request);

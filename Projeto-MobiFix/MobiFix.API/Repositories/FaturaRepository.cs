@@ -13,7 +13,6 @@ public class FaturaRepository : IFaturaRepository
     {
         string url = $"api/Fatura/FaturaID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -25,7 +24,6 @@ public class FaturaRepository : IFaturaRepository
     {
         string url = $"api/Fatura?$filter=ClienteID eq {clienteId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -37,7 +35,6 @@ public class FaturaRepository : IFaturaRepository
     public async Task<FaturaDto?> CriarAsync(FaturaDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Fatura");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -49,7 +46,6 @@ public class FaturaRepository : IFaturaRepository
     public async Task<List<FaturaDto>> ObterTodasAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "api/Fatura");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();

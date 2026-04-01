@@ -12,7 +12,7 @@ public class EncomendaStockRepository : IEncomendaStockRepository
     public async Task<EncomendaStockDto?> CriarAsync(EncomendaStockDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/EncomendaStock");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -24,7 +24,6 @@ public class EncomendaStockRepository : IEncomendaStockRepository
     public async Task<List<EncomendaStockDto>> ObterTodasAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "api/EncomendaStock");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -37,7 +36,7 @@ public class EncomendaStockRepository : IEncomendaStockRepository
     {
         string url = $"api/EncomendaStock/EncomendaID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -49,7 +48,7 @@ public class EncomendaStockRepository : IEncomendaStockRepository
     {
         string url = $"api/EncomendaStock/EncomendaID/{id}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var dados = operadorRececaoId != null
             ? (object)new { Estado = estado, OperadorRececaoID = operadorRececaoId }

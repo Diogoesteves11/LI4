@@ -1,25 +1,20 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY MobiFix.API.csproj .
+COPY *.csproj ./
 RUN dotnet restore
 
 COPY . .
 RUN dotnet publish -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-RUN apt-get update -qq && \
-    apt-get install -y -qq curl && \
-    dotnet tool install -g Microsoft.DataApiBuilder && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-ENV PATH="$PATH:/root/.dotnet/tools"
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app .
 
-EXPOSE 5001 5000
+EXPOSE 5001
 
 COPY start.sh .
 RUN chmod +x start.sh

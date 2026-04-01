@@ -13,7 +13,6 @@ public class ServicoRepository : IServicoRepository
     {
         string url = $"api/Servico/ServicoID/{id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -25,7 +24,6 @@ public class ServicoRepository : IServicoRepository
     {
         string url = $"api/Servico?$filter=TrotineteID eq {trotineteId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -38,7 +36,6 @@ public class ServicoRepository : IServicoRepository
     {
         string url = "api/Servico";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -50,7 +47,6 @@ public class ServicoRepository : IServicoRepository
     public async Task<ServicoDto?> CriarAsync(ServicoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Servico");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -68,7 +64,6 @@ public class ServicoRepository : IServicoRepository
     {
         string url = $"api/Servico/ServicoID/{servicoId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dados);
 
         var response = await _http.SendAsync(request);
