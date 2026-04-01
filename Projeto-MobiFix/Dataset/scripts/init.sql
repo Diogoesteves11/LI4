@@ -1,23 +1,36 @@
 -- Esperar que o SQL Server esteja pronto e criar a DB
+-- 1. SETUP INICIAL
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'fixnride_db')
-BEGIN
     CREATE DATABASE fixnride_db;
-END
 GO
 
 USE fixnride_db;
 GO
 
--- CUIDADO: Isto apaga os dados das peças!
-DROP TABLE IF EXISTS Intervencao_Pecas; -- Apagar primeiro as tabelas com FK
+-- Limpeza de tabelas para re-execução (Ordem correta devido às FKs)
+DROP TABLE IF EXISTS AgendaMecanicos;
+DROP TABLE IF EXISTS EncomendaCliente_Itens;
+DROP TABLE IF EXISTS EncomendasCliente;
+DROP TABLE IF EXISTS Promocao_Pecas;
+DROP TABLE IF EXISTS Promocoes;
+DROP TABLE IF EXISTS NotasCredito;
+DROP TABLE IF EXISTS Devolucoes;
+DROP TABLE IF EXISTS Faturas;
+DROP TABLE IF EXISTS Venda_Pecas;
+DROP TABLE IF EXISTS Vendas;
+DROP TABLE IF EXISTS Intervencao_Pecas;
+DROP TABLE IF EXISTS Servico_Intervencoes;
+DROP TABLE IF EXISTS IntervencoesCatalogo;
+DROP TABLE IF EXISTS Servicos;
+DROP TABLE IF EXISTS EncomendasStock;
 DROP TABLE IF EXISTS Pecas;
+DROP TABLE IF EXISTS Trotinetes;
+DROP TABLE IF EXISTS Clientes;
+DROP TABLE IF EXISTS Funcionarios;
+GO
 
--- 2. Módulo de Utilizadores e Funcionários (Hierarquia com RBAC)
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Funcionarios')
-BEGIN
     CREATE TABLE Funcionarios (
-        FuncionarioID INT PRIMARY KEY IDENTITY(1,1),
-        NumeroMecanografico NVARCHAR(50) UNIQUE NOT NULL,
+        NumeroMecanografico PRIMARY KEY NVARCHAR(50) UNIQUE NOT NULL,
         Nome NVARCHAR(255) NOT NULL,
         Email NVARCHAR(255) UNIQUE NOT NULL,
         Contacto NVARCHAR(20) NOT NULL,
@@ -29,11 +42,10 @@ BEGIN
     );
 
     CREATE TABLE Clientes (
-        ClienteID INT PRIMARY KEY IDENTITY(1,1),
         Nome NVARCHAR(255) NOT NULL,
         Telefone NVARCHAR(20) NOT NULL,
         Morada NVARCHAR(MAX) NULL,
-        NIF NVARCHAR(20) UNIQUE NOT NULL,
+        NIF PRIMARY KEY NVARCHAR(20) UNIQUE NOT NULL,
         Email NVARCHAR(255) UNIQUE NOT NULL,
         PasswordHash NVARCHAR(MAX) NOT NULL
     );
@@ -48,8 +60,7 @@ BEGIN
     );
 
     CREATE TABLE Pecas (
-        PecaID INT PRIMARY KEY IDENTITY(1,1),
-        CodigoEAN NVARCHAR(50) UNIQUE NOT NULL,
+        CodigoEAN PRIMARY KEY NVARCHAR(50) UNIQUE NOT NULL,
         Nome NVARCHAR(255) NOT NULL,
         Descricao NVARCHAR(MAX) NULL,
         CustoAquisicao DECIMAL(18,2) NOT NULL,
@@ -58,6 +69,7 @@ BEGIN
         StockMinimo INT DEFAULT 5,
         PadraoReposicao INT DEFAULT 5,
         Imagem NVARCHAR(MAX) NULL,
+        Categoria NVARCHAR(MAX) NOT NULL,
         Ativo BIT DEFAULT 1,
         CONSTRAINT CK_Peca_Precos CHECK (PVP >= 0 AND CustoAquisicao >= 0),
         CONSTRAINT CK_Peca_Stock CHECK (StockAtual >= 0),
@@ -151,6 +163,17 @@ BEGIN
         CONSTRAINT CK_Promocao_Datas CHECK (DataFim >= DataInicio)
     );
 
+    CREATE TABLE Venda_Pecas (
+        VendaID INT NOT NULL FOREIGN KEY REFERENCES Vendas(VendaID),
+        PecaID INT NOT NULL FOREIGN KEY REFERENCES Pecas(PecaID),
+        Quantidade INT NOT NULL,
+        PrecoUnitario DECIMAL(18,2) NOT NULL, -- Guardamos o preço no momento da venda
+        Subtotal AS (Quantidade * PrecoUnitario) PERSISTED,
+        PRIMARY KEY (VendaID, PecaID),
+        CONSTRAINT CK_VendaItem_Qtd CHECK (Quantidade > 0),
+        CONSTRAINT CK_VendaItem_Preco CHECK (PrecoUnitario >= 0)
+    );
+
     CREATE TABLE Promocao_Pecas (
         PromocaoID INT NOT NULL FOREIGN KEY REFERENCES Promocoes(PromocaoID),
         PecaID INT NOT NULL FOREIGN KEY REFERENCES Pecas(PecaID),
@@ -197,68 +220,127 @@ BEGIN
         Estado NVARCHAR(20) DEFAULT 'Reservado',
         CONSTRAINT CK_TipoSlot CHECK (TipoSlot IN ('Diagnostico', 'Reparacao'))
     );
-END
 GO
 
--- Povoar dados de teste (só se tabelas estiverem vazias)
-IF NOT EXISTS (SELECT 1 FROM Funcionarios)
+--VIEWS
+CREATE OR ALTER VIEW vw_Dashboard_OrigemReceita AS
+SELECT 
+    'Mão-de-Obra' AS Categoria,
+    SUM(ic.PrecoFixoMaoDeObra) AS ValorTotal
+FROM Servico_Intervencoes si
+JOIN IntervencoesCatalogo ic ON si.IntervencaoID = ic.IntervencaoID
+JOIN Servicos s ON si.ServicoID = s.ServicoID
+WHERE s.Estado IN ('Concluido', 'Fechado')
+
+UNION ALL
+
+SELECT 
+    'Peças' AS Categoria,
+    SUM(Subtotal) AS ValorTotal
+FROM (
+    -- Peças de Intervenções
+    SELECT ip.Quantidade * p.PVP AS Subtotal
+    FROM Intervencao_Pecas ip
+    JOIN Pecas p ON ip.PecaID = p.PecaID
+    
+    UNION ALL
+    
+    -- Peças de Vendas Diretas
+    SELECT vi.Quantidade * vi.PrecoUnitario AS Subtotal
+    FROM Venda_Pecas vi
+) AS TodasPecas;
+GO
+
+CREATE OR ALTER VIEW vw_Dashboard_EficienciaMensal AS
+SELECT 
+    FORMAT(DataFim, 'MMM', 'pt-PT') AS Mes,
+    MONTH(DataFim) AS MesNum,
+    YEAR(DataFim) AS Ano,
+    CAST(AVG(CAST(TempoGastoMinutos AS DECIMAL(18,2)) / 60) AS DECIMAL(18,2)) AS TempoMedioHoras
+FROM Servico_Intervencoes
+WHERE DataFim IS NOT NULL
+GROUP BY FORMAT(DataFim, 'MMM', 'pt-PT'), MONTH(DataFim), YEAR(DataFim);
+GO
+
+CREATE OR ALTER VIEW vw_Dashboard_StatsGlobais AS
+SELECT 
+    (SELECT SUM(ValorTotal) FROM Faturas) AS FaturacaoTotal,
+    (SELECT COUNT(*) FROM Servicos WHERE Estado = 'Concluido') AS ServicosConcluidos,
+    (SELECT CAST(AVG(CAST(TempoGastoMinutos AS DECIMAL(18,2)) / 60) AS DECIMAL(18,2)) 
+     FROM Servico_Intervencoes WHERE DataFim IS NOT NULL) AS TempoMedioGeral,
+    (SELECT COUNT(*) FROM Pecas WHERE StockAtual <= StockMinimo) AS AlertasStock
+GO
+
+CREATE OR ALTER TRIGGER trg_UpdateServicoPreco_Pecas
+ON Intervencao_Pecas
+AFTER INSERT, UPDATE, DELETE
+AS
 BEGIN
-    INSERT INTO Funcionarios (NumeroMecanografico, Nome, Email, Contacto, Cargo, PasswordHash, Especialidade)
-    VALUES
-    ('ADM001', 'Admin Principal', 'admin@fixnride.pt', '910000001', 'Administrador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
-    ('OP001', 'João Operador', 'joao.op@fixnride.pt', '910000002', 'Operador', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', NULL),
-    ('MEC001', 'Carlos Mecânico', 'carlos.mec@fixnride.pt', '910000003', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'ELETRICISTA'),
-    ('MEC002', 'Sofia Técnica', 'sofia.tec@fixnride.pt', '910000004', 'Mecanico', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu', 'MECANICA_GERAL');
+    SET NOCOUNT ON;
+    UPDATE s
+    SET s.Preco = (
+        -- Soma da Mão de Obra
+        ISNULL((SELECT SUM(ic.PrecoFixoMaoDeObra) 
+                FROM Servico_Intervencoes si 
+                JOIN IntervencoesCatalogo ic ON si.IntervencaoID = ic.IntervencaoID 
+                WHERE si.ServicoID = s.ServicoID), 0) +
+        -- Soma das Peças
+        ISNULL((SELECT SUM(ip.Quantidade * p.PVP) 
+                FROM Intervencao_Pecas ip 
+                JOIN Pecas p ON ip.PecaID = p.PecaID 
+                WHERE ip.ServicoID = s.ServicoID), 0)
+    )
+    FROM Servicos s
+    WHERE s.ServicoID IN (SELECT ServicoID FROM inserted UNION SELECT ServicoID FROM deleted);
+END;
+GO
 
-    INSERT INTO Clientes (Nome, Telefone, Morada, NIF, Email, PasswordHash)
-    VALUES
-    ('Diogo Cliente', '920000001', 'Rua da Universidade, Braga', '250123456', 'diogo.user@gmail.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu'),
-    ('Ana Silva', '920000002', 'Avenida Central, Guimarães', '260987654', 'ana.silva@outlook.com', '$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu');
+--TRIGGERS
+CREATE OR ALTER TRIGGER trg_GestaoStock_Oficina
+ON Intervencao_Pecas
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+    SET NOCOUNT ON;
+    IF EXISTS (SELECT 1 FROM deleted) UPDATE P SET P.StockAtual = P.StockAtual + d.Quantidade FROM Pecas P JOIN deleted d ON P.PecaID = d.PecaID;
+    IF EXISTS (SELECT 1 FROM inserted) UPDATE P SET P.StockAtual = P.StockAtual - i.Quantidade FROM Pecas P JOIN inserted i ON P.PecaID = i.PecaID;
+    IF EXISTS (SELECT 1 FROM Pecas WHERE StockAtual < 0) BEGIN
+        RAISERROR ('Stock insuficiente para peças de oficina.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
 
-    INSERT INTO Trotinetes (NumeroSerie, Marca, Modelo, ClienteID)
-    VALUES
-    ('SN-XIAOMI-001', 'Xiaomi', 'Mi Pro 2', 1),
-    ('SN-NINEBOT-99', 'Segway-Ninebot', 'Max G30', 2),
-    ('SN-XIAOMI-002', 'Xiaomi', 'Essential', 1);
-
-    INSERT INTO Pecas (CodigoEAN, Nome, Descricao, CustoAquisicao, PVP, StockAtual, StockMinimo, Imagem)
-    VALUES
-    ('EAN001', 'Pneu 8.5 Polegadas', 'Pneu reforçado para Xiaomi', 12.50, 25.00, 20, 5, 'pneu.jpg'),
-    ('EAN002', 'Pastilhas de Travão', 'Compatível com vários modelos', 3.00, 8.50, 50, 10, 'pastilha.jpg'),
-    ('EAN003', 'Bateria 36V 12Ah', 'Bateria de substituição alta performance', 85.00, 150.00, 3, 2, 'bateria.jpg'),
-    ('EAN004', 'Manete de Travão', 'Manete de travão com muita potência', 47.99, 97.33, 6, 2, 'travao.jpg');
-
-    INSERT INTO IntervencoesCatalogo (Descricao, PrecoFixoMaoDeObra, Especialidade)
-    VALUES
-    ('Substituição de Pneu', 15.00, 'MECANICA_GERAL'),
-    ('Diagnóstico Elétrico', 20.00, 'ELETRICISTA'),
-    ('Revisão Geral', 30.00, 'MECANICA_GERAL');
+-- B) Gestão de Stock e Atualização de Total (Venda Direta)
+CREATE OR ALTER TRIGGER trg_GestaoStock_VendaDireta
+ON Venda_Pecas
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Atualiza Stock
+    IF EXISTS (SELECT 1 FROM deleted) UPDATE P SET P.StockAtual = P.StockAtual + d.Quantidade FROM Pecas P JOIN deleted d ON P.PecaID = d.PecaID;
+    IF EXISTS (SELECT 1 FROM inserted) UPDATE P SET P.StockAtual = P.StockAtual - i.Quantidade FROM Pecas P JOIN inserted i ON P.PecaID = i.PecaID;
     
-    INSERT INTO Vendas (OperadorID, DataVenda, Total)
-    VALUES (2, GETDATE(), 33.50); 
-    
-    INSERT INTO Faturas (NumeroFatura, ClienteID, VendaID, ValorTotal, MetodoPagamento)
-    VALUES ('FAT-2024-001', 1, 1, 33.50, 'MBWay');
+    -- Atualiza o Total da Venda automaticamente
+    UPDATE V SET V.Total = ISNULL((SELECT SUM(Subtotal) FROM Venda_Pecas WHERE VendaID = V.VendaID), 0)
+    FROM Vendas V WHERE V.VendaID IN (SELECT VendaID FROM inserted UNION SELECT VendaID FROM deleted);
 
-    INSERT INTO EncomendasStock (PecaID, Quantidade, Estado, DataPedido, OperadorRececaoID, AdminValidadorID)
-    VALUES 
-    (3, 10, 'Pendente', DATEADD(DAY, -1, GETDATE()), NULL, 1),
-    (1, 50, 'Em Trânsito', DATEADD(DAY, -3, GETDATE()), NULL, 1),
-    (2, 100, 'Rececionada', DATEADD(DAY, -7, GETDATE()), 2, 1),
-    (4, 15, 'Pendente', GETDATE(), NULL, 1),
-    (3, 5, 'Rececionada', DATEADD(DAY, -15, GETDATE()), 2, 1);
+    IF EXISTS (SELECT 1 FROM Pecas WHERE StockAtual < 0) BEGIN
+        RAISERROR ('Stock insuficiente para venda de balcão.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
 
-    INSERT INTO Promocoes (Descricao, PercentagemDesconto, DataInicio, DataFim, AdministradorID)
-    VALUES 
-    ('Campanha de Páscoa 2026', 15.00, '2026-03-20', '2026-04-10', 1),
-    ('Limpeza de Stock - Inverno', 40.00, '2026-01-01', '2026-02-28', 1),
-    ('Preparação de Verão 2026', 10.00, '2026-06-01', '2026-08-31', 1);
-    -- Promoção 1 (Páscoa): Desconto em Baterias (PecaID 3) e Manetes (PecaID 4)
-    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (1, 3);
-    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (1, 4);
-    -- Promoção 2 (Inverno - Já passou): Desconto agressivo em Pastilhas (PecaID 2)
-    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (2, 2);
-    -- Promoção 3 (Verão - Futura): Desconto em Pneus (PecaID 1)
-    INSERT INTO Promocao_Pecas (PromocaoID, PecaID) VALUES (3, 1);
-END
+-- C) Auto-Encomenda quando stock atinge mínimo
+CREATE OR ALTER TRIGGER trg_CheckStock_And_Order
+ON Pecas
+AFTER UPDATE AS
+BEGIN
+    IF NOT UPDATE(StockAtual) RETURN;
+    INSERT INTO EncomendasStock (PecaID, Quantidade, Estado, DataPedido)
+    SELECT i.PecaID, i.PadraoReposicao, 'Pendente', GETDATE()
+    FROM inserted i JOIN deleted d ON i.PecaID = d.PecaID
+    WHERE i.StockAtual <= i.StockMinimo AND d.StockAtual > i.StockMinimo
+      AND NOT EXISTS (SELECT 1 FROM EncomendasStock es WHERE es.PecaID = i.PecaID AND es.Estado IN ('Pendente', 'Em Trânsito'));
+END;
 GO
