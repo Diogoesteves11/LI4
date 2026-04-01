@@ -127,6 +127,8 @@ appsettings.Development.json
 *.ind
 *.ilg
 
+node_modules/
+
 # =========================================
 # EXCEÇÃO: Garantir que o PDF NUNCA é ignorado
 # =========================================

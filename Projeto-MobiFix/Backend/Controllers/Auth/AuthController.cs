@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] FuncionarioLoginDto loginDto)
     {
-        var token = await _authService;
+        var token = await _authService.LoginAsync(loginDto);
 
         if (token is null)  return Unauthorized(new { mensagem = "Número mecanográfico ou password incorretos." });
 
