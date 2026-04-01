@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
 using Backend.Models;
 
+namespace Backend.Services;
+
 public class PecaService: IPecaService
 {
     private readonly HttpClient _httpClient;

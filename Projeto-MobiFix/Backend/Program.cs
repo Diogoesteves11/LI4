@@ -8,9 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 DotNetEnv.Env.Load();
 
 // Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
-builder.Configuration.AddEnvironmentVariables();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

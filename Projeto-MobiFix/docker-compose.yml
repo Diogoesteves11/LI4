@@ -26,10 +26,9 @@ services:
     env_file:
       - .env
 
-  # ─── LN API (C# .NET) ───
   ln:
     build:
-      context: ./MobiFix.API
+      context: ./Backend 
       dockerfile: Dockerfile
     container_name: mobifix_ln_api
     depends_on:
@@ -46,7 +45,6 @@ services:
     env_file:
       - .env
 
-  # ─── FRONTEND (Vite/React) ───
   frontend:
     image: node:22-alpine
     container_name: mobifix_frontend
@@ -60,7 +58,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
     command: sh -c "npm install && npm run dev"
     depends_on:
-      - ln
+      - ln 
 
 volumes:
-  mongodb_data: # Volume persistente para o Mongo
+  mongodb_data:
