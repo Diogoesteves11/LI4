@@ -15,7 +15,7 @@ public class FuncionarioRepository : IFuncionarioRepository
     {
         string url = $"api/Funcionario?$filter=NumeroMecanografico eq '{numero}'";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -64,7 +64,7 @@ public class FuncionarioRepository : IFuncionarioRepository
 
         
         var request = new HttpRequestMessage(HttpMethod.Post, "api/Funcionario");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
         request.Content = JsonContent.Create(body, options: options);
@@ -80,8 +80,8 @@ public class FuncionarioRepository : IFuncionarioRepository
         return true;
     }
 
-    public async Task<bool> DesativarFuncionarioAsync(string numero) => await MudarStatusAsync(numero, false);
-    public async Task<bool> AtivarFuncionarioAsync(string numero) => await MudarStatusAsync(numero, true);
+    public async Task<bool> DesativarFuncionarioAsync(string numero) => await MudarStatusAsync(numero, "desativar");
+    public async Task<bool> AtivarFuncionarioAsync(string numero) => await MudarStatusAsync(numero, "ativar");
 
     private async Task<bool> MudarStatusAsync(string numero, bool novoStatus)
     {
@@ -90,10 +90,22 @@ public class FuncionarioRepository : IFuncionarioRepository
 
         string urlPatch = $"api/Funcionario/FuncionarioID/{funcId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
-        request.Content = JsonContent.Create(new { Ativo = novoStatus });
+
+
+        string nomeDaColuna = "Ativo"; 
+
+        string jsonString = $"{{\"{nomeDaColuna}\": {(novoStatus ? "true" : "false")}}}";
+
+        request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
         var response = await _http.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var erro = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Erro ao fazer PATCH: {response.StatusCode} - {erro}");
+        }
+
         return response.IsSuccessStatusCode;
     }
 
@@ -101,7 +113,7 @@ public class FuncionarioRepository : IFuncionarioRepository
     {
         string url = $"api/Funcionario?$select=FuncionarioID&$filter=NumeroMecanografico eq '{numero}'";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return false;
@@ -117,7 +129,7 @@ public class FuncionarioRepository : IFuncionarioRepository
 
         string urlPatch = $"api/Funcionario/FuncionarioID/{funcId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dados);
 
         var response = await _http.SendAsync(request);
@@ -128,7 +140,6 @@ public class FuncionarioRepository : IFuncionarioRepository
     {
         string url = $"api/Funcionario?$filter=NumeroMecanografico eq '{numero}'&$select=FuncionarioID&$first=1";
         var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var res = await _http.SendAsync(req);
         if (!res.IsSuccessStatusCode) return null;

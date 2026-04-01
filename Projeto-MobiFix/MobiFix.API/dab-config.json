@@ -12,9 +12,7 @@
   "entities": {
     "Funcionario": {
       "source": "dbo.Funcionarios",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "intervencoesRealizadas": {
           "cardinality": "many",
@@ -26,9 +24,7 @@
     },
     "Cliente": {
       "source": "dbo.Clientes",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "trotinetes": {
           "cardinality": "many",
@@ -52,9 +48,7 @@
     },
     "Trotinete": {
       "source": "dbo.Trotinetes",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "dono": {
           "cardinality": "one",
@@ -72,15 +66,11 @@
     },
     "Peca": {
       "source": "dbo.Pecas",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "Servico": {
       "source": "dbo.Servicos",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "trotinete": {
           "cardinality": "one",
@@ -98,15 +88,11 @@
     },
     "IntervencaoCatalogo": {
       "source": "dbo.IntervencoesCatalogo",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "ServicoIntervencao": {
       "source": "dbo.Servico_Intervencoes",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "pecasUtilizadas": {
           "cardinality": "many",
@@ -118,21 +104,15 @@
     },
     "IntervencaoPeca": {
       "source": "dbo.Intervencao_Pecas",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "Venda": {
       "source": "dbo.Vendas",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "Fatura": {
       "source": "dbo.Faturas",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "devolucoes": {
           "cardinality": "many",
@@ -144,9 +124,7 @@
     },
     "Devolucao": {
       "source": "dbo.Devolucoes",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "notaCredito": {
           "cardinality": "one",
@@ -158,21 +136,15 @@
     },
     "NotaCredito": {
       "source": "dbo.NotasCredito",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "EncomendaStock": {
       "source": "dbo.EncomendasStock",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "Promocao": {
       "source": "dbo.Promocoes",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "pecasEmPromocao": {
           "cardinality": "many",
@@ -184,15 +156,11 @@
     },
     "PromocaoPeca": {
       "source": "dbo.Promocao_Pecas",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "EncomendaCliente": {
       "source": "dbo.EncomendasCliente",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ],
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }],
       "relationships": {
         "itens": {
           "cardinality": "many",
@@ -204,15 +172,11 @@
     },
     "EncomendaClienteItem": {
       "source": "dbo.EncomendaCliente_Itens",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     },
     "AgendaMecanico": {
       "source": "dbo.AgendaMecanicos",
-      "permissions": [
-        { "role": "anonymous", "actions": ["*"] }
-      ]
+      "permissions": [{ "role": "anonymous", "actions": ["*"] }]
     }
   }
 }

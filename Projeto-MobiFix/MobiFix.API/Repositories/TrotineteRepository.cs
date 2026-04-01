@@ -14,7 +14,7 @@ public class TrotineteRepository : ITrotineteRepository
     {
         string url = $"api/Trotinete?$filter=NumeroSerie eq '{numSerie}'";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -38,7 +38,6 @@ public async Task<bool> CriarComEmailAsync(TrotineteDto dto, string email)
     };
 
     var request = new HttpRequestMessage(HttpMethod.Post, "api/Trotinete");
-    request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
     var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
     
@@ -62,7 +61,7 @@ public async Task<bool> CriarComEmailAsync(TrotineteDto dto, string email)
 
         string urlPatch = $"api/Trotinete/TrotineteID/{trotinete.TrotineteID}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), urlPatch);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
+
         request.Content = JsonContent.Create(dados);
 
         var response = await _http.SendAsync(request);
@@ -78,7 +77,6 @@ public async Task<bool> CriarComEmailAsync(TrotineteDto dto, string email)
     {
         string url = $"api/Cliente?$filter=Email eq '{email}'&$select=ClienteID";
         var req = new HttpRequestMessage(HttpMethod.Get, url);
-        req.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var res = await _http.SendAsync(req);
         if (!res.IsSuccessStatusCode) return null;

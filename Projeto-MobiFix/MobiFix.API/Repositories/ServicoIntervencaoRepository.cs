@@ -12,7 +12,6 @@ public class ServicoIntervencaoRepository : IServicoIntervencaoRepository
     public async Task<bool> AtribuirIntervencaoAsync(ServicoIntervencaoDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/ServicoIntervencao");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
@@ -23,7 +22,6 @@ public class ServicoIntervencaoRepository : IServicoIntervencaoRepository
     {
         string url = $"api/ServicoIntervencao/ServicoID/{servicoId}/IntervencaoID/{intervencaoId}";
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(new { DataFim = DateTime.UtcNow });
 
         var response = await _http.SendAsync(request);
@@ -34,7 +32,6 @@ public class ServicoIntervencaoRepository : IServicoIntervencaoRepository
     {
         string url = $"api/ServicoIntervencao?$filter=ServicoID eq {servicoId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
 
         var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode) return new();
@@ -46,7 +43,6 @@ public class ServicoIntervencaoRepository : IServicoIntervencaoRepository
     public async Task<bool> RegistarPecaAsync(IntervencaoPecaDto dto)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "api/IntervencaoPeca");
-        request.Headers.Add("X-MS-API-ROLE", "Administrador");
         request.Content = JsonContent.Create(dto);
 
         var response = await _http.SendAsync(request);
