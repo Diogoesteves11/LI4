@@ -40,7 +40,6 @@ exports.obterPorNif = async (req, res) => {
 
 exports.criarCliente = async (req, res) => {
     try {
-        console.log("Corpo recebido:", req.body);
         const novo = new Cliente({
             _id: req.body.NIF,
             nome: req.body.Nome,
