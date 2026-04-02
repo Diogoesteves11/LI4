@@ -72,7 +72,7 @@ export default function AppRouter() {
           <Route path="/FixNRide/catalogo" element={<Catalogo/>} />
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['Operador', 'Administrador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['OPERADOR', 'ADMINISTRADOR']} />}>
           <Route path="/FixNSell" element={<Layout />}>
             <Route path="vendadireta" element={<VendaDireta />} />
             <Route path="trotinetes-prontas" element={<TrotinetesProntas />} />
@@ -82,7 +82,7 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['Mecanico', 'Administrador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['MECANICO', 'ADMINISTRADOR']} />}>
           <Route path="/FixNRepair/" element={<RepairsLayout />}>
             <Route path="diagnosticos" element={<Dashboard />}/>
             <Route path="reparacoes" element={<Repairs />} />
@@ -90,7 +90,7 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['Administrador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['ADMINISTRADOR']} />}>
           <Route path="/FixNManage/" element={<AdminLayout/>}>
             <Route path="encomendas" element={<StockOrders/>}/>
             <Route path="dashboard" element={<AdminDashboard/>}/>

@@ -45,6 +45,7 @@ void ConfigureDefaultClient(HttpClient client)
 builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IFuncionarioService, FuncionarioService>(ConfigureDefaultClient);
 
 // Configuração JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
