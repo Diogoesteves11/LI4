@@ -37,7 +37,8 @@ services:
       - "${LN_API_PORT}:5001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DATA_API_URL=http://data-api:3001/
+      - DATA_API_URL=http://data-api:3001      # Alterado para tirar a barra final
+      - DataApiSettings__BaseUrl=http://data-api:3001 # 👈 A SALVAÇÃO!
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - JwtSettings__SecretKey=${JwtSettings__SecretKey}
       - JwtSettings__Issuer=MobiFix.API
