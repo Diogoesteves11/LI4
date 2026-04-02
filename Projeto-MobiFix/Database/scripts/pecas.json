@@ -8,6 +8,7 @@
     "pvp": 25.00,
     "stockAtual": 20,
     "stockMinimo": 5,
+    "imagem": "pneu.jpg",
     "ativo": true
   },
   {
@@ -19,6 +20,7 @@
     "pvp": 8.50,
     "stockAtual": 50,
     "stockMinimo": 10,
+    "imagem": "pastilhas.jpg",
     "ativo": true
   },
   {
@@ -30,6 +32,7 @@
     "pvp": 150.00,
     "stockAtual": 3,
     "stockMinimo": 2,
+    "imagem": "bateria.jpg",
     "ativo": true
   }
 ]

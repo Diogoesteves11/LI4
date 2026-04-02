@@ -4,7 +4,7 @@
     "nome": "Admin Principal",
     "email": "admin@fixnride.pt",
     "contacto": "910000001",
-    "cargo": "Administrador",
+    "cargo": "ADMINISTRADOR",
     "passwordHash": "$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu",
     "ativo": true
   },
@@ -13,7 +13,7 @@
     "nome": "João Operador",
     "email": "joao.op@fixnride.pt",
     "contacto": "910000002",
-    "cargo": "Operador",
+    "cargo": "OPERADOR",
     "passwordHash": "$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu",
     "ativo": true
   },
@@ -22,8 +22,8 @@
     "nome": "Carlos Mecânico",
     "email": "carlos.mec@fixnride.pt",
     "contacto": "910000003",
-    "cargo": "Mecanico",
-    "especialidade": "Eletrónica e Baterias",
+    "cargo": "MECANICO",
+    "especialidade": "ELETRONICA",
     "passwordHash": "$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu",
     "ativo": true
   },
@@ -32,8 +32,8 @@
     "nome": "Sofia Técnica",
     "email": "sofia.tec@fixnride.pt",
     "contacto": "910000004",
-    "cargo": "Mecanico",
-    "especialidade": "Mecânica Estrutural",
+    "cargo": "MECANICO",
+    "especialidade": "MECANICA GERAL",
     "passwordHash": "$2a$12$KZRN.cKaQnFeSk26/iGfcOh1UgXU1AEqduANBI6LqOPTdf9TbJSuu",
     "ativo": true
   }
