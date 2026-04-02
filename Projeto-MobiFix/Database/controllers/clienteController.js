@@ -1,14 +1,14 @@
 const Cliente = require('../models/Cliente');
 const { paraClienteDto } = require('../dtos/clienteDto');
 
-exports.obterPorEmailSistema = async (req, res) => {
+exports.obterPorNifSistema = async (req, res) => {
     try {
         const apiKey = req.headers['x-api-key'];
         if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
             return res.status(403).json({ error: "Acesso Negado." });
         }
-        const cliente = await Cliente.findOne({ email: req.params.email }).lean();
-        if (!cliente) return res.status(404).json({ mensagem: "Cliente não encontrado." });
+        const cliente = await Cliente.findById(req.params.nif).lean();
+        if (!cliente) return res.status(404).json({ mensagem: "Não encontrado." });
         return res.status(200).json(paraClienteDto(cliente));
     } catch (error) {
         return res.status(500).json({ error: error.message });

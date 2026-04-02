@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const funcionarioController = require('../controllers/funcionarioController');
-
+const clienteController = require('../controllers/clienteController');
 // Importação das Rotas (Apenas as que já existem)
 const funcionarioRoutes = require('./funcionarioRoutes');
-// const clienteRoutes = require('./clienteRoutes');
+const clienteRoutes = require('./clienteRoutes');
 // const trotineteRoutes = require('./trotineteRoutes');
 // const pecaRoutes = require('./pecaRoutes');
 // ... comenta as outras todas para já
@@ -14,7 +14,7 @@ const funcionarioRoutes = require('./funcionarioRoutes');
 // 1. ROTAS DE SISTEMA (Públicas / Sem JWT)
 // ==========================================
 router.get('/auth/funcionario/:numero', funcionarioController.obterPorNumeroLogin);
-
+router.get('/auth/cliente/:nif', clienteController.obterPorNifSistema);
 // ==========================================
 // 2. MIDDLEWARE GLOBAL DE AUTENTICAÇÃO (Para o futuro)
 // ==========================================
@@ -24,7 +24,7 @@ router.get('/auth/funcionario/:numero', funcionarioController.obterPorNumeroLogi
 // 3. MAPEAMENTO DE ROTAS DE DADOS (CRUD)
 // ==========================================
 router.use('/funcionarios', funcionarioRoutes);
-
+router.use('/clientes', clienteRoutes);
 // Comenta tudo o que ainda não tem código no respetivo ficheiro!
 // router.use('/clientes', clienteRoutes);
 // router.use('/trotinetes', trotineteRoutes);
