@@ -4,8 +4,9 @@ const connectDB = require('./config/db')
 const logger = require('morgan')
 const app = express()
 
+app.use(express.json());
 
-//const usersRouter = require('./routes/users')
+const router = require('./routes/index')
 
 app.use(express.json())
 app.use(logger('dev'))
@@ -16,7 +17,7 @@ connectDB()
 
 const PORT = process.env.PORT || 3001
 
-// app.use('/api/users', usersRouter)
+app.use('/api', router)
 
 app.use((req, res) => {
     res.status(404).json({ erro: 'Rota não encontrada na API de Dados.' });

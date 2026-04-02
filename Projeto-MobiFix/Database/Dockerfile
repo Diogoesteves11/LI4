@@ -2,17 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
-# Copia package.json e package-lock.json
+# Copia os ficheiros de dependências
 COPY package*.json ./
 
-# Instala as dependências limpas
-RUN npm ci --only=production
+# Instala TODAS as dependências (evita erro de módulos em falta como o morgan)
+RUN npm install
 
-# Copia todo o código (o .dockerignore vai ignorar os node_modules locais)
+# CORRIGIDO: Copia todo o código para a pasta atual (.)
 COPY . .
 
-
-EXPOSE 5000
+# Expõe a porta 3001 (a que definiste no .env e no compose)
+EXPOSE 3001
 
 # Inicia a API
 CMD ["npm", "start"]
