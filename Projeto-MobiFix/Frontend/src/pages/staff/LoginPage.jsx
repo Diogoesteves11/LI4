@@ -15,21 +15,32 @@ export default function LoginPage() {
   // Inicializar o hook de mutação
   const { mutate, isPending } = useLoginFuncionario();
 
+  function parseJwt(token) {
+    try {
+      const base64Payload = token.split('.')[1];
+      const decoded = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  }
   const handleSubmit = (e) => {
     e.preventDefault();
 
     mutate(
       { numeroMecanografico: username, password },
       {
-        onSuccess: (data) => {
+        onSuccess: (data) => {  
+          const token = localStorage.getItem('token');
+          const payload = parseJwt(token);
           // Redirecionamento baseado no cargo (role) que vem da API
-          const role = data.cargo;
+          const role = payload?.cargo ?? null;
           
-          if (role === 'Administrador') {
+          if (role === 'ADMINISTRADOR') {
             navigate('/FixNManage/dashboard');
-          } else if (role === 'Operador') {
+          } else if (role === 'OPERADOR') {
             navigate('/FixNSell/vendadireta');
-          } else if (role === 'Mecanico') {
+          } else if (role === 'MECANICO') {
             navigate('/FixNRepair/diagnosticos');
           } else {
             navigate('/'); // Fallback
