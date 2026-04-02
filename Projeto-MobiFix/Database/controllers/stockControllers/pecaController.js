@@ -7,7 +7,7 @@ exports.listarPecas = async (req, res) => {
         let filtro = {};
         if (ativo !== undefined) filtro.ativo = ativo === 'true';
         if (nome) filtro.nome = { $regex: nome, $options: 'i' };
-        if (categoria) filtro.categoria = categoria;
+        if (categoria) filtro.categoria = categoria.toUpperCase();
         const pecas = await Peca.find(filtro).lean();
         return res.status(200).json(pecas.map(paraPecaDto));
     } catch (error) {
@@ -31,7 +31,7 @@ exports.criarPeca = async (req, res) => {
             _id: req.body.CodigoEAN,
             nome: req.body.Nome,
             descricao: req.body.Descricao,
-            categoria: req.body.Categoria,
+            categoria: req.body.Categoria.toUpperCase(),
             custoAquisicao: req.body.CustoAquisicao,
             pvp: req.body.PVP,
             stockAtual: req.body.StockAtual ?? 0,
@@ -52,7 +52,7 @@ exports.atualizarPeca = async (req, res) => {
         const dados = {};
         if (req.body.Nome) dados.nome = req.body.Nome;
         if (req.body.Descricao !== undefined) dados.descricao = req.body.Descricao;
-        if (req.body.Categoria !== undefined) dados.categoria = req.body.Categoria;
+        if (req.body.Categoria !== undefined) dados.categoria = req.body.Categoria.toUpperCase();
         if (req.body.CustoAquisicao !== undefined) dados.custoAquisicao = req.body.CustoAquisicao;
         if (req.body.PVP !== undefined) dados.pvp = req.body.PVP;
         if (req.body.StockAtual !== undefined) dados.stockAtual = req.body.StockAtual;

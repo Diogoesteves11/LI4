@@ -6,7 +6,7 @@ const encomendaStockSchema = new mongoose.Schema({
   quantidade: { type: Number, required: true, min: 1 },
   estado: { 
     type: String, 
-    required: true,
+    default: 'PENDENTE',
     enum: ['PENDENTE', 'TRANSITO', 'RECECIONADA']
   },
   dataPedido: { 

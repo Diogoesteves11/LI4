@@ -1,0 +1,4071 @@
+{
+	"id": "612d12a1-3548-4705-be15-e55abc59e640",
+	"name": "MobiFix - Data API (Testes Completos)",
+	"timestamp": "2026-04-02T14:25:13.999Z",
+	"collection_id": "53625659-3aaa88ae-95b2-4668-9474-bd2239bbe1f9",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 162,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-04-02T14:25:07.423Z",
+	"totalFail": 60,
+	"results": [
+		{
+			"id": "885fb5b5-9da9-4eca-aaa6-caa7bfc63255",
+			"name": "1. Criar Funcionário (Mecânico)",
+			"url": "http://localhost:3001/api/funcionarios",
+			"time": 167,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Resposta deve ser JSON": true,
+				"Deve conter NumeroMecanografico correto": true,
+				"Deve conter Nome correto": true,
+				"Deve conter Email correto": true,
+				"Deve conter Cargo correto": true,
+				"Deve conter Especialidade": true,
+				"Deve estar ativo": true,
+				"NÃO deve expor PasswordHash na resposta normal": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter NumeroMecanografico correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Nome correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Email correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Cargo correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Especialidade": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve estar ativo": {
+					"pass": 1,
+					"fail": 0
+				},
+				"NÃO deve expor PasswordHash na resposta normal": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				167
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Resposta deve ser JSON": true,
+					"Deve conter NumeroMecanografico correto": true,
+					"Deve conter Nome correto": true,
+					"Deve conter Email correto": true,
+					"Deve conter Cargo correto": true,
+					"Deve conter Especialidade": true,
+					"Deve estar ativo": true,
+					"NÃO deve expor PasswordHash na resposta normal": true
+				}
+			]
+		},
+		{
+			"id": "29927fee-949c-4244-a6c9-02efee2995c4",
+			"name": "1.1 Criar Funcionário (Admin)",
+			"url": "http://localhost:3001/api/funcionarios",
+			"time": 22,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Cargo deve ser ADMINISTRADOR": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cargo deve ser ADMINISTRADOR": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				22
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Cargo deve ser ADMINISTRADOR": true
+				}
+			]
+		},
+		{
+			"id": "5848e089-5cfd-4018-95c2-28ad04f5f81b",
+			"name": "1.2 Criar Funcionário (Operador)",
+			"url": "http://localhost:3001/api/funcionarios",
+			"time": 17,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Cargo deve ser OPERADOR": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cargo deve ser OPERADOR": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Cargo deve ser OPERADOR": true
+				}
+			]
+		},
+		{
+			"id": "c05719bb-1ed0-47b6-96fa-9a99505c8f00",
+			"name": "1.3 Criar Funcionário - Duplicado (Erro)",
+			"url": "http://localhost:3001/api/funcionarios",
+			"time": 23,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 400 ou 409 (duplicado)": true,
+				"Resposta deve conter mensagem de erro": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 400 ou 409 (duplicado)": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve conter mensagem de erro": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"Status code deve ser 400 ou 409 (duplicado)": true,
+					"Resposta deve conter mensagem de erro": true
+				}
+			]
+		},
+		{
+			"id": "4ef895a6-9e19-4f26-8643-2099018f6fdb",
+			"name": "2. Listar Funcionários (Sem Filtros)",
+			"url": "http://localhost:3001/api/funcionarios",
+			"time": 33,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Array deve conter pelo menos 1 funcionário": true,
+				"Cada item deve ter os campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Array deve conter pelo menos 1 funcionário": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter os campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				33
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Array deve conter pelo menos 1 funcionário": true,
+					"Cada item deve ter os campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "e381ab6d-45a1-4fee-bc9d-07fe2fb2d660",
+			"name": "3. Listar Funcionários (Filtro Cargo)",
+			"url": "http://localhost:3001/api/funcionarios?cargo=Mecanico",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Todos os resultados devem ter cargo Mecanico": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Todos os resultados devem ter cargo Mecanico": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Todos os resultados devem ter cargo Mecanico": true
+				}
+			]
+		},
+		{
+			"id": "76ac2295-01df-4d35-8aff-2ad617ff4d4f",
+			"name": "3.1 Listar Funcionários (Filtro Ativo)",
+			"url": "http://localhost:3001/api/funcionarios?ativo=true",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Todos os resultados devem estar ativos": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Todos os resultados devem estar ativos": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Todos os resultados devem estar ativos": true
+				}
+			]
+		},
+		{
+			"id": "1fbd704a-827c-40e1-82c9-883bedce0635",
+			"name": "3.2 Listar Funcionários (Filtro Nome)",
+			"url": "http://localhost:3001/api/funcionarios?nome=Diogo",
+			"time": 188,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resultados devem conter 'Diogo' no nome": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resultados devem conter 'Diogo' no nome": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				188
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resultados devem conter 'Diogo' no nome": true
+				}
+			]
+		},
+		{
+			"id": "4322858f-7b68-4437-b92f-6143e2c9936e",
+			"name": "4. Obter Funcionário por ID",
+			"url": "http://localhost:3001/api/funcionarios/TESTE001",
+			"time": 26,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar o funcionário correto": true,
+				"Deve conter todos os campos do DTO": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar o funcionário correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				26
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar o funcionário correto": true,
+					"Deve conter todos os campos do DTO": true
+				}
+			]
+		},
+		{
+			"id": "f1c36a60-ca7d-43db-a080-7e3a25b05419",
+			"name": "4.1 Obter Funcionário Inexistente (404)",
+			"url": "http://localhost:3001/api/funcionarios/INEXISTENTE999",
+			"time": 15,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				15
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "6da5424f-0477-4673-a3cc-de5350d9bd4c",
+			"name": "5. Auth Funcionário (SUCESSO)",
+			"url": "http://localhost:3001/api/auth/funcionario/TESTE001",
+			"time": 23,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Objeto tem PasswordHash": true,
+				"PasswordHash não deve estar vazia": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Objeto tem PasswordHash": {
+					"pass": 1,
+					"fail": 0
+				},
+				"PasswordHash não deve estar vazia": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Objeto tem PasswordHash": true,
+					"PasswordHash não deve estar vazia": true
+				}
+			]
+		},
+		{
+			"id": "e65b3f02-c716-4e38-869c-feda713a8419",
+			"name": "5.1 Auth Funcionário - Chave Errada (403)",
+			"url": "http://localhost:3001/api/auth/funcionario/TESTE001",
+			"time": 8,
+			"responseCode": {
+				"code": 403,
+				"name": "Forbidden"
+			},
+			"tests": {
+				"Status code deve ser 403 Forbidden": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 403 Forbidden": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Status code deve ser 403 Forbidden": true
+				}
+			]
+		},
+		{
+			"id": "7e63902c-4de2-4081-9e73-6e1776f4ed6e",
+			"name": "5.2 Auth Funcionário - Sem Chave (403)",
+			"url": "http://localhost:3001/api/auth/funcionario/TESTE001",
+			"time": 12,
+			"responseCode": {
+				"code": 403,
+				"name": "Forbidden"
+			},
+			"tests": {
+				"Status code deve ser 403 Forbidden": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 403 Forbidden": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"Status code deve ser 403 Forbidden": true
+				}
+			]
+		},
+		{
+			"id": "b6ba6140-402b-42fe-97c9-e356cdabad5a",
+			"name": "6. Atualizar Funcionário",
+			"url": "http://localhost:3001/api/funcionarios/TESTE001",
+			"time": 31,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Nome deve estar atualizado": true,
+				"Email deve estar atualizado": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Nome deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Email deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				31
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Nome deve estar atualizado": true,
+					"Email deve estar atualizado": true
+				}
+			]
+		},
+		{
+			"id": "6c6edaf7-742f-4425-b911-17ab6d813532",
+			"name": "7. Eliminar Funcionário",
+			"url": "http://localhost:3001/api/funcionarios/TESTE001",
+			"time": 11,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": true
+				}
+			]
+		},
+		{
+			"id": "01509c24-9446-4c8c-9b45-e85a74c6e88f",
+			"name": "7.1 Verificar Eliminação (404)",
+			"url": "http://localhost:3001/api/funcionarios/TESTE001",
+			"time": 18,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Funcionário eliminado deve retornar 404": true
+			},
+			"testPassFailCounts": {
+				"Funcionário eliminado deve retornar 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"Funcionário eliminado deve retornar 404": true
+				}
+			]
+		},
+		{
+			"id": "792980b4-e81c-4940-8afb-4a5e22c934fe",
+			"name": "1. Criar Cliente",
+			"url": "http://localhost:3001/api/clientes",
+			"time": 23,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Resposta deve ser JSON": true,
+				"Deve conter NIF correto": true,
+				"Deve conter Nome correto": true,
+				"Deve conter Email correto": true,
+				"Deve conter Telefone": true,
+				"Deve conter Morada": true,
+				"NÃO deve expor PasswordHash na resposta normal": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter NIF correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Nome correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Email correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Telefone": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Morada": {
+					"pass": 1,
+					"fail": 0
+				},
+				"NÃO deve expor PasswordHash na resposta normal": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Resposta deve ser JSON": true,
+					"Deve conter NIF correto": true,
+					"Deve conter Nome correto": true,
+					"Deve conter Email correto": true,
+					"Deve conter Telefone": true,
+					"Deve conter Morada": true,
+					"NÃO deve expor PasswordHash na resposta normal": true
+				}
+			]
+		},
+		{
+			"id": "0f63cc2a-1fbe-44e0-9e97-8ee3b7eb8c24",
+			"name": "1.1 Criar Cliente - Duplicado (Erro)",
+			"url": "http://localhost:3001/api/clientes",
+			"time": 24,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 400 ou 409 (duplicado)": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 400 ou 409 (duplicado)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code deve ser 400 ou 409 (duplicado)": true
+				}
+			]
+		},
+		{
+			"id": "a71ef697-aec9-4eda-b0fc-ecba5aea3f41",
+			"name": "2. Listar Clientes (Sem Filtros)",
+			"url": "http://localhost:3001/api/clientes",
+			"time": 37,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter os campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter os campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				37
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter os campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "3c1d99b4-5cd8-4405-86ef-671716351138",
+			"name": "2.1 Listar Clientes (Filtro Nome)",
+			"url": "http://localhost:3001/api/clientes?nome=Maria",
+			"time": 178,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resultados devem conter 'Maria' no nome": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resultados devem conter 'Maria' no nome": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				178
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resultados devem conter 'Maria' no nome": true
+				}
+			]
+		},
+		{
+			"id": "849a608d-5535-4767-9b36-f222c659eebc",
+			"name": "3. Obter Cliente por NIF",
+			"url": "http://localhost:3001/api/clientes/999456789",
+			"time": 26,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar o cliente correto": true,
+				"Deve conter todos os campos do DTO": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar o cliente correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				26
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar o cliente correto": true,
+					"Deve conter todos os campos do DTO": true
+				}
+			]
+		},
+		{
+			"id": "f1f8b7b7-c325-4237-9819-f1906d677cf5",
+			"name": "3.1 Obter Cliente Inexistente (404)",
+			"url": "http://localhost:3001/api/clientes/000000000",
+			"time": 29,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				29
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "d7cf508a-5eb8-4e86-8762-ab7651ba3b42",
+			"name": "4. Auth Cliente por NIF (SUCESSO)",
+			"url": "http://localhost:3001/api/auth/cliente/999456789",
+			"time": 21,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Objeto tem PasswordHash": true,
+				"PasswordHash não deve estar vazia": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Objeto tem PasswordHash": {
+					"pass": 1,
+					"fail": 0
+				},
+				"PasswordHash não deve estar vazia": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				21
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Objeto tem PasswordHash": true,
+					"PasswordHash não deve estar vazia": true
+				}
+			]
+		},
+		{
+			"id": "2760d71e-b327-42ab-ab31-7f1dceb81140",
+			"name": "4.1 Auth Cliente - Chave Errada (403)",
+			"url": "http://localhost:3001/api/auth/cliente/999456789",
+			"time": 32,
+			"responseCode": {
+				"code": 403,
+				"name": "Forbidden"
+			},
+			"tests": {
+				"Status code deve ser 403 Forbidden": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 403 Forbidden": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				32
+			],
+			"allTests": [
+				{
+					"Status code deve ser 403 Forbidden": true
+				}
+			]
+		},
+		{
+			"id": "77e77800-8ed3-4bb0-bb7a-25aeafd45905",
+			"name": "5. Atualizar Cliente",
+			"url": "http://localhost:3001/api/clientes/999456789",
+			"time": 36,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Nome deve estar atualizado": true,
+				"Morada deve estar atualizada": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Nome deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Morada deve estar atualizada": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				36
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Nome deve estar atualizado": true,
+					"Morada deve estar atualizada": true
+				}
+			]
+		},
+		{
+			"id": "9e6f021f-7091-4c4d-8d9f-3049a9d4af77",
+			"name": "6. Eliminar Cliente",
+			"url": "http://localhost:3001/api/clientes/999456789",
+			"time": 53,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				53
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": true
+				}
+			]
+		},
+		{
+			"id": "5dde40b5-bb2e-4ed0-ab13-3ddf4079b3eb",
+			"name": "6.1 Verificar Eliminação (404)",
+			"url": "http://localhost:3001/api/clientes/999456789",
+			"time": 48,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Cliente eliminado deve retornar 404": true
+			},
+			"testPassFailCounts": {
+				"Cliente eliminado deve retornar 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				48
+			],
+			"allTests": [
+				{
+					"Cliente eliminado deve retornar 404": true
+				}
+			]
+		},
+		{
+			"id": "617b8a66-9468-4cbe-ab8d-222d75709e65",
+			"name": "0. Setup - Criar Cliente para Trotinete",
+			"url": "http://localhost:3001/api/clientes",
+			"time": 47,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				47
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true
+				}
+			]
+		},
+		{
+			"id": "8dc019c9-498e-4bbf-9be8-ad1b3768887f",
+			"name": "1. Criar Trotinete",
+			"url": "http://localhost:3001/api/trotinetes",
+			"time": 73,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Resposta deve ser JSON": true,
+				"Deve conter NumeroSerie correto": true,
+				"Deve conter Marca": true,
+				"Deve conter Modelo": true,
+				"EmServico deve ser false por defeito": true,
+				"Deve estar associada ao cliente": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter NumeroSerie correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Marca": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Modelo": {
+					"pass": 1,
+					"fail": 0
+				},
+				"EmServico deve ser false por defeito": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve estar associada ao cliente": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				73
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Resposta deve ser JSON": true,
+					"Deve conter NumeroSerie correto": true,
+					"Deve conter Marca": true,
+					"Deve conter Modelo": true,
+					"EmServico deve ser false por defeito": true,
+					"Deve estar associada ao cliente": true
+				}
+			]
+		},
+		{
+			"id": "fd13be13-e40c-4261-a991-e89880b95904",
+			"name": "1.1 Criar Segunda Trotinete",
+			"url": "http://localhost:3001/api/trotinetes",
+			"time": 52,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				52
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true
+				}
+			]
+		},
+		{
+			"id": "4b3b0286-ff45-4832-8da6-4d784805c137",
+			"name": "2. Listar Trotinetes (Sem Filtros)",
+			"url": "http://localhost:3001/api/trotinetes",
+			"time": 28,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter os campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter os campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				28
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter os campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "e1bb4d1f-77ab-4ffd-97fe-28e6fbbbd9b2",
+			"name": "2.1 Listar Trotinetes (Filtro EmServico)",
+			"url": "http://localhost:3001/api/trotinetes?emServico=true",
+			"time": 38,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Todas devem estar em serviço": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Todas devem estar em serviço": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				38
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Todas devem estar em serviço": true
+				}
+			]
+		},
+		{
+			"id": "e85a33fc-eef7-442d-abba-1f0c50666b74",
+			"name": "3. Obter Trotinete por NumSerie",
+			"url": "http://localhost:3001/api/trotinetes/TROT-TEST-001",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a trotinete correta": true,
+				"Deve conter todos os campos do DTO": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a trotinete correta": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a trotinete correta": true,
+					"Deve conter todos os campos do DTO": true
+				}
+			]
+		},
+		{
+			"id": "5025f21d-3fa8-4be1-82d6-c732621378ee",
+			"name": "3.1 Obter Trotinete Inexistente (404)",
+			"url": "http://localhost:3001/api/trotinetes/INEXISTENTE-999",
+			"time": 11,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "d3368cb7-7881-4c40-aaa8-28ada0b0921f",
+			"name": "4. Atualizar Trotinete",
+			"url": "http://localhost:3001/api/trotinetes/TROT-TEST-001",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"EmServico deve estar atualizado para true": true,
+				"Modelo deve estar atualizado": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"EmServico deve estar atualizado para true": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Modelo deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"EmServico deve estar atualizado para true": true,
+					"Modelo deve estar atualizado": true
+				}
+			]
+		},
+		{
+			"id": "d7051290-da6f-4dd3-9bf6-473799fff8ff",
+			"name": "5. Eliminar Trotinete",
+			"url": "http://localhost:3001/api/trotinetes/TROT-TEST-001",
+			"time": 12,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": true
+				}
+			]
+		},
+		{
+			"id": "61a1f591-d963-408b-8ec3-7d0d12c194a3",
+			"name": "5.1 Verificar Eliminação (404)",
+			"url": "http://localhost:3001/api/trotinetes/TROT-TEST-001",
+			"time": 8,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Trotinete eliminada deve retornar 404": true
+			},
+			"testPassFailCounts": {
+				"Trotinete eliminada deve retornar 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Trotinete eliminada deve retornar 404": true
+				}
+			]
+		},
+		{
+			"id": "4a8111a1-2188-4e07-9033-d7ba1e1a37bb",
+			"name": "1. Criar Peça",
+			"url": "http://localhost:3001/api/pecas",
+			"time": 28,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true,
+				"Resposta deve ser JSON": true,
+				"Deve conter CodigoEAN correto": true,
+				"Deve conter Nome": true,
+				"Deve conter Categoria": true,
+				"CustoAquisicao deve ser numérico e >= 0": true,
+				"PVP deve ser numérico e >= 0": true,
+				"StockAtual deve ser 20": true,
+				"Nome da imagem passado": true,
+				"Deve estar ativa": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter CodigoEAN correto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Nome": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter Categoria": {
+					"pass": 1,
+					"fail": 0
+				},
+				"CustoAquisicao deve ser numérico e >= 0": {
+					"pass": 1,
+					"fail": 0
+				},
+				"PVP deve ser numérico e >= 0": {
+					"pass": 1,
+					"fail": 0
+				},
+				"StockAtual deve ser 20": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Nome da imagem passado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve estar ativa": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				28
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true,
+					"Resposta deve ser JSON": true,
+					"Deve conter CodigoEAN correto": true,
+					"Deve conter Nome": true,
+					"Deve conter Categoria": true,
+					"CustoAquisicao deve ser numérico e >= 0": true,
+					"PVP deve ser numérico e >= 0": true,
+					"StockAtual deve ser 20": true,
+					"Nome da imagem passado": true,
+					"Deve estar ativa": true
+				}
+			]
+		},
+		{
+			"id": "9bc4b783-e8c7-461e-939e-5b15cbcc54d1",
+			"name": "1.1 Criar Segunda Peça",
+			"url": "http://localhost:3001/api/pecas",
+			"time": 10,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": true
+				}
+			]
+		},
+		{
+			"id": "4279e592-31b4-459a-9e9d-7f37845154a5",
+			"name": "2. Listar Peças (Sem Filtros)",
+			"url": "http://localhost:3001/api/pecas",
+			"time": 14,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				14
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "fdfc0f34-2d18-4a55-b47c-6699de55e85f",
+			"name": "2.1 Listar Peças com filtro",
+			"url": "http://localhost:3001/api/pecas?Categoria=BATERIAS",
+			"time": 16,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				16
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "dbb1e7bc-16aa-4de4-8a53-4439f3e54d54",
+			"name": "3. Obter Peça por EAN",
+			"url": "http://localhost:3001/api/pecas/5601234567890",
+			"time": 23,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a peça correta": true,
+				"Deve conter todos os campos do DTO": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a peça correta": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a peça correta": true,
+					"Deve conter todos os campos do DTO": true
+				}
+			]
+		},
+		{
+			"id": "84f01562-5cd2-46b7-84dd-145a6074a3a3",
+			"name": "3.1 Obter Peça Inexistente (404)",
+			"url": "http://localhost:3001/api/pecas/0000000000000",
+			"time": 23,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "b3b7d30b-b323-4569-9807-70800a5098a8",
+			"name": "4. Atualizar Peça",
+			"url": "http://localhost:3001/api/pecas/5601234567890",
+			"time": 76,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"PVP deve estar atualizado": true,
+				"StockAtual deve estar atualizado": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"PVP deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"StockAtual deve estar atualizado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				76
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"PVP deve estar atualizado": true,
+					"StockAtual deve estar atualizado": true
+				}
+			]
+		},
+		{
+			"id": "0f7662ec-bb30-4316-bac4-5d24bf404c00",
+			"name": "5. Eliminar Peça",
+			"url": "http://localhost:3001/api/pecas/5601234567890",
+			"time": 9,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": true
+				}
+			]
+		},
+		{
+			"id": "4b815593-718b-4629-9d57-873e32eb511d",
+			"name": "1. Criar Intervenção Catálogo",
+			"url": "http://localhost:3001/api/intervencoes-catalogo",
+			"time": 33,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				33
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false
+				}
+			]
+		},
+		{
+			"id": "65a30224-4af7-4162-97c0-89c53bc53841",
+			"name": "1.1 Criar Segunda Intervenção",
+			"url": "http://localhost:3001/api/intervencoes-catalogo",
+			"time": 8,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false
+				}
+			]
+		},
+		{
+			"id": "2c7c0971-a9fb-4f3a-90b7-09c9b09c068c",
+			"name": "2. Listar Intervenções",
+			"url": "http://localhost:3001/api/intervencoes-catalogo",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "0a8a8381-2e65-4228-98c3-1eab50af9068",
+			"name": "2.1 Listar Intervenções com filtros",
+			"url": "http://localhost:3001/api/intervencoes-catalogo?Especialidade=BATERIAS",
+			"time": 9,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "11d22cb7-eb19-4bbe-bc91-5b10fdf57e6f",
+			"name": "3. Obter Intervenção por ID",
+			"url": "http://localhost:3001/api/intervencoes-catalogo/",
+			"time": 9,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a intervenção correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a intervenção correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a intervenção correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "d0fbb80d-357c-440d-b8ca-916109e6750d",
+			"name": "3.1 Obter Intervenção Inexistente (404)",
+			"url": "http://localhost:3001/api/intervencoes-catalogo/99999",
+			"time": 9,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "3d02fbc6-5ef2-4d44-ab82-a46072abf7c4",
+			"name": "4. Atualizar Intervenção",
+			"url": "http://localhost:3001/api/intervencoes-catalogo/",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Preço deve estar atualizado": false,
+				"Descrição deve estar atualizada": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Preço deve estar atualizado": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Descrição deve estar atualizada": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Preço deve estar atualizado": false,
+					"Descrição deve estar atualizada": false
+				}
+			]
+		},
+		{
+			"id": "e77cb17a-3747-4aa4-b513-b4d888c063a4",
+			"name": "5. Eliminar Intervenção",
+			"url": "http://localhost:3001/api/intervencoes-catalogo/",
+			"time": 10,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "58a0593c-bb60-409c-9c5a-d14bdf6ec8a7",
+			"name": "0. Setup - Criar Trotinete para Serviço",
+			"url": "http://localhost:3001/api/trotinetes",
+			"time": 26,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code deve ser 201": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				26
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201": true
+				}
+			]
+		},
+		{
+			"id": "c88f8766-a618-4aef-acea-c8076c83493d",
+			"name": "1. Criar Serviço",
+			"url": "http://localhost:3001/api/servicos",
+			"time": 57,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				57
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "cc2be6a3-11e2-4505-8649-bda643a52fdc",
+			"name": "2. Listar Serviços",
+			"url": "http://localhost:3001/api/servicos",
+			"time": 57,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				57
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "e1342504-832b-4568-83f7-c6f5ee87f6f9",
+			"name": "3. Obter Serviço por ID",
+			"url": "http://localhost:3001/api/servicos/",
+			"time": 16,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar o serviço correto": false,
+				"Deve conter todos os campos do DTO": false,
+				"HistoricoIntervencoes deve ser um array": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar o serviço correto": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				},
+				"HistoricoIntervencoes deve ser um array": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar o serviço correto": false,
+					"Deve conter todos os campos do DTO": false,
+					"HistoricoIntervencoes deve ser um array": false
+				}
+			]
+		},
+		{
+			"id": "10221268-1f40-4b71-aa14-3d63d1656509",
+			"name": "3.1 Obter Serviço Inexistente (404)",
+			"url": "http://localhost:3001/api/servicos/99999",
+			"time": 38,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				38
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "8a856d9a-6214-4931-8d84-8f869e95b618",
+			"name": "4. Atualizar Serviço (Passar a EXECUCAO)",
+			"url": "http://localhost:3001/api/servicos/",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Estado deve estar atualizado para EXECUCAO": false,
+				"Diagnóstico deve estar atualizado": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Estado deve estar atualizado para EXECUCAO": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Diagnóstico deve estar atualizado": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Estado deve estar atualizado para EXECUCAO": false,
+					"Diagnóstico deve estar atualizado": false
+				}
+			]
+		},
+		{
+			"id": "d07decfc-e26d-4c00-a827-2b5d0d6caffa",
+			"name": "5. Eliminar Serviço",
+			"url": "http://localhost:3001/api/servicos/",
+			"time": 35,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				35
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "64729b16-ea53-4988-a95d-b9ff7201e600",
+			"name": "0. Setup - Criar Serviço para Agenda",
+			"url": "http://localhost:3001/api/servicos",
+			"time": 33,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				33
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201": false
+				}
+			]
+		},
+		{
+			"id": "58cbb462-b0ab-42f0-a6d0-7d9b080fcfd5",
+			"name": "1. Criar Slot de Agenda",
+			"url": "http://localhost:3001/api/agenda",
+			"time": 39,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				39
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "901875bc-23f3-4a31-98ee-d9c20706f58b",
+			"name": "1.1 Criar Slot de Reparação",
+			"url": "http://localhost:3001/api/agenda",
+			"time": 27,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				27
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false
+				}
+			]
+		},
+		{
+			"id": "9ae88ff0-85a9-4457-95a9-c4c38d220faf",
+			"name": "2. Listar Agenda",
+			"url": "http://localhost:3001/api/agenda",
+			"time": 305,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				305
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "7d4d94c8-e946-46e8-b413-c23976257ae2",
+			"name": "3. Obter Slot por ID",
+			"url": "http://localhost:3001/api/agenda/",
+			"time": 6,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar o slot correto": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar o slot correto": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar o slot correto": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "f4f4cde4-99e9-4dad-9f8e-c33c45a22871",
+			"name": "3.1 Obter Slot Inexistente (404)",
+			"url": "http://localhost:3001/api/agenda/99999",
+			"time": 16,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "c789d98c-0715-428b-ae6a-946a3d3b1245",
+			"name": "4. Atualizar Slot de Agenda",
+			"url": "http://localhost:3001/api/agenda/",
+			"time": 8,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"DataHoraInicio deve estar atualizada": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"DataHoraInicio deve estar atualizada": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"DataHoraInicio deve estar atualizada": false
+				}
+			]
+		},
+		{
+			"id": "6ae2e2a9-1ccf-4c2c-8358-4e567c6f4e4a",
+			"name": "5. Eliminar Slot de Agenda",
+			"url": "http://localhost:3001/api/agenda/",
+			"time": 17,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "3bb76e80-9490-4b6d-9f1d-b285da0c1a4a",
+			"name": "1. Criar Encomenda Stock",
+			"url": "http://localhost:3001/api/encomendas-stock",
+			"time": 7,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "b9489471-aa91-4f9a-ba44-42f3aac79517",
+			"name": "2. Listar Encomendas Stock",
+			"url": "http://localhost:3001/api/encomendas-stock",
+			"time": 28,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				28
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "7a594cbc-d3af-4527-a375-d9de931edbef",
+			"name": "3. Obter Encomenda Stock por ID",
+			"url": "http://localhost:3001/api/encomendas-stock/",
+			"time": 10,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a encomenda correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a encomenda correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a encomenda correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "2bd5c531-f254-4fe7-898c-4572c8b1eb72",
+			"name": "3.1 Obter Encomenda Stock Inexistente (404)",
+			"url": "http://localhost:3001/api/encomendas-stock/99999",
+			"time": 62,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				62
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "7a69b22c-7cfc-4293-ae51-73ccf4bea8ff",
+			"name": "4. Atualizar Encomenda Stock (TRANSITO)",
+			"url": "http://localhost:3001/api/encomendas-stock/",
+			"time": 6,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Estado deve ser TRANSITO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Estado deve ser TRANSITO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Estado deve ser TRANSITO": false
+				}
+			]
+		},
+		{
+			"id": "f53ac7b6-7e25-45e3-8843-e0a21bb6f16e",
+			"name": "4.1 Atualizar Encomenda Stock (RECECIONADA)",
+			"url": "http://localhost:3001/api/encomendas-stock/",
+			"time": 8,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Estado deve ser RECECIONADA": false,
+				"Deve ter OperadorRececaoNumero": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Estado deve ser RECECIONADA": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve ter OperadorRececaoNumero": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Estado deve ser RECECIONADA": false,
+					"Deve ter OperadorRececaoNumero": false
+				}
+			]
+		},
+		{
+			"id": "597a6210-8f2e-42cd-bfd8-4b1d41f99a36",
+			"name": "5. Eliminar Encomenda Stock",
+			"url": "http://localhost:3001/api/encomendas-stock/",
+			"time": 7,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "8b2f76f1-d9dc-4df5-a377-ff35af118b6b",
+			"name": "1. Criar Venda",
+			"url": "http://localhost:3001/api/vendas",
+			"time": 39,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				39
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "00710ae5-884a-4ec3-b865-a8cf2fcd6dcd",
+			"name": "2. Listar Vendas",
+			"url": "http://localhost:3001/api/vendas",
+			"time": 27,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				27
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "bff3d63b-9f30-42ce-8038-f0bb95d9cdad",
+			"name": "3. Obter Venda por ID",
+			"url": "http://localhost:3001/api/vendas/",
+			"time": 5,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a venda correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a venda correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				5
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a venda correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "a01173d2-9a67-4bac-b2ec-f77b6841dc09",
+			"name": "3.1 Obter Venda Inexistente (404)",
+			"url": "http://localhost:3001/api/vendas/99999",
+			"time": 14,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				14
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "43d175e5-6e74-4df3-8fe3-654079256dd9",
+			"name": "4. Atualizar Venda",
+			"url": "http://localhost:3001/api/vendas/",
+			"time": 5,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Total deve estar atualizado": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Total deve estar atualizado": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				5
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Total deve estar atualizado": false
+				}
+			]
+		},
+		{
+			"id": "f92b2bce-32fd-49d3-874d-33cf89aa8531",
+			"name": "5. Eliminar Venda",
+			"url": "http://localhost:3001/api/vendas/",
+			"time": 111,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				111
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "af75ff73-1f72-40b9-b0d9-cc57a8dfe0d1",
+			"name": "1. Criar Encomenda Cliente",
+			"url": "http://localhost:3001/api/encomendas-cliente",
+			"time": 77,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				77
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "4492134d-76ed-4cb4-a078-dba314a0ca61",
+			"name": "2. Listar Encomendas Cliente",
+			"url": "http://localhost:3001/api/encomendas-cliente",
+			"time": 102,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				102
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "2a9a935e-85ed-45af-b183-478e555c0a22",
+			"name": "3. Obter Encomenda Cliente por ID",
+			"url": "http://localhost:3001/api/encomendas-cliente/",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a encomenda correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a encomenda correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a encomenda correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "b48c4c67-2e67-4cf3-b91e-f18edafe37e9",
+			"name": "3.1 Obter Encomenda Cliente Inexistente (404)",
+			"url": "http://localhost:3001/api/encomendas-cliente/99999",
+			"time": 47,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				47
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "e09e0c9a-227d-4261-9820-801df1e0e553",
+			"name": "4. Atualizar Encomenda Cliente (PRONTO PARA LEVANTAMENTO)",
+			"url": "http://localhost:3001/api/encomendas-cliente/",
+			"time": 4,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Estado deve ser PRONTO PARA LEVANTAMENTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Estado deve ser PRONTO PARA LEVANTAMENTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Estado deve ser PRONTO PARA LEVANTAMENTO": false
+				}
+			]
+		},
+		{
+			"id": "d7437583-0bfd-4554-987a-3320be08623c",
+			"name": "5. Eliminar Encomenda Cliente",
+			"url": "http://localhost:3001/api/encomendas-cliente/",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "fd12a869-432c-410b-9152-f613dd821a3f",
+			"name": "1. Criar Fatura",
+			"url": "http://localhost:3001/api/faturas",
+			"time": 16,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "a120ea89-00dc-4a5b-9fad-416814ba7dc5",
+			"name": "1.1 Criar Fatura com Serviço",
+			"url": "http://localhost:3001/api/faturas",
+			"time": 15,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				15
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false
+				}
+			]
+		},
+		{
+			"id": "9d0406ea-5c86-4c21-8d36-22b9a12a6c98",
+			"name": "2. Listar Faturas",
+			"url": "http://localhost:3001/api/faturas",
+			"time": 20,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				20
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "1b8d6cc4-ab30-4ea8-9be0-e9a146c3b611",
+			"name": "3. Obter Fatura por Número",
+			"url": "http://localhost:3001/api/faturas/",
+			"time": 73,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a fatura correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a fatura correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				73
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a fatura correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "3c890829-033b-4235-85ef-8ab43434ad83",
+			"name": "3.1 Obter Fatura Inexistente (404)",
+			"url": "http://localhost:3001/api/faturas/FAT-INEXISTENTE",
+			"time": 21,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				21
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "f0751bca-d670-4201-aa7f-0358c5518024",
+			"name": "4. Atualizar Fatura (Adicionar Devolução)",
+			"url": "http://localhost:3001/api/faturas/",
+			"time": 11,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Devolucoes deve conter pelo menos 1 item": false,
+				"Devolução deve ter motivo e nota de crédito": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Devolucoes deve conter pelo menos 1 item": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Devolução deve ter motivo e nota de crédito": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Devolucoes deve conter pelo menos 1 item": false,
+					"Devolução deve ter motivo e nota de crédito": false
+				}
+			]
+		},
+		{
+			"id": "bf8be07f-96d9-4635-95b5-c844903d9840",
+			"name": "5. Eliminar Fatura",
+			"url": "http://localhost:3001/api/faturas/",
+			"time": 7,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "bf4fdd65-1ce5-4255-83dd-a06e52f313ec",
+			"name": "1. Criar Promoção",
+			"url": "http://localhost:3001/api/promocoes",
+			"time": 19,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code deve ser 201 Created": false,
+				"Resposta deve ser JSON": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 201 Created": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Resposta deve ser JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				19
+			],
+			"allTests": [
+				{
+					"Status code deve ser 201 Created": false,
+					"Resposta deve ser JSON": true
+				}
+			]
+		},
+		{
+			"id": "04850e68-6036-4299-b300-a8a1a78e0b6b",
+			"name": "2. Listar Promoções",
+			"url": "http://localhost:3001/api/promocoes",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Resposta deve ser um array": true,
+				"Cada item deve ter campos essenciais": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Resposta deve ser um array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada item deve ter campos essenciais": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				34
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Resposta deve ser um array": true,
+					"Cada item deve ter campos essenciais": true
+				}
+			]
+		},
+		{
+			"id": "9b523728-25e5-4b69-9ccb-2c7580cc254c",
+			"name": "3. Obter Promoção por ID",
+			"url": "http://localhost:3001/api/promocoes/",
+			"time": 30,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": true,
+				"Deve retornar a promoção correta": false,
+				"Deve conter todos os campos do DTO": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Deve retornar a promoção correta": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Deve conter todos os campos do DTO": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				30
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": true,
+					"Deve retornar a promoção correta": false,
+					"Deve conter todos os campos do DTO": false
+				}
+			]
+		},
+		{
+			"id": "8d791deb-8a91-4403-999b-37684e81c6fd",
+			"name": "3.1 Obter Promoção Inexistente (404)",
+			"url": "http://localhost:3001/api/promocoes/99999",
+			"time": 9,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 404 Not Found": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 404 Not Found": true
+				}
+			]
+		},
+		{
+			"id": "03808778-2672-4170-80a7-a0f8dfb90331",
+			"name": "4. Atualizar Promoção",
+			"url": "http://localhost:3001/api/promocoes/",
+			"time": 32,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 OK": false,
+				"Desconto deve estar atualizado para 20%": false,
+				"Descrição deve estar atualizada": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 OK": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Desconto deve estar atualizado para 20%": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Descrição deve estar atualizada": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				32
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 OK": false,
+					"Desconto deve estar atualizado para 20%": false,
+					"Descrição deve estar atualizada": false
+				}
+			]
+		},
+		{
+			"id": "90929146-b381-476d-b2aa-8327263041c1",
+			"name": "5. Eliminar Promoção",
+			"url": "http://localhost:3001/api/promocoes/",
+			"time": 9,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code deve ser 200 ou 204": false
+			},
+			"testPassFailCounts": {
+				"Status code deve ser 200 ou 204": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code deve ser 200 ou 204": false
+				}
+			]
+		},
+		{
+			"id": "45399b1b-870b-4ecd-a834-ed03831beec0",
+			"name": "Cleanup - Eliminar Fatura 2",
+			"url": "http://localhost:3001/api/faturas/FAT-2026-002",
+			"time": 16,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				16
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e2ca9783-102f-4f4b-ab06-5ac64bd5edda",
+			"name": "Cleanup - Eliminar Agenda Slot 2",
+			"url": "http://localhost:3001/api/agenda/5002",
+			"time": 15,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				15
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "310f8042-1eb5-4f70-902f-2444bfada8db",
+			"name": "Cleanup - Eliminar Serviço Agenda",
+			"url": "http://localhost:3001/api/servicos/2001",
+			"time": 21,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				21
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "8a773f70-61f2-4c33-9e37-2e5d77aa0e9b",
+			"name": "Cleanup - Eliminar Trotinete Serviço",
+			"url": "http://localhost:3001/api/trotinetes/TROT-SERV-001",
+			"time": 105,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				105
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "03593ea6-27e2-406f-80fb-091d0bd8817b",
+			"name": "Cleanup - Eliminar Trotinete 2",
+			"url": "http://localhost:3001/api/trotinetes/TROT-TEST-002",
+			"time": 21,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				21
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3cf53e19-bab2-4a83-bf92-1d6e55da8ffa",
+			"name": "Cleanup - Eliminar Peça 2",
+			"url": "http://localhost:3001/api/pecas/5609876543210",
+			"time": 21,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				21
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6e569f17-7ea1-40a5-85cb-8d5acf57baac",
+			"name": "Cleanup - Eliminar Intervenção 2",
+			"url": "http://localhost:3001/api/intervencoes-catalogo/2",
+			"time": 11,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				11
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c00bc820-aa32-4bde-8fc2-b41fdd276663",
+			"name": "Cleanup - Eliminar Cliente Trotinete",
+			"url": "http://localhost:3001/api/clientes/888111222",
+			"time": 23,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				23
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a41297a6-f920-45e0-9a34-880ae0e3cca6",
+			"name": "Cleanup - Eliminar Admin",
+			"url": "http://localhost:3001/api/funcionarios/ADM_TESTE",
+			"time": 16,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				16
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b95d2957-866c-4398-adc8-6eafaae1aff9",
+			"name": "Cleanup - Eliminar Operador",
+			"url": "http://localhost:3001/api/funcionarios/OPR_TESTE",
+			"time": 7,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				7
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 3562,
+	"collection": {
+		"requests": [
+			{
+				"id": "885fb5b5-9da9-4eca-aaa6-caa7bfc63255",
+				"method": "POST"
+			},
+			{
+				"id": "29927fee-949c-4244-a6c9-02efee2995c4",
+				"method": "POST"
+			},
+			{
+				"id": "5848e089-5cfd-4018-95c2-28ad04f5f81b",
+				"method": "POST"
+			},
+			{
+				"id": "c05719bb-1ed0-47b6-96fa-9a99505c8f00",
+				"method": "POST"
+			},
+			{
+				"id": "4ef895a6-9e19-4f26-8643-2099018f6fdb",
+				"method": "GET"
+			},
+			{
+				"id": "e381ab6d-45a1-4fee-bc9d-07fe2fb2d660",
+				"method": "GET"
+			},
+			{
+				"id": "76ac2295-01df-4d35-8aff-2ad617ff4d4f",
+				"method": "GET"
+			},
+			{
+				"id": "1fbd704a-827c-40e1-82c9-883bedce0635",
+				"method": "GET"
+			},
+			{
+				"id": "4322858f-7b68-4437-b92f-6143e2c9936e",
+				"method": "GET"
+			},
+			{
+				"id": "f1c36a60-ca7d-43db-a080-7e3a25b05419",
+				"method": "GET"
+			},
+			{
+				"id": "6da5424f-0477-4673-a3cc-de5350d9bd4c",
+				"method": "GET"
+			},
+			{
+				"id": "e65b3f02-c716-4e38-869c-feda713a8419",
+				"method": "GET"
+			},
+			{
+				"id": "7e63902c-4de2-4081-9e73-6e1776f4ed6e",
+				"method": "GET"
+			},
+			{
+				"id": "b6ba6140-402b-42fe-97c9-e356cdabad5a",
+				"method": "PUT"
+			},
+			{
+				"id": "6c6edaf7-742f-4425-b911-17ab6d813532",
+				"method": "DELETE"
+			},
+			{
+				"id": "01509c24-9446-4c8c-9b45-e85a74c6e88f",
+				"method": "GET"
+			},
+			{
+				"id": "792980b4-e81c-4940-8afb-4a5e22c934fe",
+				"method": "POST"
+			},
+			{
+				"id": "0f63cc2a-1fbe-44e0-9e97-8ee3b7eb8c24",
+				"method": "POST"
+			},
+			{
+				"id": "a71ef697-aec9-4eda-b0fc-ecba5aea3f41",
+				"method": "GET"
+			},
+			{
+				"id": "3c1d99b4-5cd8-4405-86ef-671716351138",
+				"method": "GET"
+			},
+			{
+				"id": "849a608d-5535-4767-9b36-f222c659eebc",
+				"method": "GET"
+			},
+			{
+				"id": "f1f8b7b7-c325-4237-9819-f1906d677cf5",
+				"method": "GET"
+			},
+			{
+				"id": "d7cf508a-5eb8-4e86-8762-ab7651ba3b42",
+				"method": "GET"
+			},
+			{
+				"id": "2760d71e-b327-42ab-ab31-7f1dceb81140",
+				"method": "GET"
+			},
+			{
+				"id": "77e77800-8ed3-4bb0-bb7a-25aeafd45905",
+				"method": "PUT"
+			},
+			{
+				"id": "9e6f021f-7091-4c4d-8d9f-3049a9d4af77",
+				"method": "DELETE"
+			},
+			{
+				"id": "5dde40b5-bb2e-4ed0-ab13-3ddf4079b3eb",
+				"method": "GET"
+			},
+			{
+				"id": "617b8a66-9468-4cbe-ab8d-222d75709e65",
+				"method": "POST"
+			},
+			{
+				"id": "8dc019c9-498e-4bbf-9be8-ad1b3768887f",
+				"method": "POST"
+			},
+			{
+				"id": "fd13be13-e40c-4261-a991-e89880b95904",
+				"method": "POST"
+			},
+			{
+				"id": "4b3b0286-ff45-4832-8da6-4d784805c137",
+				"method": "GET"
+			},
+			{
+				"id": "e1bb4d1f-77ab-4ffd-97fe-28e6fbbbd9b2",
+				"method": "GET"
+			},
+			{
+				"id": "e85a33fc-eef7-442d-abba-1f0c50666b74",
+				"method": "GET"
+			},
+			{
+				"id": "5025f21d-3fa8-4be1-82d6-c732621378ee",
+				"method": "GET"
+			},
+			{
+				"id": "d3368cb7-7881-4c40-aaa8-28ada0b0921f",
+				"method": "PUT"
+			},
+			{
+				"id": "d7051290-da6f-4dd3-9bf6-473799fff8ff",
+				"method": "DELETE"
+			},
+			{
+				"id": "61a1f591-d963-408b-8ec3-7d0d12c194a3",
+				"method": "GET"
+			},
+			{
+				"id": "4a8111a1-2188-4e07-9033-d7ba1e1a37bb",
+				"method": "POST"
+			},
+			{
+				"id": "9bc4b783-e8c7-461e-939e-5b15cbcc54d1",
+				"method": "POST"
+			},
+			{
+				"id": "4279e592-31b4-459a-9e9d-7f37845154a5",
+				"method": "GET"
+			},
+			{
+				"id": "fdfc0f34-2d18-4a55-b47c-6699de55e85f",
+				"method": "GET"
+			},
+			{
+				"id": "dbb1e7bc-16aa-4de4-8a53-4439f3e54d54",
+				"method": "GET"
+			},
+			{
+				"id": "84f01562-5cd2-46b7-84dd-145a6074a3a3",
+				"method": "GET"
+			},
+			{
+				"id": "b3b7d30b-b323-4569-9807-70800a5098a8",
+				"method": "PUT"
+			},
+			{
+				"id": "0f7662ec-bb30-4316-bac4-5d24bf404c00",
+				"method": "DELETE"
+			},
+			{
+				"id": "4b815593-718b-4629-9d57-873e32eb511d",
+				"method": "POST"
+			},
+			{
+				"id": "65a30224-4af7-4162-97c0-89c53bc53841",
+				"method": "POST"
+			},
+			{
+				"id": "2c7c0971-a9fb-4f3a-90b7-09c9b09c068c",
+				"method": "GET"
+			},
+			{
+				"id": "0a8a8381-2e65-4228-98c3-1eab50af9068",
+				"method": "GET"
+			},
+			{
+				"id": "11d22cb7-eb19-4bbe-bc91-5b10fdf57e6f",
+				"method": "GET"
+			},
+			{
+				"id": "d0fbb80d-357c-440d-b8ca-916109e6750d",
+				"method": "GET"
+			},
+			{
+				"id": "3d02fbc6-5ef2-4d44-ab82-a46072abf7c4",
+				"method": "PUT"
+			},
+			{
+				"id": "e77cb17a-3747-4aa4-b513-b4d888c063a4",
+				"method": "DELETE"
+			},
+			{
+				"id": "58a0593c-bb60-409c-9c5a-d14bdf6ec8a7",
+				"method": "POST"
+			},
+			{
+				"id": "c88f8766-a618-4aef-acea-c8076c83493d",
+				"method": "POST"
+			},
+			{
+				"id": "cc2be6a3-11e2-4505-8649-bda643a52fdc",
+				"method": "GET"
+			},
+			{
+				"id": "e1342504-832b-4568-83f7-c6f5ee87f6f9",
+				"method": "GET"
+			},
+			{
+				"id": "10221268-1f40-4b71-aa14-3d63d1656509",
+				"method": "GET"
+			},
+			{
+				"id": "8a856d9a-6214-4931-8d84-8f869e95b618",
+				"method": "PUT"
+			},
+			{
+				"id": "d07decfc-e26d-4c00-a827-2b5d0d6caffa",
+				"method": "DELETE"
+			},
+			{
+				"id": "64729b16-ea53-4988-a95d-b9ff7201e600",
+				"method": "POST"
+			},
+			{
+				"id": "58cbb462-b0ab-42f0-a6d0-7d9b080fcfd5",
+				"method": "POST"
+			},
+			{
+				"id": "901875bc-23f3-4a31-98ee-d9c20706f58b",
+				"method": "POST"
+			},
+			{
+				"id": "9ae88ff0-85a9-4457-95a9-c4c38d220faf",
+				"method": "GET"
+			},
+			{
+				"id": "7d4d94c8-e946-46e8-b413-c23976257ae2",
+				"method": "GET"
+			},
+			{
+				"id": "f4f4cde4-99e9-4dad-9f8e-c33c45a22871",
+				"method": "GET"
+			},
+			{
+				"id": "c789d98c-0715-428b-ae6a-946a3d3b1245",
+				"method": "PUT"
+			},
+			{
+				"id": "6ae2e2a9-1ccf-4c2c-8358-4e567c6f4e4a",
+				"method": "DELETE"
+			},
+			{
+				"id": "3bb76e80-9490-4b6d-9f1d-b285da0c1a4a",
+				"method": "POST"
+			},
+			{
+				"id": "b9489471-aa91-4f9a-ba44-42f3aac79517",
+				"method": "GET"
+			},
+			{
+				"id": "7a594cbc-d3af-4527-a375-d9de931edbef",
+				"method": "GET"
+			},
+			{
+				"id": "2bd5c531-f254-4fe7-898c-4572c8b1eb72",
+				"method": "GET"
+			},
+			{
+				"id": "7a69b22c-7cfc-4293-ae51-73ccf4bea8ff",
+				"method": "PUT"
+			},
+			{
+				"id": "f53ac7b6-7e25-45e3-8843-e0a21bb6f16e",
+				"method": "PUT"
+			},
+			{
+				"id": "597a6210-8f2e-42cd-bfd8-4b1d41f99a36",
+				"method": "DELETE"
+			},
+			{
+				"id": "8b2f76f1-d9dc-4df5-a377-ff35af118b6b",
+				"method": "POST"
+			},
+			{
+				"id": "00710ae5-884a-4ec3-b865-a8cf2fcd6dcd",
+				"method": "GET"
+			},
+			{
+				"id": "bff3d63b-9f30-42ce-8038-f0bb95d9cdad",
+				"method": "GET"
+			},
+			{
+				"id": "a01173d2-9a67-4bac-b2ec-f77b6841dc09",
+				"method": "GET"
+			},
+			{
+				"id": "43d175e5-6e74-4df3-8fe3-654079256dd9",
+				"method": "PUT"
+			},
+			{
+				"id": "f92b2bce-32fd-49d3-874d-33cf89aa8531",
+				"method": "DELETE"
+			},
+			{
+				"id": "af75ff73-1f72-40b9-b0d9-cc57a8dfe0d1",
+				"method": "POST"
+			},
+			{
+				"id": "4492134d-76ed-4cb4-a078-dba314a0ca61",
+				"method": "GET"
+			},
+			{
+				"id": "2a9a935e-85ed-45af-b183-478e555c0a22",
+				"method": "GET"
+			},
+			{
+				"id": "b48c4c67-2e67-4cf3-b91e-f18edafe37e9",
+				"method": "GET"
+			},
+			{
+				"id": "e09e0c9a-227d-4261-9820-801df1e0e553",
+				"method": "PUT"
+			},
+			{
+				"id": "d7437583-0bfd-4554-987a-3320be08623c",
+				"method": "DELETE"
+			},
+			{
+				"id": "fd12a869-432c-410b-9152-f613dd821a3f",
+				"method": "POST"
+			},
+			{
+				"id": "a120ea89-00dc-4a5b-9fad-416814ba7dc5",
+				"method": "POST"
+			},
+			{
+				"id": "9d0406ea-5c86-4c21-8d36-22b9a12a6c98",
+				"method": "GET"
+			},
+			{
+				"id": "1b8d6cc4-ab30-4ea8-9be0-e9a146c3b611",
+				"method": "GET"
+			},
+			{
+				"id": "3c890829-033b-4235-85ef-8ab43434ad83",
+				"method": "GET"
+			},
+			{
+				"id": "f0751bca-d670-4201-aa7f-0358c5518024",
+				"method": "PUT"
+			},
+			{
+				"id": "bf8be07f-96d9-4635-95b5-c844903d9840",
+				"method": "DELETE"
+			},
+			{
+				"id": "bf4fdd65-1ce5-4255-83dd-a06e52f313ec",
+				"method": "POST"
+			},
+			{
+				"id": "04850e68-6036-4299-b300-a8a1a78e0b6b",
+				"method": "GET"
+			},
+			{
+				"id": "9b523728-25e5-4b69-9ccb-2c7580cc254c",
+				"method": "GET"
+			},
+			{
+				"id": "8d791deb-8a91-4403-999b-37684e81c6fd",
+				"method": "GET"
+			},
+			{
+				"id": "03808778-2672-4170-80a7-a0f8dfb90331",
+				"method": "PUT"
+			},
+			{
+				"id": "90929146-b381-476d-b2aa-8327263041c1",
+				"method": "DELETE"
+			},
+			{
+				"id": "45399b1b-870b-4ecd-a834-ed03831beec0",
+				"method": "DELETE"
+			},
+			{
+				"id": "e2ca9783-102f-4f4b-ab06-5ac64bd5edda",
+				"method": "DELETE"
+			},
+			{
+				"id": "310f8042-1eb5-4f70-902f-2444bfada8db",
+				"method": "DELETE"
+			},
+			{
+				"id": "8a773f70-61f2-4c33-9e37-2e5d77aa0e9b",
+				"method": "DELETE"
+			},
+			{
+				"id": "03593ea6-27e2-406f-80fb-091d0bd8817b",
+				"method": "DELETE"
+			},
+			{
+				"id": "3cf53e19-bab2-4a83-bf92-1d6e55da8ffa",
+				"method": "DELETE"
+			},
+			{
+				"id": "6e569f17-7ea1-40a5-85cb-8d5acf57baac",
+				"method": "DELETE"
+			},
+			{
+				"id": "c00bc820-aa32-4bde-8fc2-b41fdd276663",
+				"method": "DELETE"
+			},
+			{
+				"id": "a41297a6-f920-45e0-9a34-880ae0e3cca6",
+				"method": "DELETE"
+			},
+			{
+				"id": "b95d2957-866c-4398-adc8-6eafaae1aff9",
+				"method": "DELETE"
+			}
+		]
+	}
+}
