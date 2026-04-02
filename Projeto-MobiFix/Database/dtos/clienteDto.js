@@ -4,8 +4,8 @@ const paraClienteDto = (c) => {
         NIF: c._id.toString(),
         Nome: c.nome,
         Telefone: c.telefone,
-        Morada: c.morada || null,
         Email: c.email,
+        Morada: c.morada || null,
         PasswordHash: c.passwordHash
     };
 };
