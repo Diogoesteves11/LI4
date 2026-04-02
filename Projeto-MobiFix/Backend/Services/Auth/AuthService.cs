@@ -1,5 +1,7 @@
 namespace Backend.Services;
 
+using System.Text.Json; 
+using System.Text.Json.Serialization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -11,6 +13,11 @@ public class AuthService: IAuthService
 {
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
+
+    private static readonly JsonSerializerOptions _optionsPascalCase = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = null // Isto impede a conversão para minúsculas
+    };
 
     public AuthService(HttpClient httpClient, IConfiguration configuration)
     {
@@ -36,7 +43,7 @@ public class AuthService: IAuthService
         if (string.IsNullOrWhiteSpace(loginDto.NIF))
             return null;
  
-        var cliente = await _httpClient.GetFromJsonAsync<ClienteDto?>($"/auth/clientes/{loginDto.NIF}");
+        var cliente = await _httpClient.GetFromJsonAsync<ClienteDto>($"api/auth/cliente/{loginDto.NIF}");
  
         if (cliente is null)
             return null;
@@ -54,17 +61,16 @@ public class AuthService: IAuthService
  
         var payload = new
         {
-            registoDto.Nome,
-            registoDto.Email,
-            registoDto.Morada,
             registoDto.NIF,
+            registoDto.Nome,
             registoDto.Telefone,
+            registoDto.Morada,
+            registoDto.Email,
             PasswordHash = passwordHash
         };
  
-        var response = await _httpClient.PostAsJsonAsync("/cliente", payload);
+        var response = await _httpClient.PostAsJsonAsync("api/clientes", payload, _optionsPascalCase);
         return response.IsSuccessStatusCode;
-
     }
 
 

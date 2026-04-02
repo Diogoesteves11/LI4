@@ -34,7 +34,7 @@ public class AuthController : ControllerBase
         var sucesso = await _authService.RegistarClienteAsync(registoDto);
  
         if (!sucesso)
-            return Conflict(new { mensagem = "Não foi possível criar a conta. O email ou NIF já podem estar registados." });
+            return Conflict(new { mensagem = "Não foi possível criar a conta. O NIF já deve estar registado." });
  
         return Created(string.Empty, new { mensagem = "Conta criada com sucesso." });
     }
