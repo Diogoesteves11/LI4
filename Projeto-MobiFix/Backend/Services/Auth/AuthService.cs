@@ -18,51 +18,116 @@ public class AuthService: IAuthService
         _configuration = configuration;
     }
 
-public async Task<string?> LoginAsync(FuncionarioLoginDto loginDto)
-{
-    // Procura no .env por INTERNAL_API_KEY
-    var apiKey = _configuration["INTERNAL_API_KEY"] 
-                 ?? throw new InvalidOperationException("INTERNAL_API_KEY não encontrada no .env");
-
-    _httpClient.DefaultRequestHeaders.Remove("x-api-key");
-    _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
-    var url = $"funcionarios/{loginDto.NumeroMecanografico}";
-    var funcionario = await _httpClient.GetFromJsonAsync<FuncionarioDto>(url);
-
-    if (funcionario is null) return null;
-
-    bool passwordValida = BCrypt.Net.BCrypt.Verify(loginDto.Password, funcionario.PasswordHash);
-    if (!passwordValida) return null;
-
-    return GerarToken(funcionario);
-}
-
-private string GerarToken(FuncionarioDto funcionario)
-{
-    // Procura no .env por JWT_SECRET
-    var secretKey = _configuration["JWT_SECRET"]
-        ?? throw new InvalidOperationException("JWT_SECRET não encontrada no .env");
-
-    var claims = new[]
+    public async Task<string?> LoginFuncionarioAsync(FuncionarioLoginDto loginDto)
     {
-        new Claim("id", funcionario.NumeroMecanografico),
-        new Claim("nome", funcionario.Nome),
-        new Claim("cargo", funcionario.Cargo)
-    };
+        // Procura no .env por INTERNAL_API_KEY
+        var apiKey = _configuration["INTERNAL_API_KEY"] 
+                    ?? throw new InvalidOperationException("INTERNAL_API_KEY não encontrada no .env");
 
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-    var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        _httpClient.DefaultRequestHeaders.Remove("x-api-key");
+        _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
-    var token = new JwtSecurityToken(
-        // Podes meter estes valores no .env também ou deixar fixos
-        issuer: "MobiFixBackend", 
-        audience: "MobiFixFrontend",
-        claims: claims,
-        expires: DateTime.UtcNow.AddHours(8),
-        signingCredentials: credentials
-    );
+        var url = $"/auth/funcionarios/{loginDto.NumeroMecanografico}";
+        var funcionario = await _httpClient.GetFromJsonAsync<FuncionarioDto>(url);
 
-    return new JwtSecurityTokenHandler().WriteToken(token);
-}
+        if (funcionario is null) return null;
+
+        bool passwordValida = BCrypt.Net.BCrypt.Verify(loginDto.Password, funcionario.PasswordHash);
+        if (!passwordValida) return null;
+
+        return GerarTokenFuncionario(funcionario);
+    }
+
+    public async Task<string?> LoginClienteAsync(ClienteLoginDto loginDto)
+    {
+        if (string.IsNullOrWhiteSpace(loginDto.NIF))
+            return null;
+ 
+        var cliente = await _httpClient.GetFromJsonAsync<ClienteDto?>($"/auth/clientes/{loginDto.NIF}");
+ 
+        if (cliente is null)
+            return null;
+ 
+        bool passwordValida = BCrypt.Net.BCrypt.Verify(loginDto.Password, cliente.PasswordHash);
+        if (!passwordValida)
+            return null;
+ 
+        return GerarTokenCliente(cliente);
+    } 
+
+    public async Task<bool> RegistarClienteAsync(ClienteRegistoDto registoDto)
+    {
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(registoDto.Password);
+ 
+        var payload = new
+        {
+            registoDto.Nome,
+            registoDto.Email,
+            registoDto.Morada,
+            registoDto.NIF,
+            registoDto.Telefone,
+            PasswordHash = passwordHash
+        };
+ 
+        var response = await _httpClient.PostAsJsonAsync("/cliente", payload);
+        return response.IsSuccessStatusCode;
+
+    }
+
+
+    private string GerarTokenFuncionario(FuncionarioDto funcionario)
+    {
+        // Procura no .env por JWT_SECRET
+        var secretKey = _configuration["JWT_SECRET"]
+            ?? throw new InvalidOperationException("JWT_SECRET não encontrada no .env");
+
+        var claims = new[]
+        {
+            new Claim("id", funcionario.NumeroMecanografico),
+            new Claim("nome", funcionario.Nome),
+            new Claim("cargo", funcionario.Cargo)
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            // Podes meter estes valores no .env também ou deixar fixos
+            issuer: "MobiFixBackend", 
+            audience: "MobiFixFrontend",
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(8),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GerarTokenCliente(ClienteDto cliente)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"]
+            ?? throw new InvalidOperationException("JwtSettings:SecretKey não está configurado.");
+ 
+        var claims = new[]
+        {
+            new Claim("id", cliente.NIF),
+            new Claim("nome", cliente.Nome),
+            new Claim("email", cliente.Email),
+            new Claim("cargo", "Cliente")
+        };
+ 
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+ 
+        var token = new JwtSecurityToken(
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(8),
+            signingCredentials: credentials
+        );
+ 
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 }

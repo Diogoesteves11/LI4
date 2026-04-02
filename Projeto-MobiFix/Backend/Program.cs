@@ -7,10 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 // CARREGA O FICHEIRO .ENV
 DotNetEnv.Env.Load();
 
-// Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
@@ -43,6 +43,7 @@ void ConfigureDefaultClient(HttpClient client)
 // 3. Registamos todos os serviços usando a mesma configuração
 builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
 
 // Configuração JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
