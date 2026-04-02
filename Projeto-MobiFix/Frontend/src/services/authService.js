@@ -1,8 +1,8 @@
 import api from './api';
 
 export const authService = {
-    loginCliente: async(email, password) => {
-        const response = await api.post('/Auth/login/cliente', { email, password });
+    loginCliente: async(nif, password) => {
+        const response = await api.post('/Auth/login/cliente', { nif, password });
         return response.data;
     },
 
@@ -14,8 +14,8 @@ export const authService = {
     },
 
     registoCliente: async(nome, nif, telefone, morada, email, password) => {
-        const response = await api.post('/Auth/registar/cliente', {
-            nome, nif, telefone, morada, email, password
+        const response = await api.post('/Auth/register/cliente', {
+            Nome: nome, Email: email, Morada: morada, NIF: nif, Telefone: telefone, Password: password
         });
         return response.data;
     }

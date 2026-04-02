@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Mail, Lock, User, ArrowLeft, CheckCircle2, Loader2, Hash, MapPin, Phone } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router'; // Adicionei useNavigate para redirecionar
+import { useLocation, useNavigate } from 'react-router'; 
 import { useLoginCliente, useRegistoCliente } from '../../hooks/useAuth';
-
 import LogoMobifix from "../../assets/mobifix_logo.png";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   
-  // 1. Estados para os campos do formulário
+  // Estados do formulário
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -19,7 +18,6 @@ export default function AuthPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 2. Inicializar o Hook de Login
   const loginMutation = useLoginCliente();
   const registerMutation = useRegistoCliente();
 
@@ -33,15 +31,14 @@ export default function AuthPage() {
     }
   }, [location.state]);
 
-  // 3. Função para lidar com o envio do formulário
+  // 1. ATUALIZADO: Lógica de envio com NIF no Login
   const handleSubmit = (e) => {
     e.preventDefault();
     
     if (isLogin) {
-      // Dispara a mutation de login
-      loginMutation.mutate({ email, password }, {
+      // Enviamos NIF e Password para o C#
+      loginMutation.mutate({ nif, password }, {
         onSuccess: () => {
-          // Se o login der certo, podes redirecionar para a dashboard
           navigate('/FixNRide/'); 
         }
       });
@@ -60,7 +57,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-safety-orange selection:text-white">
       
-      {/* LADO ESQUERDO: Visual / Branding */}
+      {/* LADO ESQUERDO: Branding */}
       <div className="hidden lg:flex relative bg-deep-slate items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-corporate-blue rounded-full blur-3xl"></div>
@@ -70,7 +67,7 @@ export default function AuthPage() {
         <div className="relative z-10 max-w-md text-center">
           <div className="inline-flex items-center gap-3 mb-8">
             <div className="w-60 h-35 flex ">
-              <img src={LogoMobifix}/>
+              <img src={LogoMobifix} alt="MobiFix Logo"/>
             </div>
           </div>
           
@@ -108,32 +105,78 @@ export default function AuthPage() {
               {isLogin ? 'Login de Cliente' : 'Criar Conta Cliente'}
             </h1>
             <p className="text-slate-500">
-              {isLogin ? 'Introduza os seus dados pirata para entrar.' : 'Preencha o formulário para se registar.'}
+              {isLogin ? 'Introduza o seu NIF e password para entrar.' : 'Preencha o formulário para se registar.'}
             </p>
           </div>
 
-          {/* Alterado para usar o handleSubmit */}
           <form className="space-y-5" onSubmit={handleSubmit}>
             
-          {!isLogin && (
-          <>
-            {/* NOME COMPLETO */}
-            <div>
-              <label className="block text-sm font-bold text-deep-slate mb-2">Nome Completo</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="text" 
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="João Silva"
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
-                  required={!isLogin}
-                />
-              </div>
-            </div>
+            {/* CAMPOS EXCLUSIVOS DE REGISTO */}
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-sm font-bold text-deep-slate mb-2">Nome Completo</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input 
+                      type="text" 
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      placeholder="João Silva"
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
 
-            {/* NIF */}
+                <div>
+                  <label className="block text-sm font-bold text-deep-slate mb-2">Telefone</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input 
+                      type="tel" 
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      placeholder="912 345 678"
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-deep-slate mb-2">Morada</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input 
+                      type="text" 
+                      value={morada}
+                      onChange={(e) => setMorada(e.target.value)}
+                      placeholder="Rua da MobiFix, nº 10"
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-deep-slate mb-2">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="exemplo@email.com"
+                      className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* NIF: AGORA VISÍVEL EM LOGIN E REGISTO */}
             <div>
               <label className="block text-sm font-bold text-deep-slate mb-2">NIF</label>
               <div className="relative">
@@ -142,63 +185,15 @@ export default function AuthPage() {
                   type="text" 
                   maxLength={9}
                   value={nif}
-                  onChange={(e) => setNif(e.target.value.replace(/\D/g, ""))} // Apenas números
+                  onChange={(e) => setNif(e.target.value.replace(/\D/g, ""))} 
                   placeholder="123456789"
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
-                  required={!isLogin}
-                />
-              </div>
-            </div>
-
-            {/* TELEFONE */}
-            <div>
-              <label className="block text-sm font-bold text-deep-slate mb-2">Telefone</label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="tel" 
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  placeholder="912 345 678"
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
-                  required={!isLogin}
-                />
-              </div>
-            </div>
-
-            {/* MORADA */}
-            <div>
-              <label className="block text-sm font-bold text-deep-slate mb-2">Morada</label>
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="text" 
-                  value={morada}
-                  onChange={(e) => setMorada(e.target.value)}
-                  placeholder="Rua da MobiFix, nº 10"
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
-                  required={!isLogin}
-                />
-              </div>
-            </div>
-          </>
-        )} 
-
-            <div>
-              <label className="block text-sm font-bold text-deep-slate mb-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="exemplo@email.com"
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-corporate-blue focus:outline-none transition-all"
                   required
                 />
               </div>
             </div>
 
+            {/* PASSWORD: SEMPRE VISÍVEL */}
             <div>
               <label className="block text-sm font-bold text-deep-slate mb-2">Palavra-passe</label>
               <div className="relative">
@@ -220,9 +215,6 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* Botão com estado de carregamento */}
-                     
-            
             <button 
               type="submit"
               disabled={isPending}
@@ -231,7 +223,6 @@ export default function AuthPage() {
               }`}
             >
               {isPending && <Loader2 className="animate-spin" size={20} />}
-              
               {isLogin 
                 ? (loginMutation.isPending ? 'A entrar...' : 'Entrar') 
                 : (registerMutation.isPending ? 'A criar conta...' : 'Finalizar Registo')
