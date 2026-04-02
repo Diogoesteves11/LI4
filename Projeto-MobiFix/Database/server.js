@@ -4,13 +4,12 @@ const connectDB = require('./config/db')
 const logger = require('morgan')
 const app = express()
 
-app.use(express.json());
-
-const router = require('./routes/index')
 
 app.use(express.json())
 app.use(logger('dev'))
 app.use(express.urlencoded({ extended: true }))
+
+const router = require('./routes/index')
 
 
 connectDB()
