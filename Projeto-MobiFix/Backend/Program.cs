@@ -12,7 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        // Isto impede o C# de converter "Nome" em "nome"
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });;
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
