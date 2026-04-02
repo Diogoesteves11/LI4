@@ -23,6 +23,5 @@ public class ClienteRegistoDto
     public string Telefone { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "A password é obrigatória.")]
-    [MinLength(8, ErrorMessage = "A password deve ter pelo menos 8 caracteres.")]
     public string Password { get; set; } = string.Empty;
 }

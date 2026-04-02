@@ -21,33 +21,49 @@ import Promotions from '../pages/admin/Promocoes.jsx'
 import LoginPage from '../pages/staff/LoginPage.jsx'
 import AuthPage from '../pages/public/AuthPage.jsx'
 
+// Extrai o payload do JWT sem biblioteca externa
+function parseJwt(token) {
+  try {
+    const base64Payload = token.split('.')[1];
+    const decoded = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
+function getUserRole() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  const payload = parseJwt(token);
+  return payload?.cargo ?? null;
+}
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('user_role');
 
   if (!token) {
     return <Navigate to="/auth" replace />;
   }
 
+  const userRole = getUserRole();
+
   if (allowedRoles && !allowedRoles.includes(userRole)) {
-    console.warn("Acesso negado: Role insuficiente.");
+    console.warn(`Acesso negado: role "${userRole}" não está em [${allowedRoles}]`);
     return <Navigate to="/auth" replace />;
   }
 
-  return <Outlet />; // Renderiza as rotas filhas
+  return <Outlet />;
 };
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ROTAS PÚBLICAS */}
         <Route path="/" element={<HomePage/>} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/staff" element={<LoginPage/>} />
 
-        {/* ÁREA DO CLIENTE - Só para 'Cliente' */}
         <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
           <Route path="/FixNRide/" element={<HomeClientePage/>} />
           <Route path="/FixNRide/trotinetes" element={<Trotinetes/>} />
@@ -56,7 +72,6 @@ export default function AppRouter() {
           <Route path="/FixNRide/catalogo" element={<Catalogo/>} />
         </Route>
 
-        {/* ÁREA DO OPERADOR - Operador e Admin podem entrar */}
         <Route element={<ProtectedRoute allowedRoles={['Operador', 'Administrador']} />}>
           <Route path="/FixNSell" element={<Layout />}>
             <Route path="vendadireta" element={<VendaDireta />} />
@@ -66,8 +81,7 @@ export default function AppRouter() {
             <Route index element={<VendaDireta />} />
           </Route>
         </Route>
-        
-        {/* ÁREA DO MECÂNICO - Mecânico e Admin podem entrar */}
+
         <Route element={<ProtectedRoute allowedRoles={['Mecanico', 'Administrador']} />}>
           <Route path="/FixNRepair/" element={<RepairsLayout />}>
             <Route path="diagnosticos" element={<Dashboard />}/>
@@ -76,7 +90,6 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        {/* ÁREA DO ADMIN - Só para 'Administrador' */}
         <Route element={<ProtectedRoute allowedRoles={['Administrador']} />}>
           <Route path="/FixNManage/" element={<AdminLayout/>}>
             <Route path="encomendas" element={<StockOrders/>}/>
@@ -87,7 +100,6 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        {/* Rota de Catch-all (404 ou redirecionar) */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

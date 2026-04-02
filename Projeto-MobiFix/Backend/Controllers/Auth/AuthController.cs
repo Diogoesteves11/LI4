@@ -15,7 +15,7 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [HttpPost("/login/funcionario")]
+    [HttpPost("login/funcionario")]
     public async Task<IActionResult> LoginFuncionario([FromBody] FuncionarioLoginDto loginDto)
     {
         var token = await _authService.LoginFuncionarioAsync(loginDto);
@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
         return Ok(new {token});
     }
 
-    [HttpPost("/register/cliente")]
+    [HttpPost("register/cliente")]
     public async Task<IActionResult> Registar([FromBody] ClienteRegistoDto registoDto)
     {
         if (!ModelState.IsValid)
@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
         return Created(string.Empty, new { mensagem = "Conta criada com sucesso." });
     }
  
-    [HttpPost("/login/cliente")]
+    [HttpPost("login/cliente")]
     public async Task<IActionResult> Login([FromBody] ClienteLoginDto loginDto)
     {
         if (!ModelState.IsValid)

@@ -1,14 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
-import { authService } from '../services/authservice';
+import { authService } from '../services/authService';
 
 export function useLoginCliente(){
     return useMutation({
-        mutationFn: ({email, password}) => authService.loginCliente(email, password),
+        mutationFn: ({nif, password}) => authService.loginCliente(nif, password),
         onSuccess: (data) => {
             localStorage.setItem('token', data.token);
-            localStorage.setItem('user_name', data.nome);
-            localStorage.setItem('user_role', 'Cliente');
-            localStorage.setItem('id', data.clienteId);
 
             console.log('Login efetuado com sucesso!');
         },
@@ -24,9 +21,6 @@ export function useLoginFuncionario() {
         mutationFn: ({numeroMecanografico, password}) => authService.loginFuncionario(numeroMecanografico, password),
         onSuccess: (data) => {
             localStorage.setItem('token', data.token);
-            localStorage.setItem('user_name', data.nome);
-            localStorage.setItem('user_role', data.cargo);
-            localStorage.setItem('funcionarioId', data.funcionarioId);
 
             console.log(data);
 
