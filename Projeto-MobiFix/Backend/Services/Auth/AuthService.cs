@@ -20,14 +20,7 @@ public class AuthService: IAuthService
 
     public async Task<string?> LoginFuncionarioAsync(FuncionarioLoginDto loginDto)
     {
-        // Procura no .env por INTERNAL_API_KEY
-        var apiKey = _configuration["INTERNAL_API_KEY"] 
-                    ?? throw new InvalidOperationException("INTERNAL_API_KEY não encontrada no .env");
-
-        _httpClient.DefaultRequestHeaders.Remove("x-api-key");
-        _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
-        var url = $"/auth/funcionarios/{loginDto.NumeroMecanografico}";
+        var url = $"api/auth/funcionario/{loginDto.NumeroMecanografico}";
         var funcionario = await _httpClient.GetFromJsonAsync<FuncionarioDto>(url);
 
         if (funcionario is null) return null;
@@ -77,9 +70,9 @@ public class AuthService: IAuthService
 
     private string GerarTokenFuncionario(FuncionarioDto funcionario)
     {
-        // Procura no .env por JWT_SECRET
-        var secretKey = _configuration["JWT_SECRET"]
-            ?? throw new InvalidOperationException("JWT_SECRET não encontrada no .env");
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"]
+            ?? throw new InvalidOperationException("JwtSettings:SecretKey não está configurado.");
 
         var claims = new[]
         {
@@ -92,9 +85,8 @@ public class AuthService: IAuthService
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            // Podes meter estes valores no .env também ou deixar fixos
-            issuer: "MobiFixBackend", 
-            audience: "MobiFixFrontend",
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddHours(8),
             signingCredentials: credentials
