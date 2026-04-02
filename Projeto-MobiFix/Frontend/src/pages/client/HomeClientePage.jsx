@@ -22,7 +22,21 @@ export default function HomeClientePage() {
     },
   ]
 
-  const nome = localStorage.getItem('user_name');
+  function parseJwt(token) {
+    try {
+      const base64Payload = token.split('.')[1];
+      const decoded = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  const payload = parseJwt(token);
+
+  const nome = payload?.nome ?? null;
   return (
       <main className="min-h-screen bg-slate-50 pb-24 font-sans antialiased">
       {/* Header Estilo Premium */}
