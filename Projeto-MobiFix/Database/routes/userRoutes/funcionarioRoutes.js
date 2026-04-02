@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/funcionarioController');
+const ctrl = require('../../controllers/userControllers/funcionarioController');
 
 router.get('/', ctrl.listarFuncionarios);
 router.post('/', ctrl.criarFuncionario);

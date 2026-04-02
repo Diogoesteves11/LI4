@@ -1,5 +1,5 @@
-const Cliente = require('../models/Cliente');
-const { paraClienteDto } = require('../dtos/clienteDto');
+const Cliente = require('../../models/users/Cliente');
+const { paraClienteDto } = require('../../dtos/userDtos/clienteDto');
 
 exports.obterPorNifSistema = async (req, res) => {
     try {
@@ -49,7 +49,12 @@ exports.criarCliente = async (req, res) => {
             passwordHash: req.body.PasswordHash
         });
         await novo.save();
-        return res.status(201).json(paraClienteDto(novo));
+
+        const clienteLimpo = novo.toObject();
+
+        delete clienteLimpo.passwordHash;
+
+        return res.status(201).json(paraClienteDto(clienteLimpo));
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }

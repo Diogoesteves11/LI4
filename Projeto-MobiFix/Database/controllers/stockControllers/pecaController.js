@@ -1,5 +1,5 @@
-const Peca = require('../models/Peca');
-const { paraPecaDto } = require('../dtos/pecaDto');
+const Peca = require('../../models/stocks/Peca');
+const { paraPecaDto } = require('../../dtos/stockDtos/pecaDto');
 
 exports.listarPecas = async (req, res) => {
     try {

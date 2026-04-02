@@ -1,5 +1,5 @@
-const Servico = require('../models/Servico');
-const { paraServicoDto } = require('../dtos/servicoDto');
+const Servico = require('../../models/Servico');
+const { paraServicoDto } = require('../../dtos/servicoDto');
 
 exports.listarServicos = async (req, res) => {
     try {

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const funcionarioController = require('../controllers/funcionarioController');
-const clienteController = require('../controllers/clienteController');
+const funcionarioController = require('../controllers/userControllers/funcionarioController');
+const clienteController = require('../controllers/userControllers/clienteController');
 // Importação das Rotas (Apenas as que já existem)
-const funcionarioRoutes = require('./funcionarioRoutes');
-const clienteRoutes = require('./clienteRoutes');
-// const trotineteRoutes = require('./trotineteRoutes');
+const funcionarioRoutes = require('./userRoutes/funcionarioRoutes');
+const clienteRoutes = require('./userRoutes/clienteRoutes');
+const trotineteRoutes = require('./userRoutes/trotineteRoutes');
 // const pecaRoutes = require('./pecaRoutes');
 // ... comenta as outras todas para já
 
@@ -25,9 +25,7 @@ router.get('/auth/cliente/:nif', clienteController.obterPorNifSistema);
 // ==========================================
 router.use('/funcionarios', funcionarioRoutes);
 router.use('/clientes', clienteRoutes);
-// Comenta tudo o que ainda não tem código no respetivo ficheiro!
-// router.use('/clientes', clienteRoutes);
-// router.use('/trotinetes', trotineteRoutes);
+router.use('/trotinetes', trotineteRoutes);
 // router.use('/pecas', pecaRoutes);
 // router.use('/intervencoes-catalogo', intervencaoCatalogoRoutes);
 // router.use('/servicos', servicoRoutes);

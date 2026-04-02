@@ -1,11 +1,12 @@
-const Trotinete = require('../models/Trotinete');
-const { paraTrotineteDto } = require('../dtos/trotineteDto');
+const Trotinete = require('../../models/users/Trotinete');
+const { paraTrotineteDto } = require('../../dtos/userDtos/trotineteDto');
 
 exports.listarTrotinetes = async (req, res) => {
     try {
-        const { clienteId } = req.query;
+        const { NIF, emServico } = req.query;
         let filtro = {};
-        if (clienteId) filtro.clienteId = clienteId;
+        if (NIF) filtro.clienteId = clienteId;
+        if(emServico) filtro.emServico = emServico;
         const trotinetes = await Trotinete.find(filtro).lean();
         return res.status(200).json(trotinetes.map(paraTrotineteDto));
     } catch (error) {

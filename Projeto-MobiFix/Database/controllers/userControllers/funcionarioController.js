@@ -1,5 +1,5 @@
-const Funcionario = require('../models/Funcionario');
-const { paraFuncionarioDto } = require('../dtos/funcionarioDto');
+const Funcionario = require('../../models/users/Funcionario');
+const { paraFuncionarioDto } = require('../../dtos/userDtos/funcionarioDto');
 
 exports.obterPorNumeroLogin = async (req, res) => {
     try {
@@ -104,9 +104,8 @@ exports.listarFuncionarios = async (req, res) => {
 
 exports.criarFuncionario = async (req, res) => {
     try {
-        // No MongoDB, se quisermos usar o numeroMecanografico como _id:
         const novoFuncionario = new Funcionario({
-            _id: req.body.NumeroMecanografico, // Mapeamento inverso do DTO
+            _id: req.body.NumeroMecanografico,
             nome: req.body.Nome,
             email: req.body.Email,
             contacto: req.body.Contacto,
@@ -117,7 +116,13 @@ exports.criarFuncionario = async (req, res) => {
         });
 
         await novoFuncionario.save();
-        return res.status(201).json(paraFuncionarioDto(novoFuncionario));
+
+        const funcionarioLimpo = novoFuncionario.toObject();
+        
+        delete funcionarioLimpo.passwordHash;
+        
+        return res.status(201).json(paraFuncionarioDto(funcionarioLimpo));
+        
     } catch (error) {
         return res.status(400).json({ error: "Erro ao criar funcionário. Verifique se o ID ou Email já existem." });
     }

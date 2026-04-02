@@ -8,7 +8,7 @@ const funcionarioSchema = new mongoose.Schema({
   cargo: { 
     type: String, 
     required: true,
-    enum: ['ADMIN', 'OPERADOR', 'MECANICO'] 
+    enum: ['ADMINISTRADOR', 'OPERADOR', 'MECANICO'] 
   },
   especialidade: { type: String, default: null }, // Apenas para Mecânicos
   passwordHash: { type: String, required: true },
