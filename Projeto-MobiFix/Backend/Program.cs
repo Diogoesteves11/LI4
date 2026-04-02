@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 // CARREGA O FICHEIRO .ENV
 DotNetEnv.Env.Load();
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
@@ -28,19 +27,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-var dataApiUrl = builder.Configuration["DATA_API_URL"] 
+var dataApiUrl = builder.Configuration["DATA_API_URL"]
                  ?? throw new Exception("DATA_API_URL não definida");
-var internalApiKey = builder.Configuration["INTERNAL_API_KEY"] 
+var internalApiKey = builder.Configuration["INTERNAL_API_KEY"]
                      ?? throw new Exception("INTERNAL_API_KEY não definida");
 
-// 2. Criamos uma funçãozinha para configurar o cliente de forma igual
 void ConfigureDefaultClient(HttpClient client)
 {
     client.BaseAddress = new Uri(dataApiUrl);
     client.DefaultRequestHeaders.Add("x-api-key", internalApiKey);
 }
 
-// 3. Registamos todos os serviços usando a mesma configuração
 builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
