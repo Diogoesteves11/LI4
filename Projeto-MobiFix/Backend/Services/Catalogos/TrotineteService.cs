@@ -57,7 +57,7 @@ public class TrotineteService : ITrotineteService
                 _optionsPascalCase
             );
 
-            if (trotinete is null || trotinete.ClienteId != clienteNIF)
+            if (trotinete is null || trotinete.ClienteNIF != clienteNIF)
                 return false;
         }
         catch (HttpRequestException)

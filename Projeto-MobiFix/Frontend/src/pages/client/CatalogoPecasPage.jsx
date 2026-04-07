@@ -4,7 +4,9 @@ import Header from "../../components/Header";
 import BottomNav from "../../components/BottomNav";
 import { usePecas } from "../../hooks/usePecas";
 
-const categories = ["Todas", "Bateria", "Pneu", "Travões", "Pastilhas", "Manete"];
+// Mantemos a lista para os botões de filtro, 
+// mas agora eles vão comparar diretamente com o campo p.categoria
+const categories = ["Todas", "Eletronica", "Travagem", "Pneu"];
 
 export default function Catalogo() {
   const [activeFilter, setActiveFilter] = useState("Todas");
@@ -12,24 +14,20 @@ export default function Catalogo() {
 
   const { data: pecas, isLoading, isError } = usePecas();
 
-  // Lógica de Filtro e Pesquisa
+  // Lógica de Filtro e Pesquisa Simplificada
   const filteredProducts = useMemo(() => {
     if (!pecas) return [];
 
     return pecas.filter((p) => {
-      // EXTRAÇÃO DA CATEGORIA: Pegamos a primeira palavra do nome
-      // Ex: "Bateria Xiaomi Mi" -> "Bateria"
-      const derivedCategory = p.nome ? p.nome.split(" ")[0] : "Geral";
-
-      // Filtro por Categoria
+      // Filtro por Categoria (usando o campo real da API)
       const matchesCategory = 
         activeFilter === "Todas" || 
-        derivedCategory.toLowerCase() === activeFilter.toLowerCase();
+        p.Categoria?.toLowerCase() === activeFilter.toLowerCase();
       
       // Filtro por Pesquisa
       const matchesSearch = 
-        p.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.ean?.includes(searchTerm);
+        p.Nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.CodigoEAN?.includes(searchTerm);
 
       return matchesCategory && matchesSearch;
     });
@@ -66,6 +64,7 @@ export default function Catalogo() {
           </p>
         </section>
 
+        {/* Barra de Pesquisa */}
         <div className="relative mb-6">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -77,6 +76,7 @@ export default function Catalogo() {
           />
         </div>
 
+        {/* Filtros de Categoria */}
         <section className="mb-8 overflow-x-auto no-scrollbar">
           <div className="flex gap-2 pb-2">
             {categories.map((category) => (
@@ -95,62 +95,62 @@ export default function Catalogo() {
           </div>
         </section>
 
+        {/* Grid de Produtos */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p) => (
               <article 
-                key={p.ean} 
+                key={p.CodigoEAN} 
                 className="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100/50 flex flex-col h-full"
               >
                 <div className="aspect-[4/3] overflow-hidden bg-slate-200">
                   <img 
-                    src={`../../../${p.imagem}`} 
-                    alt={p.nome}
+                    src={`../../../${p.Imagem}`} 
+                    alt={p.Nome}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                    // Fallback para imagem caso p.imagem falhe
                     onError={(e) => { e.target.src = "https://placehold.co/400x300?text=Peca"; }}
                   />
                 </div>
                 
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      {/* AQUI: Exibimos a primeira palavra do nome como categoria */}
-                      {p.nome ? p.nome.split(" ")[0] : "Geral"}
+                    {/* AQUI: Usamos o campo categoria real */}
+                    <span className="text-[10px] text-blue-600 font-black uppercase tracking-wider">
+                      {p.Categoria || "Geral"}
                     </span>
                     <span className="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
-                      EAN: {p.ean}
+                      EAN: {p.CodigoEan}
                     </span>
                   </div>
                   
                   <h2 className="text-lg font-bold text-slate-900 leading-tight">
-                    {p.nome}
+                    {p.Nome}
                   </h2>
                   
                   <p className="text-xs text-slate-500 mt-2 mb-4 line-clamp-2">
-                    {p.descricao}
+                    {p.Descricao}
                   </p>
 
                   <div className="mt-auto">
                     <div className="flex justify-between items-baseline mb-3">
                       <p className="text-xl font-black text-blue-600">
-                        €{p.pvp?.toFixed(2)}
+                        €{p.PVP?.toFixed(2)}
                       </p>
-                      <p className={`text-[10px] font-medium italic ${p.stockAtual > 0 ? 'text-slate-400' : 'text-red-500 font-bold'}`}>
-                        {p.stockAtual > 0 ? `Stock: ${p.stockAtual}` : 'Esgotado'}
+                      <p className={`text-[10px] font-medium italic ${p.Stock > 0 ? 'text-slate-400' : 'text-red-500 font-bold'}`}>
+                        {p.StockAtual > 0 ? `Stock: ${p.StockAtual}` : 'Esgotado'}
                       </p>
                     </div>
 
                     <button 
-                      disabled={p.stockAtual <= 0}
+                      disabled={p.StockAtual <= 0}
                       className={`w-full rounded-xl py-3 text-sm font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                        p.stockAtual > 0 
+                        p.StockAtual > 0 
                         ? "bg-slate-950 text-white hover:bg-slate-800" 
                         : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
                       }`}
                     >
                       <ShoppingCart size={16} />
-                      {p.stockAtual > 0 ? "Reservar" : "Indisponível"}
+                      {p.StockAtual > 0 ? "Reservar" : "Indisponível"}
                     </button>
                   </div>
                 </div>
