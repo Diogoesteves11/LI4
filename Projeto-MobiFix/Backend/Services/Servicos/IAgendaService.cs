@@ -5,7 +5,7 @@ using Backend.Models;
 public interface IAgendaService
 {
     Task<IEnumerable<AgendaDto>> ListarAgendaAsync();
-    Task<AgendaDto?> ObterSlotPorIdAsync(string id);
+    Task<AgendaDto?> ObterSlotPorIdAsync(int id);
     Task<AgendaDto?> CriarSlotAsync(AgendaCriacaoDto dto);
-    Task<bool> EliminarSlotAsync(string id);
+    Task<bool> EliminarSlotAsync(int id);
 }

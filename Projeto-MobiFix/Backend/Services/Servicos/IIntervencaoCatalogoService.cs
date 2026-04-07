@@ -4,5 +4,5 @@ using Backend.Models;
 public interface IIntervencaoCatalogoService
 {
     Task<IEnumerable<IntervencaoCatalogoDto>> ListarTodasAsync();
-    Task<IntervencaoCatalogoDto?> ObterPorIdAsync(string id);
+    Task<IntervencaoCatalogoDto?> ObterPorIdAsync(int id);
 }

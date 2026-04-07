@@ -20,7 +20,7 @@ public class AgendaService : IAgendaService
                ?? Enumerable.Empty<AgendaDto>();
     }
 
-    public async Task<AgendaDto?> ObterSlotPorIdAsync(string id)
+    public async Task<AgendaDto?> ObterSlotPorIdAsync(int id)
     {
         try {
             return await _httpClient.GetFromJsonAsync<AgendaDto>($"api/agenda/{id}", _options);
@@ -37,7 +37,7 @@ public class AgendaService : IAgendaService
         return await response.Content.ReadFromJsonAsync<AgendaDto>(_options);
     }
 
-    public async Task<bool> EliminarSlotAsync(string id)
+    public async Task<bool> EliminarSlotAsync(int id)
     {
         var response = await _httpClient.DeleteAsync($"api/agenda/{id}");
         return response.IsSuccessStatusCode;

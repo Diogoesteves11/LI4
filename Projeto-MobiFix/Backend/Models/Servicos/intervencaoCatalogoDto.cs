@@ -2,7 +2,7 @@ namespace Backend.Models;
 
 public class IntervencaoCatalogoDto
 {
-    public string IntervencaoID { get; set; } = string.Empty;
+    public int IntervencaoID { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public decimal PrecoFixoMaoDeObra { get; set; }
     public string Especialidade { get; set; } = string.Empty;
