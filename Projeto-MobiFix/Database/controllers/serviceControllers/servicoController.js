@@ -7,7 +7,7 @@ exports.criarServico = async (req, res) => {
             _id: req.body.ServicoID,
             trotineteId: req.body.TrotineteNumSerie,
             estado: req.body.Estado,
-            descricaoDiagnostico: req.body.DescricaoDiagnostico,
+            feedbackCliente: req.body.FeedbackCliente,
             preco: req.body.Preco,
             dataAgendamento: new Date(),
             historicoIntervencoes: []
