@@ -67,26 +67,32 @@ export default function AgendarDiagnostico() {
         </section>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Seleção de Trotinete Real */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
-              Selecione a Trotinete
-            </label>
-            <select
-              value={selectedScooter}
-              onChange={(e) => setSelectedScooter(e.target.value)}
-              required
-              disabled={loadingScooters || isPending}
-              className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none shadow-sm disabled:opacity-50"
-            >
-              <option value="">{loadingScooters ? "A carregar veículos..." : "Escolha um veículo..."}</option>
-              {scooters.map((s) => (
+        {/* Seleção de Trotinete Real */}
+        <div>
+          <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
+            Selecione a Trotinete
+          </label>
+          <select
+            value={selectedScooter}
+            onChange={(e) => setSelectedScooter(e.target.value)}
+            required
+            disabled={loadingScooters || isPending}
+            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none shadow-sm disabled:opacity-50"
+          >
+            <option value="">
+              {loadingScooters ? "A carregar veículos..." : "Escolha um veículo..."}
+            </option>
+            
+            {/* Filtramos para mostrar apenas as que NÃO ( ! ) estão em serviço */}
+            {scooters
+              .filter((s) => !s.EmServico) 
+              .map((s) => (
                 <option key={s.NumeroSerie} value={s.NumeroSerie}>
                   {s.Marca} {s.Modelo} ({s.NumeroSerie})
                 </option>
               ))}
-            </select>
-          </div>
+          </select>
+        </div>
 
           {/* Data */}
           <div>

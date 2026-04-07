@@ -16,22 +16,35 @@ public class AgendaService : IAgendaService
 
     public async Task<IEnumerable<AgendaDto>> ListarAgendaAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<AgendaDto>>("api/agenda", _options) 
+        return await _httpClient.GetFromJsonAsync<IEnumerable<AgendaDto>>("api/agenda", _options)
                ?? Enumerable.Empty<AgendaDto>();
     }
 
     public async Task<AgendaDto?> ObterSlotPorIdAsync(int id)
     {
-        try {
+        try
+        {
             return await _httpClient.GetFromJsonAsync<AgendaDto>($"api/agenda/{id}", _options);
-        } catch { return null; }
+        }
+        catch { return null; }
     }
 
     public async Task<AgendaDto?> CriarSlotAsync(AgendaCriacaoDto dto)
     {
-        // O payload deve usar os nomes que o agendaController.js espera no req.body
-        var response = await _httpClient.PostAsJsonAsync("api/agenda", dto, _options);
-        
+        // Gera o ID aqui tal como o ServicoID era gerado antes — int positivo aleatório
+        var payload = new
+        {
+            AgendaID      = Random.Shared.Next(10, int.MaxValue),
+            MecanicoNumero = "MEC001",
+            ServicoID     = dto.ServicoID,
+            TipoSlot      = "DIAGNOSTICO",
+            DataHoraInicio = dto.DataHoraInicio,
+            IntervencaoID = 3,
+            Estado        = "RESERVADO"
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("api/agenda", payload, _options);
+
         if (!response.IsSuccessStatusCode) return null;
 
         return await response.Content.ReadFromJsonAsync<AgendaDto>(_options);

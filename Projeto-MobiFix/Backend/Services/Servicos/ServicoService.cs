@@ -16,26 +16,29 @@ public class ServicoService : IServicoService
 
     public async Task<IEnumerable<ServicoDto>> ListarTodosAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<ServicoDto>>("api/servicos", _options) 
+        return await _httpClient.GetFromJsonAsync<IEnumerable<ServicoDto>>("api/servicos", _options)
                ?? Enumerable.Empty<ServicoDto>();
     }
 
     public async Task<ServicoDto?> ObterPorIdAsync(int id)
     {
-        try {
+        try
+        {
             return await _httpClient.GetFromJsonAsync<ServicoDto>($"api/servicos/{id}", _options);
-        } catch { return null; }
+        }
+        catch { return null; }
     }
 
     public async Task<ServicoDto?> CriarServicoDiagnosticoAsync(ServicoCriacaoDto dto)
     {
-        // Mapeamento para o que o Node.js espera no req.body
-        var payload = new {
-            ServicoID = dto.ServicoID,
+        var payload = new
+        {
+            ServicoID = Random.Shared.Next(20, 1000000),
             TrotineteNumSerie = dto.TrotineteNumSerie,
-            Estado = dto.Estado,
-            DescricaoDiagnostico = dto.DescricaoDiagnostico,
-            Preco = dto.Preco
+            Estado = "AGENDADO",
+            FeedbackCliente = dto.FeedbackCliente,
+            Preco = 0,                 
+            IntervencaoInicialD = 3    
         };
 
         var response = await _httpClient.PostAsJsonAsync("api/servicos", payload, _options);

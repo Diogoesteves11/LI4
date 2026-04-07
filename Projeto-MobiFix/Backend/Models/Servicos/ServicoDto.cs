@@ -17,7 +17,7 @@ public class ServicoDto
 
 public class IntervencaoRealizadaDto
 {
-    public int IntervencaoCatalogoID { get; set; } 
+    public int IntervencaoCatalogoID { get; set; }
     public string MecanicoNumero { get; set; } = string.Empty;
     public DateTime DataInicio { get; set; }
     public DateTime? DataFim { get; set; }
@@ -33,13 +33,9 @@ public class PecaUtilizadaDto
 
 public class ServicoCriacaoDto
 {
-    [Required]
-    public int ServicoID { get; set; } 
-    [Required]
+    // ServicoID removido — é gerado pelo Node.js/MongoDB, não pelo cliente
+    [Required(ErrorMessage = "O número de série da trotinete é obrigatório.")]
     public string TrotineteNumSerie { get; set; } = string.Empty;
-    public string Estado { get; set; } = "Pendente";
-    public string DescricaoDiagnostico { get; set; } = "Diagnóstico inicial agendado.";
-    public decimal Preco { get; set; }
-    // ID "3" fixo para a intervenção de catálogo de diagnóstico
-    public int IntervencaoInicialID { get; set; } = 3;
+
+    public string? FeedbackCliente { get; set; }
 }

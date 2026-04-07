@@ -1,13 +1,18 @@
 import api from "./api";
 
 export const agendaService = {
-    getAgendaMecanico: async(mecanicoId) => {
-        const response = await api.get(`/Agenda/mecanico/${mecanicoId}`);
+    // Nome corrigido: era "createAgenda", o hook chamava "criarSlot"
+    criarSlot: async (dados) => {
+        // Payload direto, sem wrapper { agenda: dados }
+        const response = await api.post('/Agenda', {
+            ServicoID: dados.servicoID,
+            DataHoraInicio: dados.dataHoraInicio,
+        });
         return response.data;
     },
 
-    createAgenda: async(agenda) => {
-        const response = await api.post('/Agenda', {agenda});
+    getAgendaMecanico: async (mecanicoId) => {
+        const response = await api.get(`/Agenda/mecanico/${mecanicoId}`);
         return response.data;
-    }
-}
+    },
+};
