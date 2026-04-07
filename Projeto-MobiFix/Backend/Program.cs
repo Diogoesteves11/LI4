@@ -75,6 +75,9 @@ builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IFuncionarioService, FuncionarioService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IFaturaService, FaturaService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IServicoService, ServicoService>(ConfigureDefaultClient);
 
 // Configuração JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

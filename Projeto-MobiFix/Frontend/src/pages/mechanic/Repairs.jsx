@@ -5,14 +5,14 @@ import {
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { useRepairs } from '../../context/RepairsContext';
-import { useAgendaMecanico } from '../../hooks/useAgenda'; // Hook que criaste
+import { useCriarAgenda } from '../../hooks/useAgenda'; // Hook que criaste
 
 export default function Repairs() {
   const { repairs, completeIntervention } = useRepairs();
   
   // 1. Obter o ID do mecânico logado e carregar a sua agenda
   const mecanicoId = localStorage.getItem('funcionarioId'); 
-  const { data: minhaAgenda, isLoading, isError } = useAgendaMecanico(mecanicoId);
+  const { data: minhaAgenda, isLoading, isError } = useCriarAgenda();
 
   const [selectedRepairId, setSelectedRepairId] = useState(null);
   const [expandedRepairs, setExpandedRepairs] = useState(new Set());

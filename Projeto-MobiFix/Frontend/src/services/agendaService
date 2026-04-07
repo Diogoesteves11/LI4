@@ -1,0 +1,15 @@
+import api from './api';
+
+export const agendaService = {
+    criarSlot: async (dados) => {
+        // Envia para o controller .NET: api/Agenda
+        const response = await api.post('/Agenda', {
+            ServicoID: dados.servicoId,
+            TipoSlot: "Diagnostico",
+            IntervencaoID: "3", // ID do Diagnóstico no Catálogo
+            DataHoraInicio: dados.dataHora,
+            Estado: "Agendado"
+        });
+        return response.data;
+    }
+};

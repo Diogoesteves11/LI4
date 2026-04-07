@@ -5,7 +5,7 @@ exports.listarTrotinetes = async (req, res) => {
     try {
         const { NIF, emServico } = req.query;
         let filtro = {};
-        if (NIF) filtro.clienteId = clienteId;
+        if (NIF) filtro.clienteId = NIF;
         if(emServico) filtro.emServico = emServico;
         const trotinetes = await Trotinete.find(filtro).lean();
         return res.status(200).json(trotinetes.map(paraTrotineteDto));
