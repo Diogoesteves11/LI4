@@ -25,7 +25,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetPorId(string id)
+    public async Task<IActionResult> GetPorId(int id)
     {
         var servico = await _servicoService.ObterPorIdAsync(id);
         if (servico == null) return NotFound();

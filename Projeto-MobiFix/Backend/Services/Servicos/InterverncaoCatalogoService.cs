@@ -22,7 +22,7 @@ public class IntervencaoCatalogoService : IIntervencaoCatalogoService
                ?? Enumerable.Empty<IntervencaoCatalogoDto>();
     }
 
-    public async Task<IntervencaoCatalogoDto?> ObterPorIdAsync(string id)
+    public async Task<IntervencaoCatalogoDto?> ObterPorIdAsync(int id)
     {
         try 
         {

@@ -20,7 +20,7 @@ public class ServicoService : IServicoService
                ?? Enumerable.Empty<ServicoDto>();
     }
 
-    public async Task<ServicoDto?> ObterPorIdAsync(string id)
+    public async Task<ServicoDto?> ObterPorIdAsync(int id)
     {
         try {
             return await _httpClient.GetFromJsonAsync<ServicoDto>($"api/servicos/{id}", _options);
@@ -44,7 +44,7 @@ public class ServicoService : IServicoService
         return await response.Content.ReadFromJsonAsync<ServicoDto>(_options);
     }
 
-    public async Task<bool> AtualizarEstadoAsync(string id, string novoEstado)
+    public async Task<bool> AtualizarEstadoAsync(int id, string novoEstado)
     {
         var payload = new { Estado = novoEstado };
         var response = await _httpClient.PutAsJsonAsync($"api/servicos/{id}", payload, _options);

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class ServicoDto
 {
-    public string ServicoID { get; set; } = string.Empty;
+    public int ServicoID { get; set; }
     public string TrotineteNumSerie { get; set; } = string.Empty;
     public string Estado { get; set; } = string.Empty;
     public DateTime DataAgendamento { get; set; }
@@ -17,8 +17,8 @@ public class ServicoDto
 
 public class IntervencaoRealizadaDto
 {
-    public string IntervencaoCatalogoID { get; set; } = string.Empty;
-    public string? MecanicoNumero { get; set; }
+    public int IntervencaoCatalogoID { get; set; } 
+    public string MecanicoNumero { get; set; } = string.Empty;
     public DateTime DataInicio { get; set; }
     public DateTime? DataFim { get; set; }
     public int? TempoGastoMinutos { get; set; }
@@ -34,12 +34,12 @@ public class PecaUtilizadaDto
 public class ServicoCriacaoDto
 {
     [Required]
-    public string ServicoID { get; set; } = string.Empty;
+    public int ServicoID { get; set; } 
     [Required]
     public string TrotineteNumSerie { get; set; } = string.Empty;
     public string Estado { get; set; } = "Pendente";
     public string DescricaoDiagnostico { get; set; } = "Diagnóstico inicial agendado.";
     public decimal Preco { get; set; }
     // ID "3" fixo para a intervenção de catálogo de diagnóstico
-    public string IntervencaoInicialID { get; set; } = "3";
+    public int IntervencaoInicialID { get; set; } = 3;
 }

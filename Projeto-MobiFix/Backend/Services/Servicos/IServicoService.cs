@@ -5,7 +5,7 @@ using Backend.Models;
 public interface IServicoService
 {
     Task<IEnumerable<ServicoDto>> ListarTodosAsync();
-    Task<ServicoDto?> ObterPorIdAsync(string id);
+    Task<ServicoDto?> ObterPorIdAsync(int id);
     Task<ServicoDto?> CriarServicoDiagnosticoAsync(ServicoCriacaoDto dto);
-    Task<bool> AtualizarEstadoAsync(string id, string novoEstado);
+    Task<bool> AtualizarEstadoAsync(int id, string novoEstado);
 }

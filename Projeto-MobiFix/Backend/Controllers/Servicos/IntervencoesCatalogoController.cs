@@ -25,7 +25,7 @@ public class IntervencoesCatalogoController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Obter(string id)
+    public async Task<IActionResult> Obter(int id)
     {
         var item = await _catalogoService.ObterPorIdAsync(id);
         if (item == null) return NotFound(new { mensagem = "Intervenção não encontrada no catálogo." });

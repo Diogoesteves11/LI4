@@ -28,7 +28,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Obter(string id)
+    public async Task<IActionResult> Obter(int id)
     {
         var slot = await _agendaService.ObterSlotPorIdAsync(id);
         if (slot == null) return NotFound(new { mensagem = "Slot de agenda não encontrado." });
@@ -53,7 +53,6 @@ public class AgendaController : ControllerBase
             mecanicoEscolhido = mecanicos[indice].NumeroMecanografico;
         }
 
-        dto.AgendaID = Guid.NewGuid().ToString();
         dto.MecanicoNumero = mecanicoEscolhido;
         
         dto.Estado ??= "AGENDADO";
@@ -68,7 +67,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Eliminar(string id)
+    public async Task<IActionResult> Eliminar(int id)
     {
         var sucesso = await _agendaService.EliminarSlotAsync(id);
         if (!sucesso) return NotFound(new { mensagem = "Slot não encontrado." });
