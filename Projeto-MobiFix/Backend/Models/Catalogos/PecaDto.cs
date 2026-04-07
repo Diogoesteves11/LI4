@@ -11,5 +11,6 @@ public class PecaDto
     public float CustoAquisicao { get; set; }
     public int QuantidadeMinima { get; set; } 
     public int PadraoReposicao { get; set; }
+    public string Imagem { get; set; } = string.Empty;
     public bool Ativo { get; set; }
 }
