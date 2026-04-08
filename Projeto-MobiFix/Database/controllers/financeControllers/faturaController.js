@@ -5,14 +5,21 @@ exports.criarFatura = async (req, res) => {
     try {
         const novaFatura = new Fatura({
             _id: req.body.NumeroFatura,
-            clienteNIF: req.body.ClienteNIF,
-            servicoID: req.body.ServicoID, // Opcional
+            
+            clienteId: req.body.ClienteNIF || req.body.clienteId, 
+            
+            servicoId: req.body.ServicoID || null,
+            
+            vendaId: req.body.VendaID || null,     
+            
             valorTotal: req.body.ValorTotal,
             metodoPagamento: req.body.MetodoPagamento,
-            devolucoes: [],
-            dataEmissao: new Date()
+            devolucoes: []
+            
         });
+
         await novaFatura.save();
+        
         return res.status(201).json(paraFaturaDto(novaFatura.toObject()));
     } catch (error) {
         return res.status(400).json({ error: error.message });

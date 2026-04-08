@@ -23,7 +23,7 @@ exports.listarAgenda = async (req, res) => {
     try {
         const { mecanicoId, servicoId, estado, tipoSlot } = req.query;
         let filtro = {};
-        if (mecanicoId) filtro.mecanicoId = Number(mecanicoId);
+        if (mecanicoId) filtro.mecanicoId = mecanicoId;
         if (servicoId) filtro.servicoId = Number(servicoId);
         if (estado) filtro.estado = estado.toUpperCase();
         if (tipoSlot) filtro.tipoSlot = tipoSlot.toUpperCase();

@@ -7,6 +7,7 @@ const paraPromocaoDto = (p) => {
         DataInicio: p.dataInicio,
         DataFim: p.dataFim,
         AdministradorNumero: p.administradorId,
+        Ativa: p.ativa,
         PecasAplicaveisEANs: p.pecasAplicaveisIds || []
     };
 };

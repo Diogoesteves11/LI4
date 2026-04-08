@@ -13,9 +13,9 @@ const promocaoSchema = new mongoose.Schema({
     required: true 
   },
   administradorId: { type: String, ref: 'Funcionario', required: true },
+  ativa: {type: Boolean ,default: true},
   pecasAplicaveisIds: [{ type: String, ref: 'Peca' }]
 }, { versionKey: false });
 
-// 3º argumento para evitar "promocaos"
 const Promocao = mongoose.model('Promocao', promocaoSchema, 'promocoes');
 module.exports = Promocao;
