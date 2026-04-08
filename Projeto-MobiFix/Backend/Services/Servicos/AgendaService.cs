@@ -31,11 +31,10 @@ public class AgendaService : IAgendaService
 
     public async Task<AgendaDto?> CriarSlotAsync(AgendaCriacaoDto dto)
     {
-        // Gera o ID aqui tal como o ServicoID era gerado antes — int positivo aleatório
         var payload = new
         {
             AgendaID      = Random.Shared.Next(10, int.MaxValue),
-            MecanicoNumero = "MEC001",
+            MecanicoNumero = dto.MecanicoNumero,
             ServicoID     = dto.ServicoID,
             TipoSlot      = "DIAGNOSTICO",
             DataHoraInicio = dto.DataHoraInicio,
