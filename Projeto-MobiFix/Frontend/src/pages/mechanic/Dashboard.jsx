@@ -7,13 +7,13 @@ import { ScheduleRepairDialog } from '../../components/AgendamentoReparacao';
 import { toast, Toaster } from 'sonner';
 import { generateDiagnosticPDF } from '../../utils/PDFGuiaReparacao';
 import { useRepairs } from '../../context/RepairsContext';
-import { useAgendaCreate } from '../../hooks/useAgenda'; 
+import { useCriarAgenda } from '../../hooks/useAgenda'; 
 
 export default function Dashboard() {
   const { repairs, updateRepairStatus, addRepairDetails } = useRepairs();
   
   // 1. Inicializar a Mutação
-  const { mutateAsync: criarAgendamento, isLoading: isSaving } = useAgendaCreate();
+  const { mutateAsync: criarAgendamento, isLoading: isSaving } = useCriarAgenda();
 
   const [selectedRepairId, setSelectedRepairId] = useState(repairs[0]?.id || null);
   const [selectedInterventions, setSelectedInterventions] = useState([]);

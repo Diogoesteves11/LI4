@@ -1,68 +1,100 @@
-import { Calendar, Clock, AlertCircle, Phone, Mail, MapPin } from "lucide-react";
+import { Calendar, Clock, AlertCircle, Phone, Mail, MapPin, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import BottomNav from "../../components/BottomNav";
+import { useTrotinetes } from "../../hooks/useTrotinetes";
+import { useCriarServico } from "../../hooks/useServicos";
+import { useCriarAgenda } from "../../hooks/useAgenda";
 
-export default function AgendarDiagnostico(){
-  const navigate = useNavigate()
+export default function AgendarDiagnostico() {
+  const navigate = useNavigate();
+  
+  // Hooks de Dados e Mutações
+  const { data: scooters = [], isLoading: loadingScooters } = useTrotinetes();
+  const criarServico = useCriarServico();
+  const criarAgenda = useCriarAgenda();
+
+  // Estados do Formulário
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedScooter, setSelectedScooter] = useState("");
   const [problem, setProblem] = useState("");
 
-  const availableTimes = [
-    "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00",
-  ];
+  const availableTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
 
-  const scooters = [
-    { id: "3", name: "Xiaomi Essential - XM2022-1234" },
-    { id: "1", name: "Xiaomi Mi Pro 2 - XM2023-4567" },
-    { id: "2", name: "Segway Ninebot Max - SG2023-8901" },
-    { id: "4", name: "Ninebot KickScooter E45 - NB2023-5678" },
-  ];
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    alert("Diagnóstico agendado com sucesso!");
-    navigate("/cliente");
-  }
+    try {
+      // PASSO 1: Criar o Serviço
+      const servicoObj = await criarServico.mutateAsync({
+        trotineteNumSerie: selectedScooter,
+        descricao: problem
+      });
 
-  const isFormValid = selectedDate && selectedTime && selectedScooter && problem;
+      // PASSO 2: Criar o slot na Agenda usando o ID do serviço criado
+      // Combinamos data e hora para o formato ISO que o .NET espera
+      const dataHoraIso = `${selectedDate}T${selectedTime}:00`;
+      
+      await criarAgenda.mutateAsync({
+        servicoId: servicoObj.ServicoID,
+        dataHora: dataHoraIso
+      });
+
+      alert("Diagnóstico agendado com sucesso! O mecânico foi atribuído automaticamente.");
+      navigate("/cliente");
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao realizar o agendamento. Por favor, tente novamente.");
+    }
+  };
+
+  const isPending = criarServico.isPending || criarAgenda.isPending;
+  const isFormValid = selectedDate && selectedTime && selectedScooter && problem && !isPending;
 
   return (
-  <main className="min-h-screen bg-slate-50 pb-28">
-  <Header title="Agendar Diagnóstico" showBack />
-  <div className="px-5 py-6">
+    <main className="min-h-screen bg-slate-50 pb-28">
+      <Header title="Agendar Diagnóstico" showBack />
+      
+      <div className="px-5 py-6">
         <section className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 flex gap-3 shadow-sm">
           <AlertCircle className="text-blue-600 shrink-0" size={20} />
           <p className="text-xs text-blue-800 leading-relaxed">
-            Agende um diagnóstico gratuito. Os nossos técnicos irão avaliar o seu
+            Agende um diagnóstico gratuito. Os nossos técnicos (atribuídos aleatoriamente) irão avaliar o seu
             veículo e fornecer um orçamento detalhado em 24h.
           </p>
         </section>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
-              Selecione a Trotinete
-            </label>
-            <select
-              value={selectedScooter}
-              onChange={(e) => setSelectedScooter(e.target.value)}
-              required
-              className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none shadow-sm"
-            >
-              <option value="">Escolha um veículo...</option>
-              {scooters.map((scooter) => (
-                <option key={scooter.id} value={scooter.id}>
-                  {scooter.name}
+        {/* Seleção de Trotinete Real */}
+        <div>
+          <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
+            Selecione a Trotinete
+          </label>
+          <select
+            value={selectedScooter}
+            onChange={(e) => setSelectedScooter(e.target.value)}
+            required
+            disabled={loadingScooters || isPending}
+            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none shadow-sm disabled:opacity-50"
+          >
+            <option value="">
+              {loadingScooters ? "A carregar veículos..." : "Escolha um veículo..."}
+            </option>
+            
+            {/* Filtramos para mostrar apenas as que NÃO ( ! ) estão em serviço */}
+            {scooters
+              .filter((s) => !s.EmServico) 
+              .map((s) => (
+                <option key={s.NumeroSerie} value={s.NumeroSerie}>
+                  {s.Marca} {s.Modelo} ({s.NumeroSerie})
                 </option>
               ))}
-            </select>
-          </div>
+          </select>
+        </div>
 
+          {/* Data */}
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
               <Calendar className="inline mr-1.5" size={14} />
@@ -74,10 +106,12 @@ export default function AgendarDiagnostico(){
               onChange={(e) => setSelectedDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
               required
+              disabled={isPending}
               className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
             />
           </div>
 
+          {/* Horários */}
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider ml-1">
               <Clock className="inline mr-1.5" size={14} />
@@ -88,6 +122,7 @@ export default function AgendarDiagnostico(){
                 <button
                   key={time}
                   type="button"
+                  disabled={isPending}
                   onClick={() => setSelectedTime(time)}
                   className={`py-3 rounded-xl text-xs font-bold transition-all border ${
                     selectedTime === time
@@ -101,6 +136,7 @@ export default function AgendarDiagnostico(){
             </div>
           </div>
 
+          {/* Descrição */}
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider ml-1">
               Descrição do Problema
@@ -109,8 +145,9 @@ export default function AgendarDiagnostico(){
               value={problem}
               onChange={(e) => setProblem(e.target.value)}
               rows={4}
-              placeholder="Ex: O travão de trás faz barulho e a luz não acende..."
+              placeholder="Ex: O travão de trás faz barulho..."
               required
+              disabled={isPending}
               className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm resize-none"
             />
           </div>
@@ -118,9 +155,16 @@ export default function AgendarDiagnostico(){
           <button
             type="submit"
             disabled={!isFormValid}
-            className="w-full bg-blue-600 text-white rounded-2xl p-5 font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:pointer-events-none mt-4"
+            className="w-full bg-blue-600 text-white rounded-2xl p-5 font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:pointer-events-none mt-4 flex items-center justify-center gap-2"
           >
-            Confirmar Agendamento
+            {isPending ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                A processar agendamento...
+              </>
+            ) : (
+              "Confirmar Agendamento"
+            )}
           </button>
         </form>
 

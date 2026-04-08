@@ -34,14 +34,14 @@ export default function FeaturedParts() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {parts.map((part) => (
             <div
-              key={part.codigoEAN}
+              key={part.CodigoEAN}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border border-slate-100"
             >
               {/* Product Image Container */}
               <div className="relative aspect-square overflow-hidden bg-slate-50">
                 <img
-                  src={`/public/${part.imagem}`}
-                  alt={part.nome}
+                  src={`/public/${part.Imagem}`}
+                  alt={part.Nome}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute top-3 left-3">
@@ -54,10 +54,10 @@ export default function FeaturedParts() {
               {/* Product Info */}
               <div className="p-6">
                 <h3 className="text-lg font-bold text-deep-slate mb-1 group-hover:text-corporate-blue transition-colors">
-                  {part.nome}
+                  {part.Nome}
                 </h3>
                 <p className="text-2xl font-black text-corporate-blue mb-6">
-                  {part.pvp}€
+                  {part.PVP}€
                 </p>
 
                 {/* Action Buttons */}

@@ -13,7 +13,7 @@ public class PecaService: IPecaService
 
     public async Task<IEnumerable<PecaDto>> GetTodasPecasAsync()
     {
-        var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<PecaDto>>("pecas/");
+        var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<PecaDto>>("api/pecas");
         return resultado ?? Enumerable.Empty<PecaDto>();
     }
 }

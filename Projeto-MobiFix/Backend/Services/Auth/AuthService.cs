@@ -1,5 +1,7 @@
 namespace Backend.Services;
 
+using System.Text.Json; 
+using System.Text.Json.Serialization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -12,6 +14,11 @@ public class AuthService: IAuthService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
 
+    private static readonly JsonSerializerOptions _optionsPascalCase = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = null // Isto impede a conversão para minúsculas
+    };
+
     public AuthService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
@@ -20,14 +27,7 @@ public class AuthService: IAuthService
 
     public async Task<string?> LoginFuncionarioAsync(FuncionarioLoginDto loginDto)
     {
-        // Procura no .env por INTERNAL_API_KEY
-        var apiKey = _configuration["INTERNAL_API_KEY"] 
-                    ?? throw new InvalidOperationException("INTERNAL_API_KEY não encontrada no .env");
-
-        _httpClient.DefaultRequestHeaders.Remove("x-api-key");
-        _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
-        var url = $"/auth/funcionarios/{loginDto.NumeroMecanografico}";
+        var url = $"api/auth/funcionario/{loginDto.NumeroMecanografico}";
         var funcionario = await _httpClient.GetFromJsonAsync<FuncionarioDto>(url);
 
         if (funcionario is null) return null;
@@ -43,7 +43,7 @@ public class AuthService: IAuthService
         if (string.IsNullOrWhiteSpace(loginDto.NIF))
             return null;
  
-        var cliente = await _httpClient.GetFromJsonAsync<ClienteDto?>($"/auth/clientes/{loginDto.NIF}");
+        var cliente = await _httpClient.GetFromJsonAsync<ClienteDto>($"api/auth/cliente/{loginDto.NIF}");
  
         if (cliente is null)
             return null;
@@ -61,25 +61,24 @@ public class AuthService: IAuthService
  
         var payload = new
         {
-            registoDto.Nome,
-            registoDto.Email,
-            registoDto.Morada,
             registoDto.NIF,
+            registoDto.Nome,
             registoDto.Telefone,
+            registoDto.Morada,
+            registoDto.Email,
             PasswordHash = passwordHash
         };
  
-        var response = await _httpClient.PostAsJsonAsync("/cliente", payload);
+        var response = await _httpClient.PostAsJsonAsync("api/clientes", payload, _optionsPascalCase);
         return response.IsSuccessStatusCode;
-
     }
 
 
     private string GerarTokenFuncionario(FuncionarioDto funcionario)
     {
-        // Procura no .env por JWT_SECRET
-        var secretKey = _configuration["JWT_SECRET"]
-            ?? throw new InvalidOperationException("JWT_SECRET não encontrada no .env");
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"]
+            ?? throw new InvalidOperationException("JwtSettings:SecretKey não está configurado.");
 
         var claims = new[]
         {
@@ -92,9 +91,8 @@ public class AuthService: IAuthService
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            // Podes meter estes valores no .env também ou deixar fixos
-            issuer: "MobiFixBackend", 
-            audience: "MobiFixFrontend",
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddHours(8),
             signingCredentials: credentials

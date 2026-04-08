@@ -12,9 +12,23 @@ export default function Layout() {
     { path:'/FixNSell/pecas-reservadas', label: 'Peças Reservadas', icon: Toolbox},
     { path: '/FixNSell/rececao-encomendas', label: 'Receção de Encomendas', icon: Package },
   ];
+  
+  function parseJwt(token) {
+    try {
+      const base64Payload = token.split('.')[1];
+      const decoded = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  }
 
-  const nome = localStorage.getItem('user_name');
-  const role = localStorage.getItem('user_role');
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  const payload = parseJwt(token);
+
+  const nome = payload?.nome ?? null;
+  const role = payload?.cargo ?? null;
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans antialiased">

@@ -12,9 +12,42 @@ var builder = WebApplication.CreateBuilder(args);
 // Adiciona as variáveis do sistema (incluindo as do .env) ao Configuration
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        // Isto impede o C# de converter "Nome" em "nome"
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });;
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "MobiFix API", Version = "v1" });
+
+    // Define o esquema de segurança JWT
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header usando o esquema Bearer. Exemplo: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
@@ -41,6 +74,12 @@ void ConfigureDefaultClient(HttpClient client)
 builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IFuncionarioService, FuncionarioService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IFaturaService, FaturaService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IServicoService, ServicoService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IAgendaService, AgendaService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IEncomendaClienteService, EncomendaClienteService>(ConfigureDefaultClient);
 
 // Configuração JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
