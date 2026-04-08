@@ -1,38 +1,99 @@
-import { Scooter, Search, ShoppingCart, Loader2, AlertCircle } from "lucide-react";
+import { Search, ShoppingCart, Loader2, AlertCircle, Plus, Minus, Trash2, X, CheckCircle2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import Header from "../../components/Header";
 import BottomNav from "../../components/BottomNav";
 import { usePecas } from "../../hooks/usePecas";
+import { useCriarReserva } from "../../hooks/useEncomendaCliente";
 
-// Mantemos a lista para os botões de filtro, 
-// mas agora eles vão comparar diretamente com o campo p.categoria
 const categories = ["Todas", "Eletronica", "Travagem", "Pneu"];
+
+// Ícone SVG de scooter inline
+function ScooterIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+      <path d="M5 17H3v-4l3-5h8l2 3h2a2 2 0 0 1 2 2v4h-2"/>
+      <path d="M11 8V5l-2-2"/>
+    </svg>
+  );
+}
 
 export default function Catalogo() {
   const [activeFilter, setActiveFilter] = useState("Todas");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm]     = useState("");
+  const [carrinho, setCarrinho]         = useState([]); // [{ peca, quantidade }]
+  const [carrinhoAberto, setCarrinhoAberto] = useState(false);
+  const [reservaConcluida, setReservaConcluida] = useState(false);
 
   const { data: pecas, isLoading, isError } = usePecas();
+  const criarReservaMutation = useCriarReserva();
 
-  // Lógica de Filtro e Pesquisa Simplificada
+  // ── Filtro ────────────────────────────────────────────────────────────────
   const filteredProducts = useMemo(() => {
     if (!pecas) return [];
-
     return pecas.filter((p) => {
-      // Filtro por Categoria (usando o campo real da API)
-      const matchesCategory = 
-        activeFilter === "Todas" || 
+      const matchesCategory =
+        activeFilter === "Todas" ||
         p.Categoria?.toLowerCase() === activeFilter.toLowerCase();
-      
-      // Filtro por Pesquisa
-      const matchesSearch = 
+      const matchesSearch =
         p.Nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.CodigoEAN?.includes(searchTerm);
-
+        p.CodigoEan?.includes(searchTerm);
       return matchesCategory && matchesSearch;
     });
   }, [pecas, activeFilter, searchTerm]);
 
+  // ── Carrinho helpers ──────────────────────────────────────────────────────
+  const totalItens = carrinho.reduce((sum, i) => sum + i.quantidade, 0);
+  const totalPreco = carrinho.reduce((sum, i) => sum + i.peca.PVP * i.quantidade, 0);
+
+  const adicionarAoCarrinho = (peca) => {
+    setCarrinho(prev => {
+      const existente = prev.find(i => i.peca.CodigoEan === peca.CodigoEan);
+      if (existente) {
+        return prev.map(i =>
+          i.peca.CodigoEan === peca.CodigoEan
+            ? { ...i, quantidade: i.quantidade + 1 }
+            : i
+        );
+      }
+      return [...prev, { peca, quantidade: 1 }];
+    });
+  };
+
+  const alterarQuantidade = (ean, delta) => {
+    setCarrinho(prev =>
+      prev
+        .map(i => i.peca.CodigoEan === ean ? { ...i, quantidade: i.quantidade + delta } : i)
+        .filter(i => i.quantidade > 0)
+    );
+  };
+
+  const removerDoCarrinho = (ean) => {
+    setCarrinho(prev => prev.filter(i => i.peca.CodigoEan !== ean));
+  };
+
+  const quantidadeNoCarrinho = (ean) =>
+    carrinho.find(i => i.peca.CodigoEan === ean)?.quantidade ?? 0;
+
+  // ── Submeter reserva ──────────────────────────────────────────────────────
+  const handleConfirmarReserva = () => {
+    const itens = carrinho.map(i => ({
+      pecaEAN:       i.peca.CodigoEan,
+      quantidade:    i.quantidade,
+      precoUnitario: i.peca.PVP,
+    }));
+
+    criarReservaMutation.mutate(itens, {
+      onSuccess: () => {
+        setCarrinho([]);
+        setCarrinhoAberto(false);
+        setReservaConcluida(true);
+        setTimeout(() => setReservaConcluida(false), 4000);
+      },
+    });
+  };
+
+  // ── Loading / Error ───────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -55,28 +116,52 @@ export default function Catalogo() {
   return (
     <main className="min-h-screen bg-slate-50 pb-28">
       <Header title="Catálogo de Peças" showBack />
-      
+
       <div className="p-5">
+        {/* Banner informativo */}
         <section className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 flex gap-3 shadow-sm">
-          <Scooter className="text-blue-600 shrink-0" size={18} />
+          <ScooterIcon className="text-blue-600 shrink-0 w-5 h-5 mt-0.5" />
           <p className="text-xs text-blue-800 leading-relaxed font-medium">
-            Reserve peças para levantar na loja MobiFix.
+            Reserve peças para levantar na loja MobiFix. O pagamento é feito no balcão.
           </p>
         </section>
 
-        {/* Barra de Pesquisa */}
-        <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Pesquisar por nome ou EAN..."
-            className="w-full bg-slate-100 border border-slate-200 rounded-full px-5 pl-11 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all shadow-inner"
-          />
+        {/* Toast de sucesso */}
+        {reservaConcluida && (
+          <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-in slide-in-from-top-3 duration-300">
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="font-bold text-sm">Reserva confirmada! Levante na loja.</span>
+          </div>
+        )}
+
+        {/* Barra de pesquisa + botão carrinho */}
+        <div className="flex gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Pesquisar por nome ou EAN..."
+              className="w-full bg-slate-100 border border-slate-200 rounded-full px-5 pl-11 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 transition-all"
+            />
+          </div>
+
+          {/* Botão carrinho */}
+          <button
+            onClick={() => setCarrinhoAberto(true)}
+            className="relative flex items-center justify-center w-12 h-12 bg-slate-950 text-white rounded-full shadow-lg active:scale-95 transition-all shrink-0"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {totalItens > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                {totalItens}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Filtros de Categoria */}
+        {/* Filtros */}
         <section className="mb-8 overflow-x-auto no-scrollbar">
           <div className="flex gap-2 pb-2">
             {categories.map((category) => (
@@ -95,67 +180,83 @@ export default function Catalogo() {
           </div>
         </section>
 
-        {/* Grid de Produtos */}
+        {/* Grid de produtos */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((p) => (
-              <article 
-                key={p.CodigoEAN} 
-                className="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100/50 flex flex-col h-full"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-slate-200">
-                  <img 
-                    src={`../../../${p.Imagem}`} 
-                    alt={p.Nome}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                    onError={(e) => { e.target.src = "https://placehold.co/400x300?text=Peca"; }}
-                  />
-                </div>
-                
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    {/* AQUI: Usamos o campo categoria real */}
-                    <span className="text-[10px] text-blue-600 font-black uppercase tracking-wider">
-                      {p.Categoria || "Geral"}
-                    </span>
-                    <span className="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
-                      EAN: {p.CodigoEan}
-                    </span>
-                  </div>
-                  
-                  <h2 className="text-lg font-bold text-slate-900 leading-tight">
-                    {p.Nome}
-                  </h2>
-                  
-                  <p className="text-xs text-slate-500 mt-2 mb-4 line-clamp-2">
-                    {p.Descricao}
-                  </p>
+            filteredProducts.map((p) => {
+              const qtd = quantidadeNoCarrinho(p.CodigoEan);
+              const esgotado = p.StockAtual <= 0;
 
-                  <div className="mt-auto">
-                    <div className="flex justify-between items-baseline mb-3">
-                      <p className="text-xl font-black text-blue-600">
-                        €{p.PVP?.toFixed(2)}
-                      </p>
-                      <p className={`text-[10px] font-medium italic ${p.Stock > 0 ? 'text-slate-400' : 'text-red-500 font-bold'}`}>
-                        {p.StockAtual > 0 ? `Stock: ${p.StockAtual}` : 'Esgotado'}
-                      </p>
+              return (
+                <article
+                  key={p.CodigoEan}
+                  className="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100/50 flex flex-col h-full"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-slate-200">
+                    <img
+                      src={`../../../${p.Imagem}`}
+                      alt={p.Nome}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      onError={(e) => { e.target.src = "https://placehold.co/400x300?text=Peca"; }}
+                    />
+                  </div>
+
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-[10px] text-blue-600 font-black uppercase tracking-wider">
+                        {p.Categoria || "Geral"}
+                      </span>
+                      <span className="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                        EAN: {p.CodigoEan}
+                      </span>
                     </div>
 
-                    <button 
-                      disabled={p.StockAtual <= 0}
-                      className={`w-full rounded-xl py-3 text-sm font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                        p.StockAtual > 0 
-                        ? "bg-slate-950 text-white hover:bg-slate-800" 
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                      }`}
-                    >
-                      <ShoppingCart size={16} />
-                      {p.StockAtual > 0 ? "Reservar" : "Indisponível"}
-                    </button>
+                    <h2 className="text-lg font-bold text-slate-900 leading-tight">{p.Nome}</h2>
+                    <p className="text-xs text-slate-500 mt-2 mb-4 line-clamp-2">{p.Descricao}</p>
+
+                    <div className="mt-auto">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <p className="text-xl font-black text-blue-600">€{p.PVP?.toFixed(2)}</p>
+                        <p className={`text-[10px] font-medium italic ${esgotado ? 'text-red-500 font-bold' : 'text-slate-400'}`}>
+                          {esgotado ? 'Esgotado' : `Stock: ${p.StockAtual}`}
+                        </p>
+                      </div>
+
+                      {/* Botão / controlo de quantidade */}
+                      {esgotado ? (
+                        <button disabled className="w-full rounded-xl py-3 text-sm font-bold bg-slate-200 text-slate-400 cursor-not-allowed">
+                          Indisponível
+                        </button>
+                      ) : qtd === 0 ? (
+                        <button
+                          onClick={() => adicionarAoCarrinho(p)}
+                          className="w-full rounded-xl py-3 text-sm font-bold bg-slate-950 text-white hover:bg-slate-800 shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                          <ShoppingCart size={16} /> Reservar
+                        </button>
+                      ) : (
+                        <div className="flex items-center justify-between bg-slate-100 rounded-xl px-2 py-1">
+                          <button
+                            onClick={() => alterarQuantidade(p.CodigoEan, -1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-all"
+                          >
+                            <Minus className="w-4 h-4 text-slate-600" />
+                          </button>
+                          <span className="font-black text-slate-900 text-sm">{qtd}</span>
+                          <button
+                            onClick={() => alterarQuantidade(p.CodigoEan, +1)}
+                            disabled={qtd >= p.StockAtual}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-all disabled:opacity-30"
+                          >
+                            <Plus className="w-4 h-4 text-slate-600" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))
+                </article>
+              );
+            })
           ) : (
             <div className="col-span-full text-center py-10 text-slate-400">
               Nenhuma peça encontrada com estes critérios.
@@ -163,6 +264,97 @@ export default function Catalogo() {
           )}
         </section>
       </div>
+
+      {/* ── Drawer do carrinho ─────────────────────────────────────────────── */}
+      {carrinhoAberto && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setCarrinhoAberto(false)}
+          />
+
+          {/* Painel */}
+          <div className="relative w-full max-w-lg bg-white rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom-4 duration-300 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <div>
+                <h3 className="font-black text-slate-900 text-lg">A tua reserva</h3>
+                <p className="text-xs text-slate-400 font-medium">Pagamento no balcão ao levantar</p>
+              </div>
+              <button
+                onClick={() => setCarrinhoAberto(false)}
+                className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Itens */}
+            <div className="overflow-y-auto flex-1 p-6 space-y-4">
+              {carrinho.length === 0 ? (
+                <p className="text-center text-slate-300 font-bold py-8">O carrinho está vazio.</p>
+              ) : (
+                carrinho.map(({ peca, quantidade }) => (
+                  <div key={peca.CodigoEan} className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
+                      <img
+                        src={`../../../${peca.Imagem}`}
+                        alt={peca.Nome}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = "https://placehold.co/48x48?text=?"; }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900 text-sm truncate">{peca.Nome}</p>
+                      <p className="text-xs text-slate-400">€{peca.PVP?.toFixed(2)} × {quantidade}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center bg-slate-100 rounded-lg">
+                        <button onClick={() => alterarQuantidade(peca.CodigoEan, -1)} className="w-7 h-7 flex items-center justify-center">
+                          <Minus className="w-3 h-3 text-slate-600" />
+                        </button>
+                        <span className="px-1 font-black text-sm text-slate-900">{quantidade}</span>
+                        <button
+                          onClick={() => alterarQuantidade(peca.CodigoEan, +1)}
+                          disabled={quantidade >= peca.StockAtual}
+                          className="w-7 h-7 flex items-center justify-center disabled:opacity-30"
+                        >
+                          <Plus className="w-3 h-3 text-slate-600" />
+                        </button>
+                      </div>
+                      <button onClick={() => removerDoCarrinho(peca.CodigoEan)} className="p-1.5 text-slate-300 hover:text-red-500 transition-all">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer com total e botão */}
+            {carrinho.length > 0 && (
+              <div className="p-6 border-t border-slate-100 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-500">Total estimado</span>
+                  <span className="font-black text-xl text-slate-900">€{totalPreco.toFixed(2)}</span>
+                </div>
+                <button
+                  onClick={handleConfirmarReserva}
+                  disabled={criarReservaMutation.isPending}
+                  className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-black text-sm shadow-xl transition-all active:scale-[0.98] ${
+                    criarReservaMutation.isPending
+                      ? "bg-slate-400 cursor-not-allowed"
+                      : "bg-slate-950 hover:bg-black"
+                  }`}
+                >
+                  {criarReservaMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {criarReservaMutation.isPending ? "A confirmar..." : "Confirmar Reserva"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </main>
