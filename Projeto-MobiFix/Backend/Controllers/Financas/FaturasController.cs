@@ -24,6 +24,20 @@ public class FaturasController : ControllerBase
         return Ok(faturas);
     }
 
+    [HttpGet("minhas")]
+    public async Task<IActionResult> ObterFaturasCliente()
+    { 
+        var clienteNIF = User.FindFirst("id")?.Value;
+        if (string.IsNullOrEmpty(clienteNIF)) 
+            return Unauthorized(new { mensagem = "Token inválido ou NIF não encontrado." });
+
+        var faturas = await _faturaService.GetFaturasCliente(clienteNIF);
+        
+        if (faturas == null) return NotFound(new { mensagem = "O cliente não tem faturas" });
+        
+        return Ok(faturas);
+    }
+
     [HttpGet("{numero}")]
     public async Task<IActionResult> Obter(string numero)
     {

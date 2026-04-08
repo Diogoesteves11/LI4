@@ -6,8 +6,8 @@ public class FaturaDto
 {
     public string NumeroFatura { get; set; } = string.Empty;
     public string ClienteNIF { get; set; } = string.Empty;
-    public string? ServicoID { get; set; }
-    public string? VendaID { get; set; }
+    public int? ServicoID { get; set; }
+    public int? VendaID { get; set; }
     public decimal ValorTotal { get; set; }
     public string MetodoPagamento { get; set; } = string.Empty;
     public DateTime DataEmissao { get; set; }
@@ -33,7 +33,7 @@ public class FaturaCriacaoDto
     public string NumeroFatura { get; set; } = string.Empty;
     [Required]
     public string ClienteNIF { get; set; } = string.Empty;
-    public string? ServicoID { get; set; }
+    public int? ServicoID { get; set; }
     [Range(0.01, double.MaxValue)]
     public decimal ValorTotal { get; set; }
     [Required]
