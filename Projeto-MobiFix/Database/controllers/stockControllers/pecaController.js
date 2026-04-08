@@ -8,7 +8,9 @@ exports.listarPecas = async (req, res) => {
         if (ativo !== undefined) filtro.ativo = ativo === 'true';
         if (nome) filtro.nome = { $regex: nome, $options: 'i' };
         if (categoria) filtro.categoria = categoria.toUpperCase();
-        const pecas = await Peca.find(filtro).lean();
+        const pecas = await Peca.find(filtro)
+            .sort({ categoria: 1, nome: 1 })
+            .lean();
         return res.status(200).json(pecas.map(paraPecaDto));
     } catch (error) {
         return res.status(500).json({ error: error.message });

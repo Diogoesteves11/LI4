@@ -20,7 +20,13 @@ exports.criarEncomenda = async (req, res) => {
 
 exports.listarEncomendas = async (req, res) => {
     try {
-        const encomendas = await EncomendaStock.find().lean();
+        const { estado, pecaId } = req.query;
+        let filtro = {};
+        if (estado) filtro.estado = estado.toUpperCase();
+        if (pecaId) filtro.pecaId = pecaId;
+        const encomendas = await EncomendaStock.find(filtro)
+            .sort({ dataPedido: -1 })
+            .lean();
         return res.status(200).json(encomendas.map(e => paraEncomendaStockDto(e)));
     } catch (error) {
         return res.status(500).json({ error: error.message });

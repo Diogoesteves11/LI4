@@ -21,7 +21,19 @@ exports.criarPromocao = async (req, res) => {
 
 exports.listarPromocoes = async (req, res) => {
     try {
-        const promocoes = await Promocao.find().lean();
+        const { ativa, pecaEan } = req.query;
+        let filtro = {};
+        if (ativa === 'true') {
+            const agora = new Date();
+            filtro.dataInicio = { $lte: agora };
+            filtro.dataFim = { $gte: agora };
+        } else if (ativa === 'false') {
+            filtro.dataFim = { $lt: new Date() };
+        }
+        if (pecaEan) filtro.pecasAplicaveisEANs = pecaEan;
+        const promocoes = await Promocao.find(filtro)
+            .sort({ dataFim: -1 })
+            .lean();
         return res.status(200).json(promocoes.map(p => paraPromocaoDto(p)));
     } catch (error) {
         return res.status(500).json({ error: error.message });

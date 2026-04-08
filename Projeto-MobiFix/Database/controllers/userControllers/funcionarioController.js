@@ -85,7 +85,9 @@ exports.listarFuncionarios = async (req, res) => {
             filtro.nome = { $regex: nome, $options: 'i' }; 
         }
 
-        const funcionarios = await Funcionario.find(filtro).lean();
+        const funcionarios = await Funcionario.find(filtro)
+            .sort({ cargo: 1, nome: 1 })
+            .lean();
 
         // Mapeamos o array para o formato DTO
         const listaDtos = funcionarios.map(f => paraFuncionarioDto(f));

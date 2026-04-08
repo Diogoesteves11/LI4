@@ -21,7 +21,9 @@ exports.listarClientes = async (req, res) => {
         let filtro = {};
         if (nome) filtro.nome = { $regex: nome, $options: 'i' };
         if (email) filtro.email = email;
-        const clientes = await Cliente.find(filtro).lean();
+        const clientes = await Cliente.find(filtro)
+            .sort({ nome: 1 })
+            .lean();
         return res.status(200).json(clientes.map(paraClienteDto));
     } catch (error) {
         return res.status(500).json({ error: error.message });

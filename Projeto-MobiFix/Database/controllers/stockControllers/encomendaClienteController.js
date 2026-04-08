@@ -26,7 +26,13 @@ exports.criarEncomendaCliente = async (req, res) => {
 
 exports.listarEncomendasCliente = async (req, res) => {
     try {
-        const encomendas = await EncomendaCliente.find().lean();
+        const { clienteId, estado } = req.query;
+        let filtro = {};
+        if (clienteId) filtro.clienteId = clienteId;
+        if (estado) filtro.estado = estado.toUpperCase();
+        const encomendas = await EncomendaCliente.find(filtro)
+            .sort({ dataEncomenda: -1 })
+            .lean();
         return res.status(200).json(encomendas.map(e => paraEncomendaClienteDto(e)));
     } catch (error) {
         return res.status(500).json({ error: error.message });

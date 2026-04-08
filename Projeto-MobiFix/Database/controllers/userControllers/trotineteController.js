@@ -3,7 +3,7 @@ const { paraTrotineteDto } = require('../../dtos/userDtos/trotineteDto');
 
 exports.listarTrotinetes = async (req, res) => {
     try {
-        const { NIF, emServico } = req.query;
+        const { nif, emServico, marca, modelo } = req.query;
         let filtro = {};
         if (NIF) filtro.clienteId = NIF;
         if(emServico) filtro.emServico = emServico;
