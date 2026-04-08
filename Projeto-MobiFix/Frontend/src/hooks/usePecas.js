@@ -1,10 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pecaService } from "../services/pecaService";
 
-export function usePecas(){
+// Hook de Leitura
+export function usePecas() {
     return useQuery({
         queryKey: ['pecas'],
         queryFn: pecaService.getPecas,
-        staleTime: 1000 * 60 * 5,
+        staleTime: 1,
+    });
+}
+
+// Hook para Criar
+export function useCriarPeca() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: pecaService.criarPeca,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pecas'] });
+        },
+    });
+}
+
+// Hook para Atualizar (Edição Completa)
+export function useAtualizarPeca() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ ean, dados }) => pecaService.atualizarPeca(ean, dados),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pecas'] });
+        },
+    });
+}
+
+// Hook para Ativar/Desativar (Edição Parcial)
+export function useAlterarEstadoPeca() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ ean, ativo }) => pecaService.alterarEstadoPeca(ean, ativo),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pecas'] });
+        },
     });
 }

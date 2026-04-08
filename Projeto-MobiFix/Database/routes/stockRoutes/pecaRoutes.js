@@ -6,6 +6,6 @@ router.get('/', controller.listarPecas);
 router.get('/:ean', controller.obterPorEan);
 router.put('/:ean', controller.atualizarPeca);
 router.post('/', controller.criarPeca);
-router.delete('/:ean', controller.eliminarPeca);
+router.patch('/:ean/estado', controller.alterarEstadoPeca);
 
 module.exports = router;

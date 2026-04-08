@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Edit, UserX, UserCheck, Shield, User, Mail, Phone, Wrench, Loader2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Edit, UserX, UserCheck, Shield, User, Mail, Phone, Wrench, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { useFuncionarios, useCriarFuncionario, useAtualizarFuncionario } from "../../hooks/useFuncionarios";
 
 const CARGO_LABELS = {
@@ -33,6 +33,9 @@ export default function UserManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingNumero, setEditingNumero] = useState(null);
   const [formData, setFormData] = useState(FORM_EMPTY);
+  
+  // Estado para controlo da ordenação (Standard = Nome asc)
+  const [sortConfig, setSortConfig] = useState({ key: "Nome", direction: "asc" });
 
   const isPending = criarMutation.isPending || atualizarMutation.isPending;
 
@@ -84,6 +87,43 @@ export default function UserManagement() {
     setEditingNumero(null);
   };
 
+  // Função para lidar com o clique nos cabeçalhos da tabela
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Memoização da lista ordenada para não re-calcular em cada renderização
+  const sortedFuncionarios = useMemo(() => {
+    let sortableItems = [...funcionarios];
+    sortableItems.sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Prevenir erros na especialidade (pode ser null)
+      if (aValue === null || aValue === undefined) aValue = "";
+      if (bValue === null || bValue === undefined) bValue = "";
+
+      // Ajustar ordenação booleana (Ativo: true/false)
+      if (sortConfig.key === "Ativo") {
+        aValue = aValue ? 1 : 0;
+        bValue = bValue ? 1 : 0;
+      }
+
+      if (aValue < bValue) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+    return sortableItems;
+  }, [funcionarios, sortConfig]);
+
   const field = (label, content) => (
     <div className="space-y-2">
       <label className="text-xs font-black uppercase text-slate-500">{label}</label>
@@ -91,7 +131,31 @@ export default function UserManagement() {
     </div>
   );
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-hidden focus:border-blue-500 bg-slate-50";
+  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50";
+
+  // Componente auxiliar para renderizar os cabeçalhos ordenáveis com setas
+  const renderSortableHeader = (label, columnKey) => {
+    const isActive = sortConfig.key === columnKey;
+    return (
+      <th 
+        className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group select-none"
+        onClick={() => handleSort(columnKey)}
+      >
+        <div className="flex items-center gap-2">
+          {label}
+          {isActive ? (
+            sortConfig.direction === "asc" ? (
+              <ArrowUp className="w-3 h-3 text-blue-600" />
+            ) : (
+              <ArrowDown className="w-3 h-3 text-blue-600" />
+            )
+          ) : (
+            <ArrowUpDown className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+          )}
+        </div>
+      </th>
+    );
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -137,7 +201,6 @@ export default function UserManagement() {
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* Número Mecanográfico — só na criação */}
             {!editingNumero && field("Número Mecanográfico",
               <input
                 type="text"
@@ -203,7 +266,6 @@ export default function UserManagement() {
               />
             )}
 
-            {/* Password — só na criação */}
             {!editingNumero && field("Password",
               <input
                 type="password"
@@ -216,7 +278,6 @@ export default function UserManagement() {
               />
             )}
 
-            {/* Ativo toggle — só na edição */}
             {editingNumero && (
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-500">Estado</label>
@@ -273,20 +334,22 @@ export default function UserManagement() {
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-400">
               <tr>
-                <th className="px-6 py-4">Funcionário</th>
-                <th className="px-6 py-4">Cargo</th>
+                {renderSortableHeader("Funcionário", "Nome")}
+                {renderSortableHeader("Cargo", "Cargo")}
+                {/* O contacto não foi pedido nos requisitos de ordenação */}
                 <th className="px-6 py-4">Contacto</th>
-                <th className="px-6 py-4">Especialidade</th>
-                <th className="px-6 py-4">Status</th>
+                {renderSortableHeader("Especialidade", "Especialidade")}
+                {renderSortableHeader("Status", "Ativo")}
                 <th className="px-6 py-4 text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {funcionarios.map((func) => (
+              {/* Iteramos sobre sortedFuncionarios em vez da raw list funcionarios */}
+              {sortedFuncionarios.map((func) => (
                 <tr key={func.NumeroMecanografico} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-xs uppercase shadow-md">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-xs uppercase shadow-md">
                         {func.Nome.charAt(0)}
                       </div>
                       <div>

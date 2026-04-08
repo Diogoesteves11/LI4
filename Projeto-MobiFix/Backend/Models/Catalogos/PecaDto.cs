@@ -14,3 +14,8 @@ public class PecaDto
     public string Imagem { get; set; } = string.Empty;
     public bool Ativo { get; set; }
 }
+
+public class EstadoPecaDto
+{
+    public bool Ativo { get; set; }
+}
