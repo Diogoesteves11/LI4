@@ -21,7 +21,7 @@ public class TrotineteService : ITrotineteService
     public async Task<IEnumerable<TrotineteDto>> GetTrotinetesClienteAsync(string clienteNIF)
     {
         var trotinetes = await _httpClient.GetFromJsonAsync<IEnumerable<TrotineteDto>>(
-            $"api/trotinetes?NIF={clienteNIF}",
+            $"api/trotinetes?nif={clienteNIF}",
             _optionsPascalCase
         );
 

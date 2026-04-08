@@ -1,7 +1,7 @@
 [
     {
     "_id": 3,
-    "descricao": "Dianóstico",
+    "descricao": "Diagnóstico",
     "precoFixoMaoDeObra": 10,
     "especialidade": "DIAGNOSTICO"
   },
@@ -18,7 +18,7 @@
     "especialidade": "ELETRONICA"
   },
   {
-    "_id": 3,
+    "_id": 4,
     "descricao": "Revisão Geral",
     "precoFixoMaoDeObra": 30.00,
     "especialidade": "MECANICA GERAL"

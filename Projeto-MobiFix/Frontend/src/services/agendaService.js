@@ -11,6 +11,12 @@ export const agendaService = {
         return response.data;
     },
 
+    getAgendas: async() => {
+        const response = await api.get('/Agenda');
+        console.log(response);
+        return response.data;
+    },
+    
     getAgendaMecanico: async (mecanicoId) => {
         const response = await api.get(`/Agenda/mecanico/${mecanicoId}`);
         return response.data;
