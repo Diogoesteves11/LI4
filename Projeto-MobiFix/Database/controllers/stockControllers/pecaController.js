@@ -71,11 +71,26 @@ exports.atualizarPeca = async (req, res) => {
     }
 };
 
-exports.eliminarPeca = async (req, res) => {
+exports.alterarEstadoPeca = async (req, res) => {
     try {
-        const resultado = await Peca.findByIdAndDelete(req.params.ean);
-        if (!resultado) return res.status(404).json({ mensagem: "Não encontrada." });
-        return res.status(204).send();
+        const { ean } = req.params;
+        const { ativo } = req.body;
+
+        if (typeof ativo !== 'boolean') {
+            return res.status(400).json({ error: "O campo 'ativo' deve ser um valor booleano (true ou false)." });
+        }
+
+        const peca = await Peca.findByIdAndUpdate(
+            ean, 
+            { ativo: ativo },
+            { new: true }
+        ).lean();
+
+        if (!peca) {
+            return res.status(404).json({ mensagem: "Peça não encontrada." });
+        }
+
+        return res.status(200).json(paraPecaDto(peca));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

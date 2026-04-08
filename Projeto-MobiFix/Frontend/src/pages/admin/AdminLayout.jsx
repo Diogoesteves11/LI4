@@ -4,7 +4,8 @@ import {
   Package, 
   Tag, 
   Users, 
-  Wrench 
+  Wrench,
+  Box 
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -15,6 +16,7 @@ export default function AdminLayout() {
     { name: "Encomendas Pendentes", href: "/FixNManage/encomendas", icon: Package },
     { name: "Promoções", href: "/FixNManage/promocoes", icon: Tag },
     { name: "Utilizadores", href: "/FixNManage/users", icon: Users },
+    { name: "Catálogo de Peças", href: "/FixNManage/pecas", icon: Box }, 
   ];
 
   const isActive = (href) => {
