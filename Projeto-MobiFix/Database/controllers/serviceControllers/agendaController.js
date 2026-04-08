@@ -21,7 +21,15 @@ exports.criarSlot = async (req, res) => {
 
 exports.listarAgenda = async (req, res) => {
     try {
-        const agenda = await Agenda.find().lean();
+        const { mecanicoId, servicoId, estado, tipoSlot } = req.query;
+        let filtro = {};
+        if (mecanicoId) filtro.mecanicoId = Number(mecanicoId);
+        if (servicoId) filtro.servicoId = Number(servicoId);
+        if (estado) filtro.estado = estado.toUpperCase();
+        if (tipoSlot) filtro.tipoSlot = tipoSlot.toUpperCase();
+        const agenda = await Agenda.find(filtro)
+            .sort({ dataHoraInicio: 1 })
+            .lean();
         return res.status(200).json(agenda.map(a => paraAgendaDto(a)));
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -41,8 +49,8 @@ exports.obterSlot = async (req, res) => {
 exports.atualizarSlot = async (req, res) => {
     try {
         const dadosAtualizados = {
-            mecanicoNumero: req.body.MecanicoNumero,
-            servicoID: req.body.ServicoID,
+            mecanicoId: req.body.MecanicoNumero,
+            servicoId: req.body.ServicoID,
             tipoSlot: req.body.TipoSlot,
             dataHoraInicio: req.body.DataHoraInicio,
             estado: req.body.Estado

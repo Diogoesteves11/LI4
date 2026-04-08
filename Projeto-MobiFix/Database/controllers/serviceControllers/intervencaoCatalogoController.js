@@ -18,7 +18,13 @@ exports.criarIntervencao = async (req, res) => {
 
 exports.listarIntervencoes = async (req, res) => {
     try {
-        const lista = await IntervencaoCatalogo.find().lean();
+        const { especialidade, descricao } = req.query;
+        let filtro = {};
+        if (especialidade) filtro.especialidade = especialidade.toUpperCase();
+        if (descricao) filtro.descricao = { $regex: descricao, $options: 'i' };
+        const lista = await IntervencaoCatalogo.find(filtro)
+            .sort({ especialidade: 1, descricao: 1 })
+            .lean();
         return res.status(200).json(lista.map(i => paraIntervencaoCatalogoDto(i)));
     } catch (error) { return res.status(500).json({ error: error.message }); }
 };

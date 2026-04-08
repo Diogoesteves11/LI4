@@ -21,13 +21,28 @@ exports.criarFatura = async (req, res) => {
 
 exports.listarFaturas = async (req, res) => {
     try {
-        const faturas = await Fatura.find().lean();
+        const { nif, metodoPagamento, dataMin, dataMax } = req.query;
+        let filtro = {};
+
+        if (nif) filtro.clienteId = nif;
+
+        if (metodoPagamento) filtro.metodoPagamento = metodoPagamento.toUpperCase();
+
+        if (dataMin || dataMax) {
+            filtro.dataEmissao = {};
+            if (dataMin) filtro.dataEmissao.$gte = dataMin; 
+            if (dataMax) filtro.dataEmissao.$lte = dataMax; 
+        }
+
+        const faturas = await Fatura.find(filtro)
+            .sort({ dataEmissao: -1 })
+            .lean();
+
         return res.status(200).json(faturas.map(f => paraFaturaDto(f)));
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
-
 exports.obterFatura = async (req, res) => {
     try {
         const fatura = await Fatura.findById(req.params.numero).lean();

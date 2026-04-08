@@ -19,7 +19,18 @@ exports.criarServico = async (req, res) => {
 
 exports.listarServicos = async (req, res) => {
     try {
-        const servicos = await Servico.find().lean();
+        const { estado, trotineteId, dataMin, dataMax } = req.query;
+        let filtro = {};
+        if (estado) filtro.estado = estado.toUpperCase();
+        if (trotineteId) filtro.trotineteId = trotineteId;
+        if (dataMin || dataMax) {
+            filtro.dataAgendamento = {};
+            if (dataMin) filtro.dataAgendamento.$gte = new Date(dataMin);
+            if (dataMax) filtro.dataAgendamento.$lte = new Date(dataMax);
+        }
+        const servicos = await Servico.find(filtro)
+            .sort({ dataAgendamento: -1 })
+            .lean();
         return res.status(200).json(servicos.map(s => paraServicoDto(s)));
     } catch (error) { return res.status(500).json({ error: error.message }); }
 };

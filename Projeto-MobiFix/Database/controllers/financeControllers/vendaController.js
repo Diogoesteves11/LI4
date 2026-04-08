@@ -24,7 +24,17 @@ exports.criarVenda = async (req, res) => {
 
 exports.listarVendas = async (req, res) => {
     try {
-        const vendas = await Venda.find().lean();
+        const { operadorId, dataMin, dataMax } = req.query;
+        let filtro = {};
+        if (operadorId) filtro.operadorId = Number(operadorId);
+        if (dataMin || dataMax) {
+            filtro.dataVenda = {};
+            if (dataMin) filtro.dataVenda.$gte = new Date(dataMin);
+            if (dataMax) filtro.dataVenda.$lte = new Date(dataMax);
+        }
+        const vendas = await Venda.find(filtro)
+            .sort({ dataVenda: -1 })
+            .lean();
         return res.status(200).json(vendas.map(v => paraVendaDto(v)));
     } catch (error) {
         return res.status(500).json({ error: error.message });
