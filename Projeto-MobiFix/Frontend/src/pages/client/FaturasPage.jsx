@@ -5,11 +5,8 @@ import { useFaturas } from "../../hooks/useFaturas"
 import { gerarPDFFatura } from "../../utils/PDFFatura";
 
 export default function Faturas() {
-  // 1. Obtemos o ID (Idealmente viria de um AuthContext, mas aqui usamos localStorage como planeado)
-  const clienteId = localStorage.getItem('id');
-  
   // 2. Usamos o hook
-  const { data: faturas, isLoading, isError } = useFaturas(clienteId);
+  const { data: faturas, isLoading, isError } = useFaturas();
 
   // 3. Função para lidar com o download
   const handleDownload = async (id) => {
@@ -21,7 +18,7 @@ export default function Faturas() {
   };
 
   // Cálculo do total baseado nos dados reais da API
-  const totalPago = faturas?.reduce((acc, f) => acc + f.valorTotal, 0) || 0;
+  const totalPago = faturas?.reduce((acc, f) => acc + f.ValorTotal, 0) || 0;
 
   if (isLoading) {
     return (
@@ -52,7 +49,7 @@ export default function Faturas() {
 
           {faturas?.map((fatura) => (
             <div
-              key={fatura.faturaID}
+              key={fatura.NumeroFatura}
               className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-start gap-3">
@@ -62,22 +59,22 @@ export default function Faturas() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-medium text-gray-900">
-                      {fatura.numeroFatura}
+                      {fatura.NumeroFatura}
                     </h3>
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                      Paga ({fatura.metodoPagamento})
+                      Paga ({fatura.MetodoPagamento})
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
                     {/* Como o DTO não tem descrição, usamos IDs ou info genérica */}
-                    {fatura.servicoID ? `Serviço de Manutenção #${fatura.servicoID}` : `Venda #${fatura.vendaID}`}
+                    {fatura.ServicoID ? `Serviço de Manutenção #${fatura.ServicoID}` : `Venda #${fatura.VendaID}`}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {new Date(fatura.dataEmissao).toLocaleDateString('pt-PT')}
+                    {new Date(fatura.DataEmissao).toLocaleDateString('pt-PT')}
                   </p>
                   <div className="flex items-center justify-between mt-3">
                     <p className="text-lg font-bold text-blue-600">
-                      €{fatura.valorTotal.toFixed(2)}
+                      €{fatura.ValorTotal.toFixed(2)}
                     </p>
                     <button
                       onClick={() => gerarPDFFatura(fatura)}
