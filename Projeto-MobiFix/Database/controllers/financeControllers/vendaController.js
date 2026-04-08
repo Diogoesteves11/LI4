@@ -29,8 +29,8 @@ exports.listarVendas = async (req, res) => {
         if (operadorId) filtro.operadorId = Number(operadorId);
         if (dataMin || dataMax) {
             filtro.dataVenda = {};
-            if (dataMin) filtro.dataVenda.$gte = new Date(dataMin);
-            if (dataMax) filtro.dataVenda.$lte = new Date(dataMax);
+            if (dataMin) filtro.dataVenda.$gte = dataMin;
+            if (dataMax) filtro.dataVenda.$lte = dataMax;
         }
         const vendas = await Venda.find(filtro)
             .sort({ dataVenda: -1 })

@@ -9,10 +9,16 @@ exports.criarPromocao = async (req, res) => {
             percentagemDesconto: req.body.PercentagemDesconto,
             dataInicio: req.body.DataInicio,
             dataFim: req.body.DataFim,
-            administradorNumero: req.body.AdministradorNumero,
-            pecasAplicaveisEANs: req.body.PecasAplicaveisEANs
+            
+            administradorId: req.body.AdministradorNumero || req.body.administradorId,
+            
+            ...(req.body.Ativa !== undefined && { ativa: req.body.Ativa }),
+
+            pecasAplicaveisIds: req.body.PecasAplicaveisEANs || req.body.pecasAplicaveisIds || []
         });
+
         await novaPromocao.save();
+        
         return res.status(201).json(paraPromocaoDto(novaPromocao.toObject()));
     } catch (error) {
         return res.status(400).json({ error: error.message });
@@ -21,19 +27,23 @@ exports.criarPromocao = async (req, res) => {
 
 exports.listarPromocoes = async (req, res) => {
     try {
-        const { ativa, pecaEan } = req.query;
+        const { ativa, pecaEan, dataMin, dataMax } = req.query;
         let filtro = {};
-        if (ativa === 'true') {
-            const agora = new Date();
-            filtro.dataInicio = { $lte: agora };
-            filtro.dataFim = { $gte: agora };
-        } else if (ativa === 'false') {
-            filtro.dataFim = { $lt: new Date() };
+
+        if (ativa !== undefined) filtro.ativa = ativa; 
+
+        if (pecaEan) filtro.pecasAplicaveisIds = pecaEan;
+
+        if (dataMin || dataMax) {
+            filtro.dataInicio = {};
+            if (dataMin) filtro.dataInicio.$gte = dataMin;
+            if (dataMax) filtro.dataInicio.$lte = dataMax;
         }
-        if (pecaEan) filtro.pecasAplicaveisEANs = pecaEan;
+
         const promocoes = await Promocao.find(filtro)
             .sort({ dataFim: -1 })
             .lean();
+            
         return res.status(200).json(promocoes.map(p => paraPromocaoDto(p)));
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -63,6 +73,32 @@ exports.atualizarPromocao = async (req, res) => {
         return res.status(200).json(paraPromocaoDto(promocao));
     } catch (error) {
         return res.status(400).json({ error: error.message });
+    }
+};
+
+
+// Método para Ativar/Desativar Promoção
+exports.alterarEstadoPromocao = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { ativa } = req.body;
+
+        if (typeof ativa !== 'boolean') {
+            return res.status(400).json({ error: "O campo 'ativa' deve ser um valor booleano (true ou false)." });
+        }
+        const promocaoAtualizada = await Promocao.findByIdAndUpdate(
+            Number(id), 
+            { ativa: ativa },
+            { new: true } 
+        ).lean();
+
+        if (!promocaoAtualizada) {
+            return res.status(404).json({ error: "Promoção não encontrada." });
+        }
+
+        return res.status(200).json(paraPromocaoDto(promocaoAtualizada));
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
     }
 };
 
