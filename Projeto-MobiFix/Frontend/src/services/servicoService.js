@@ -7,5 +7,11 @@ export const servicoService = {
             FeedbackCliente: dados.descricao,
         });
         return response.data;
+    },
+    
+    listar: async() => {
+        const response = await api.get('/Servicos');
+        console.log(response);
+        return response.data;
     }
 };
