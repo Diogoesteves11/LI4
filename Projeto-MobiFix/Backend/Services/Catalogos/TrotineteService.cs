@@ -28,6 +28,21 @@ public class TrotineteService : ITrotineteService
         return trotinetes ?? Enumerable.Empty<TrotineteDto>();
     }
 
+    public async Task<TrotineteDto?> GetTrotineteNumeroSerie(string serie)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<TrotineteDto>(
+                $"api/trotinetes/{serie}",
+                _optionsPascalCase
+            );
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+    }
+
     public async Task<TrotineteDto?> CriarTrotineteAsync(string clienteNIF, TrotinetelCriacaoDto criacaoDto)
     {
         var payload = new

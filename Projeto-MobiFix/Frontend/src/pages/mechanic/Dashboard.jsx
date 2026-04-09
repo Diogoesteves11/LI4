@@ -1,78 +1,64 @@
 import { useState, useMemo } from 'react';
-import { FileDown, CalendarCheck, Clock, User, Bike, Battery, Loader2, AlertCircle } from 'lucide-react';
+import {
+  FileDown, CalendarCheck, Clock, User, Bike,
+  Loader2, AlertCircle, Hash, ShieldCheck, Euro
+} from 'lucide-react';
 import { RepairList } from '../../components/RepairList';
 import { InterventionSelector } from '../../components/SelecionarIntervencao';
 import { EANScanner } from '../../components/EANScanner';
 import { ScheduleRepairDialog } from '../../components/AgendamentoReparacao';
 import { toast, Toaster } from 'sonner';
 import { generateDiagnosticPDF } from '../../utils/PDFGuiaReparacao';
-import { useAgendas, useCriarAgenda } from '../../hooks/useAgenda'; // Adicionado useCriarAgenda
+import { useAgendas, useCriarAgenda } from '../../hooks/useAgenda';
 import { useServicos } from '../../hooks/useServicos';
+import { useBuscarTrotinete } from '../../hooks/useTrotinetes';
 
 export default function Dashboard() {
-  // 1. Hooks de Dados (Agendas e Serviços)
-  const { data: agendas, isLoading: loadingAgendas, isError: errorAgendas } = useAgendas();
-  const { data: servicos, isLoading: loadingServicos } = useServicos();
-  
-  // --- ADICIONADO: Hook para criar o agendamento da reparação ---
+  // ── Dados remotos ──────────────────────────────────────────────────────────
+  const { data: agendas,  isLoading: loadingAgendas,  isError: errorAgendas  } = useAgendas();
+  const { data: servicos, isLoading: loadingServicos                          } = useServicos();
   const { mutateAsync: criarAgendamento, isPending: isSaving } = useCriarAgenda();
 
-  // 2. Filtro e Enriquecimento de Dados
+  // ── Lista de diagnósticos reservados ───────────────────────────────────────
   const repairs = useMemo(() => {
     if (!agendas || !servicos) return [];
-
     return agendas
-      .filter(agenda => 
-        agenda.TipoSlot === "DIAGNOSTICO" && 
-        agenda.Estado === "RESERVADO"
-      )
-      .map(agenda => {
-        const servicoInfo = servicos.find(s => s.ServicoID === agenda.ServicoID);
-
+      .filter(a => a.TipoSlot === 'DIAGNOSTICO' && a.Estado === 'RESERVADO')
+      .map(a => {
+        const s = servicos.find(sv => sv.ServicoID === a.ServicoID);
         return {
-          id: agenda.AgendaID,
-          servicoId: agenda.ServicoID,
-          mecanico: agenda.MecanicoNumero,
-          vehiclePlate: servicoInfo?.TrotineteNumSerie || "S/ N/Serie",
-          vehicleBrand: "Trotinete",
-          vehicleModel: servicoInfo?.TrotineteNumSerie || "Modelo",
-          clientName: servicoInfo?.FeedbackCliente || "Cliente Pendente",
-          status: agenda.Estado.toLowerCase(),
-          scheduledTime: new Date(agenda.DataHoraInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          batteryLevel: 100,
-          description: servicoInfo?.DescricaoDiagnostico || ""
+          id:            a.AgendaID,
+          servicoId:     a.ServicoID,
+          vehiclePlate:  s?.TrotineteNumSerie   || 'S/N',
+          clientName:    s?.FeedbackCliente     || 'Cliente Registado',
+          status:        a.Estado.toLowerCase(),
+          scheduledTime: new Date(a.DataHoraInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          description:   s?.DescricaoDiagnostico || '',
         };
       });
   }, [agendas, servicos]);
 
+  // ── Reparação selecionada ──────────────────────────────────────────────────
   const [selectedRepairId, setSelectedRepairId] = useState(null);
-  const [selectedInterventions, setSelectedInterventions] = useState([]);
-  const [parts, setParts] = useState([]);
-  const [notes, setNotes] = useState('');
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-
   const selectedRepair = repairs.find(r => r.id === selectedRepairId);
 
-  // --- ADICIONADO: Handler para o agendamento ---
-  const handleScheduleRepair = async (scheduleData) => {
-    if (!selectedRepair) return;
+  const { data: trotineteInfo } = useBuscarTrotinete(
+    selectedRepair?.vehiclePlate !== 'S/N' ? selectedRepair?.vehiclePlate : null
+  );
 
-    const payload = {
-      mecanicoId: scheduleData.mecanicoId,
-      servicoId: selectedRepair.servicoId, // Usamos o ID do serviço original
-      dataHoraInicio: `${scheduleData.date}T${scheduleData.time}:00`,
-    };
-
-    try {
-      await criarAgendamento(payload);
-      toast.success(`Reparação agendada com sucesso!`);
-      setShowScheduleDialog(false);
-      limparFormulario();
-      setSelectedRepairId(null); // Volta para a lista
-    } catch (error) {
-      toast.error('Erro ao gravar agendamento no servidor');
-    }
+  const displayData = {
+    ...selectedRepair,
+    vehicleBrand: trotineteInfo?.Marca    || '—',
+    vehicleModel: trotineteInfo?.Modelo   || '—',
+    clientNif:    trotineteInfo?.ClienteId || 'N/A',
+    emServico:    trotineteInfo?.EmServico,
   };
+
+  // ── Estado do formulário ───────────────────────────────────────────────────
+  const [selectedInterventions, setSelectedInterventions] = useState([]);
+  const [parts, setParts]                                 = useState([]);
+  const [notes, setNotes]                                 = useState('');
+  const [showScheduleDialog, setShowScheduleDialog]       = useState(false);
 
   const limparFormulario = () => {
     setSelectedInterventions([]);
@@ -80,28 +66,57 @@ export default function Dashboard() {
     setNotes('');
   };
 
+  // Totais para feedback visual
+  const totalMaoDeObra = selectedInterventions.reduce((s, i) => s + (i.PrecoFixoMaoDeObra ?? 0), 0);
+  const totalPecas     = parts.reduce((s, p) => s + (p.pvp ?? 0) * p.quantity, 0);
+
+  // ── Agendar Reparação — cria agenda do tipo REPARACAO ─────────────────────
+  const handleScheduleRepair = async (scheduleData) => {
+    if (!selectedRepair) return;
+
+    // O AgendaController.cs preenche MecanicoNumero, TipoSlot e Estado
+    // Forçamos TipoSlot = REPARACAO passando via payload extra
+    const payload = {
+      servicoID:      selectedRepair.servicoId,
+      dataHoraInicio: `${scheduleData.date}T${scheduleData.time}:00`,
+      tipoSlot:       'REPARACAO',           // diferencia do diagnóstico
+    };
+
+    try {
+      await criarAgendamento(payload);
+      toast.success('Reparação agendada com sucesso!');
+      setShowScheduleDialog(false);
+      limparFormulario();
+      setSelectedRepairId(null);
+    } catch {
+      toast.error('Erro ao gravar agendamento no servidor');
+    }
+  };
+
+  // ── Guards ─────────────────────────────────────────────────────────────────
   if (loadingAgendas || loadingServicos) return (
-    <div className="flex h-screen items-center justify-center bg-slate-100">
-      <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-      <span className="ml-3 text-xl font-bold">A carregar diagnósticos agendados...</span>
+    <div className="flex h-screen items-center justify-center bg-slate-100 gap-3">
+      <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      <span className="text-xl font-bold text-slate-700">A carregar dados do sistema...</span>
     </div>
   );
 
   if (errorAgendas) return (
-    <div className="flex h-screen items-center justify-center bg-slate-100 text-red-600">
-      <AlertCircle className="h-12 w-12" />
-      <span className="ml-3 text-xl font-bold">Erro ao carregar a agenda de mecânicos.</span>
+    <div className="flex h-screen items-center justify-center bg-slate-100 text-red-600 gap-3">
+      <AlertCircle className="h-10 w-10" />
+      <span className="text-xl font-bold">Erro ao carregar a agenda.</span>
     </div>
   );
 
   return (
     <div className="flex h-screen bg-slate-100">
       <Toaster position="top-right" richColors />
-      
-      <aside className="w-[400px] border-r-4 border-slate-300 bg-white shadow-2xl overflow-hidden flex flex-col">
+
+      {/* ── Sidebar ── */}
+      <aside className="w-[380px] border-r-4 border-slate-200 bg-white shadow-2xl overflow-hidden flex flex-col shrink-0">
         <div className="p-4 bg-slate-50 border-b border-slate-200">
           <h2 className="text-lg font-black text-slate-700 uppercase tracking-wider">Fila de Diagnóstico</h2>
-          <p className="text-xs text-slate-500 font-bold">Apenas Reservados / Diagnóstico</p>
+          <p className="text-xs text-slate-500 font-bold">Reservados · Aguardam diagnóstico</p>
         </div>
         <RepairList
           repairs={repairs}
@@ -113,10 +128,13 @@ export default function Dashboard() {
         />
       </aside>
 
+      {/* ── Painel principal ── */}
       <main className="flex-1 overflow-y-auto bg-slate-50/50">
         {selectedRepair ? (
-          <div className="mx-auto max-w-7xl p-8 space-y-8">
-            <div className="overflow-hidden rounded-2xl border-0 bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-2xl">
+          <div className="mx-auto max-w-5xl p-8 space-y-8">
+
+            {/* Header da trotinete */}
+            <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="mb-4 flex items-center gap-4">
@@ -124,80 +142,133 @@ export default function Dashboard() {
                       <Bike className="h-10 w-10 text-white" />
                     </div>
                     <div>
-                      <h1 className="text-3xl font-black tracking-tight">Diagnóstico Agenda #{selectedRepair.id}</h1>
-                      <p className="mt-1 text-xl font-medium text-blue-100 italic">
-                        Serviço ID: {selectedRepair.servicoId} • Mecânico: {selectedRepair.mecanico}
+                      <h1 className="text-3xl font-black tracking-tight">
+                        {displayData.vehicleBrand} {displayData.vehicleModel}
+                      </h1>
+                      <p className="mt-1 text-lg font-medium text-blue-100 italic">
+                        S/N: {displayData.vehiclePlate} · Agenda #{displayData.id}
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-8 text-sm font-bold">
+
+                  <div className="flex flex-wrap items-center gap-3 text-sm font-bold">
                     <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
-                      <User className="h-5 w-5" /> {selectedRepair.clientName}
+                      <User className="h-4 w-4 text-blue-200" /> {displayData.clientName}
                     </span>
                     <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
-                      <Clock className="h-5 w-5" /> Início: {selectedRepair.scheduledTime}
+                      <Hash className="h-4 w-4 text-blue-200" /> NIF: {displayData.clientNif}
                     </span>
+                    <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+                      <Clock className="h-4 w-4 text-blue-200" /> {displayData.scheduledTime}
+                    </span>
+                    {displayData.emServico && (
+                      <span className="flex items-center gap-2 bg-green-500/30 text-green-200 px-3 py-1.5 rounded-lg border border-green-500/50">
+                        <ShieldCheck className="h-4 w-4" /> Em Manutenção
+                      </span>
+                    )}
                   </div>
                 </div>
-                <span className="rounded-xl px-6 py-3 text-sm font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg">
-                  {selectedRepair.status}
-                </span>
+
+                <div className="flex flex-col items-end gap-2 ml-4">
+                  <span className="rounded-xl px-5 py-2 text-sm font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg">
+                    {displayData.status}
+                  </span>
+                  <p className="text-xs font-bold text-blue-200">Serviço #{displayData.servicoId}</p>
+                </div>
               </div>
             </div>
 
+            {/* Seletor de intervenções — dados reais da API */}
             <InterventionSelector
               selectedInterventions={selectedInterventions}
-              onAddIntervention={(i) => setSelectedInterventions([...selectedInterventions, i])}
-              onRemoveIntervention={(id) => setSelectedInterventions(selectedInterventions.filter(i => i.id !== id))}
+              onAddIntervention={(i) => {
+                if (!selectedInterventions.find(s => s.IntervencaoID === i.IntervencaoID))
+                  setSelectedInterventions(prev => [...prev, i]);
+              }}
+              onRemoveIntervention={(id) =>
+                setSelectedInterventions(prev => prev.filter(i => i.IntervencaoID !== id))
+              }
             />
 
+            {/* Scanner EAN — peças reais da API */}
             <EANScanner
               parts={parts}
               onAddPart={(part) => {
-                const idx = parts.findIndex(p => p.ean === part.ean);
-                setParts(idx >= 0 ? parts.map((p, i) => i === idx ? part : p) : [...parts, part]);
+                setParts(prev => {
+                  const idx = prev.findIndex(p => p.ean === part.ean);
+                  return idx >= 0
+                    ? prev.map((p, i) => i === idx ? part : p)
+                    : [...prev, part];
+                });
               }}
-              onRemovePart={(ean) => setParts(parts.filter(p => p.ean !== ean))}
+              onRemovePart={(ean) => setParts(prev => prev.filter(p => p.ean !== ean))}
             />
 
+            {/* Relatório de diagnóstico */}
             <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-xl font-bold text-slate-900">Observações Técnicas</h3>
+              <h3 className="mb-4 text-xl font-bold text-slate-900">Relatório de Diagnóstico</h3>
+              {displayData.description && (
+                <div className="mb-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                  <p className="text-xs font-bold text-amber-700 uppercase mb-1">Queixa do Cliente:</p>
+                  <p className="text-slate-700 italic">"{displayData.description}"</p>
+                </div>
+              )}
               <textarea
-                placeholder="Detalhes sobre a avaria..."
+                placeholder="Escreva aqui o diagnóstico técnico detalhado..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="w-full rounded-xl border-2 border-slate-200 p-4 text-lg focus:border-blue-500 outline-none transition-all"
+                className="w-full rounded-xl border-2 border-slate-200 p-4 text-base focus:border-blue-500 outline-none transition-all resize-none"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
+            {/* Resumo de custos */}
+            {(selectedInterventions.length > 0 || parts.length > 0) && (
+              <div className="rounded-2xl border-2 border-emerald-100 bg-emerald-50 p-5 flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-emerald-700">Mão de obra: €{totalMaoDeObra.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-emerald-700">Peças: €{totalPecas.toFixed(2)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Total estimado</p>
+                  <p className="text-3xl font-black text-emerald-700 flex items-center gap-1">
+                    <Euro className="h-6 w-6" />{(totalMaoDeObra + totalPecas).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Ações */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
               <button
                 onClick={() => {
-                   generateDiagnosticPDF(selectedRepair, selectedInterventions, parts, notes);
-                   toast.success('Guia PDF gerada!');
+                  generateDiagnosticPDF(displayData, selectedInterventions, parts, notes);
+                  toast.success('Guia PDF gerada!');
                 }}
                 disabled={selectedInterventions.length === 0}
-                className="group flex h-24 items-center justify-center gap-4 rounded-2xl bg-linear-to-r from-purple-600 to-purple-800 text-2xl font-black text-white shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+                className="group flex h-24 items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-800 text-2xl font-black text-white shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
               >
-                <FileDown className="h-10 w-10" />
+                <FileDown className="h-9 w-9" />
                 Gerar Guia PDF
               </button>
-              
+
               <button
                 onClick={() => setShowScheduleDialog(true)}
                 disabled={selectedInterventions.length === 0 || isSaving}
-                className="group flex h-24 items-center justify-center gap-4 rounded-2xl bg-linear-to-r from-green-600 to-green-700 text-2xl font-black text-white shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+                className="group flex h-24 items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-green-600 to-green-700 text-2xl font-black text-white shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
               >
-                {isSaving ? <Loader2 className="h-10 w-10 animate-spin" /> : <CalendarCheck className="h-10 w-10" />}
+                {isSaving
+                  ? <Loader2 className="h-9 w-9 animate-spin" />
+                  : <CalendarCheck className="h-9 w-9" />}
                 {isSaving ? 'A guardar...' : 'Agendar Reparação'}
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center text-slate-400">
-            <CalendarCheck className="h-20 w-20 opacity-20 mb-4" />
-            <p className="text-2xl font-bold">Selecione um diagnóstico reservado</p>
+          <div className="flex h-full flex-col items-center justify-center text-slate-300 gap-4">
+            <CalendarCheck className="h-24 w-24 opacity-30" />
+            <p className="text-2xl font-bold">Selecione um diagnóstico na fila</p>
+            <p className="text-sm font-medium text-slate-400">{repairs.length} aguardam diagnóstico</p>
           </div>
         )}
       </main>
@@ -206,10 +277,10 @@ export default function Dashboard() {
         <ScheduleRepairDialog
           open={showScheduleDialog}
           onOpenChange={setShowScheduleDialog}
-          repair={selectedRepair}
+          repair={displayData}
           interventions={selectedInterventions}
           parts={parts}
-          onConfirmSchedule={handleScheduleRepair} // Conectado à nova função
+          onConfirmSchedule={handleScheduleRepair}
         />
       )}
     </div>

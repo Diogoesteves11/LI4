@@ -1,16 +1,25 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { agendaService } from '../services/agendaService';
-import { useMutation, useQuery} from '@tanstack/react-query';
 
-export function useCriarAgenda() {
-    return useMutation({
-        mutationFn: (dados) => agendaService.criarSlot(dados)
+const QUERY_KEY = ['agendas'];
+
+export function useAgendas() {
+    return useQuery({
+        queryKey: QUERY_KEY,
+        queryFn: () => agendaService.getAgendas(),
     });
 }
 
-export function useAgendas(){
-    return useQuery({
-        queryKey: ['agendas'],
-        queryFn: agendaService.getAgendas,
-        staleTime: 1000 * 60,
+export function useCriarAgenda() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (dados) => agendaService.criarSlot(dados),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+        },
+        onError: (error) => {
+            const msg = error.response?.data?.mensagem || 'Erro ao criar agendamento.';
+            alert(msg);
+        },
     });
 }

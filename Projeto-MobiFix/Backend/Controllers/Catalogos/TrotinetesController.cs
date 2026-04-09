@@ -30,6 +30,13 @@ public class TrotinetesController : ControllerBase
         return Ok(trotinetes);
     }
 
+    [HttpGet("{numeroSerie}")]
+    public async Task<IActionResult> GetTrotineteByNumero(string numeroSerie)
+    {
+        var trotinete = await _trotineteService.GetTrotineteNumeroSerie(numeroSerie);
+        return Ok(trotinete);
+    }
+
     // POST api/trotinetes  — regista uma nova trotinete para o cliente autenticado
     [HttpPost]
     public async Task<IActionResult> CriarTrotinete([FromBody] TrotinetelCriacaoDto criacaoDto)

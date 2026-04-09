@@ -10,6 +10,13 @@ export function useTrotinetes() {
     });
 }
 
+export function useBuscarTrotinete(serie){
+    return useQuery({
+        queryKey: ['trotinetes', serie],
+        queryFn:() => trotineteService.buscarTrotinete(serie),
+    })
+}
+
 export function useCriarTrotinete() {
     const queryClient = useQueryClient();
 
