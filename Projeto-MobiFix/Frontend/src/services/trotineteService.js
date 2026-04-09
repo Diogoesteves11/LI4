@@ -7,6 +7,12 @@ export const trotineteService = {
         return response.data;
     },
 
+    buscarTrotinete: async (serie) => {
+        const response = await api.get(`/Trotinetes/${serie}`);
+        console.log(response);
+        return response.data;
+    },
+
     criarTrotinete: async (dados) => {
         const response = await api.post('/Trotinetes', {
             NumeroSerie: dados.numeroSerie,

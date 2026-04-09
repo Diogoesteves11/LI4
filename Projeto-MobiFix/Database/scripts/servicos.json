@@ -1,10 +1,11 @@
 [
   {
-    "_id": 1,
+    "_id": 2,
     "trotineteId": "SN-XIAOMI-001",
     "estado": "EXECUCAO",
     "dataAgendamento": "2024-03-26T10:00",
     "descricaoDiagnostico": "Furo no pneu traseiro e travão perro.",
+    "feedbackCliente": "Esta merda está toda arrebentada",
     "preco": 10.00,
     "historicoIntervencoes": [
       {
@@ -22,10 +23,11 @@
   },
   {
     "_id": 1,
-    "trotineteId": "SN-XIAOMI-001",
+    "trotineteId": "SN-XIAOMI-002",
     "estado": "EXECUCAO",
     "dataAgendamento": "2024-03-26T10:00",
     "descricaoDiagnostico": "Furo no pneu traseiro e travão perro.",
+    "feedbackCliente": "Arrebantou-lhe o paneu",
     "preco": 10.00,
     "historicoIntervencoes": [
       {
