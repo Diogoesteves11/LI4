@@ -47,10 +47,14 @@ public class ServicoService : IServicoService
         return await response.Content.ReadFromJsonAsync<ServicoDto>(_options);
     }
 
-    public async Task<bool> AtualizarEstadoAsync(int id, string novoEstado)
+   public async Task<ServicoDto?> AtualizarServicoAsync(int id, ServicoDto dto)
     {
-        var payload = new { Estado = novoEstado };
-        var response = await _httpClient.PutAsJsonAsync($"api/servicos/{id}", payload, _options);
-        return response.IsSuccessStatusCode;
-    }
+        // O Node.js já está à espera de receber chaves como Estado, DescricaoDiagnostico e Preco
+        var response = await _httpClient.PutAsJsonAsync($"api/servicos/{id}", dto, _options);
+        
+        if (!response.IsSuccessStatusCode) return null;
+
+        // Retorna o objeto atualizado vindo do Node.js
+        return await response.Content.ReadFromJsonAsync<ServicoDto>(_options);
+    } 
 }
