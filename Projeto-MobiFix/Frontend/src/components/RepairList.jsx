@@ -17,9 +17,8 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
 
   const getStatusLabel = (status) => {
     const labels = {
-      pending: 'Pendente',
-      diagnosed: 'Diagnosticado',
-      scheduled: 'Agendado'
+      scheduled: 'AGENDADO',
+      completed: 'CONCLUIDO'
     };
     return labels[status] || status;
   };
@@ -40,7 +39,7 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
           Diagnósticos do Dia
         </h2>
         <p className="mt-1 text-slate-600">
-          {repairs.filter(r => r.status !== 'scheduled').length} trotinetes para diagnóstico
+          {repairs.filter(r => r.status !== 'AGENDADO').length} trotinetes para diagnóstico
         </p>
       </div>
 
@@ -65,9 +64,6 @@ export function RepairList({ repairs, selectedRepairId, onSelectRepair }) {
                   <div>
                     <div className="text-lg font-bold text-slate-900">
                       {repair.vehiclePlate}
-                    </div>
-                    <div className="text-sm text-slate-600">
-                      {repair.vehicleBrand} {repair.vehicleModel}
                     </div>
                   </div>
                 </div>

@@ -36,7 +36,7 @@ public class AgendaService : IAgendaService
             AgendaID      = Random.Shared.Next(10, int.MaxValue),
             MecanicoNumero = dto.MecanicoNumero,
             ServicoID     = dto.ServicoID,
-            TipoSlot      = "DIAGNOSTICO",
+            TipoSlot      = dto.TipoSlot,
             DataHoraInicio = dto.DataHoraInicio,
             IntervencaoID = 3,
             Estado        = "RESERVADO"
@@ -46,6 +46,14 @@ public class AgendaService : IAgendaService
 
         if (!response.IsSuccessStatusCode) return null;
 
+        return await response.Content.ReadFromJsonAsync<AgendaDto>(_options);
+    }
+
+    public async Task<AgendaDto?> AtualizarSlotAsync(int id, AgendaDto dto)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/agenda/{id}", dto, _options);
+        if (!response.IsSuccessStatusCode) return null;
+    
         return await response.Content.ReadFromJsonAsync<AgendaDto>(_options);
     }
 

@@ -7,6 +7,7 @@ export const agendaService = {
         const response = await api.post('/Agenda', {
             ServicoID: dados.servicoID,
             DataHoraInicio: dados.dataHoraInicio,
+            TipoSlot: dados.tipoSlot,
         });
         return response.data;
     },
@@ -16,7 +17,12 @@ export const agendaService = {
         console.log(response);
         return response.data;
     },
-    
+
+   atualizarSlot: async (id, dados) => {
+        const response = await api.put(`/Agenda/${id}`, dados);
+        return response.data;
+    }, 
+
     getAgendaMecanico: async (mecanicoId) => {
         const response = await api.get(`/Agenda/mecanico/${mecanicoId}`);
         return response.data;

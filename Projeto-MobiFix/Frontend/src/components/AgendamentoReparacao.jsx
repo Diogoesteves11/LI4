@@ -92,8 +92,8 @@ export function ScheduleRepairDialog({
               </h4>
               <ul className="space-y-1 text-sm text-slate-600">
                 {interventions.map((i) => (
-                  <li key={i.id} className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">•</span> {i.name}
+                  <li key={i.IntervencaoID} className="flex items-start gap-2">
+                    <span className="text-blue-500 mt-1">•</span> {i.Descricao}
                   </li>
                 ))}
               </ul>
@@ -103,7 +103,7 @@ export function ScheduleRepairDialog({
                 <h4 className="font-bold text-slate-900 mb-2">Peças ({parts.length})</h4>
                 <ul className="space-y-1 text-sm text-slate-600">
                   {parts.map((p) => (
-                    <li key={p.ean}>• {p.name} (x{p.quantity})</li>
+                    <li key={p.CodigoEAN}>• {p.Nome} (x{p.StockAtual})</li>
                   ))}
                 </ul>
               </div>
