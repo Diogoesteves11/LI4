@@ -8,4 +8,5 @@ public interface IAgendaService
     Task<AgendaDto?> ObterSlotPorIdAsync(int id);
     Task<AgendaDto?> CriarSlotAsync(AgendaCriacaoDto dto);
     Task<bool> EliminarSlotAsync(int id);
+    Task<AgendaDto?> AtualizarSlotAsync(int id, AgendaDto dto);
 }

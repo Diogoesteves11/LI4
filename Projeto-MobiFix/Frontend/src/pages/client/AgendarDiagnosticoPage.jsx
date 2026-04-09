@@ -39,7 +39,8 @@ export default function AgendarDiagnostico() {
       
       await criarAgenda.mutateAsync({
         servicoId: servicoObj.ServicoID,
-        dataHora: dataHoraIso
+        dataHora: dataHoraIso,
+        tipoSlot: 'DIAGNOSTICO'
       });
 
       alert("Diagnóstico agendado com sucesso! O mecânico foi atribuído automaticamente.");

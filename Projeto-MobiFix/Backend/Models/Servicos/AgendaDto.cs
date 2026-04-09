@@ -24,7 +24,7 @@ public class AgendaCriacaoDto
     public int ServicoID { get; set; } 
     
     [Required]
-    public string TipoSlot { get; set; } = "Diagnostico";
+    public string TipoSlot { get; set; } = string.Empty;
     
     public int IntervencaoID { get; set; }
     

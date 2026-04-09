@@ -52,10 +52,10 @@ export function EANScanner({ parts, onAddPart, onRemovePart }) {
     if (newQty > peca.StockAtual) { toast.error(`Stock insuficiente (máx. ${peca.StockAtual})`); return; }
 
     onAddPart({
-      ean:      peca.CodigoEAN,
-      name:     peca.Nome,
-      pvp:      peca.PVP,
-      quantity: newQty,
+      CodigoEAN:      peca.CodigoEAN,
+      Nome:     peca.Nome,
+      PVP:      peca.PVP,
+      StockAtual: newQty,
       timestamp: new Date().toISOString(),
     });
     toast.success(`${peca.Nome} adicionada`);
@@ -136,7 +136,7 @@ export function EANScanner({ parts, onAddPart, onRemovePart }) {
                 <p className="py-6 text-center text-sm text-slate-400">Nenhuma peça com stock encontrada.</p>
               ) : (
                 browsePecas.map((p) => {
-                  const jaAdicionada = parts.find(pt => pt.ean === p.CodigoEAN);
+                  const jaAdicionada = parts.find(pt => pt.CodigoEAN === p.CodigoEAN);
                   return (
                     <div
                       key={p.CodigoEAN}
@@ -150,7 +150,7 @@ export function EANScanner({ parts, onAddPart, onRemovePart }) {
                       <div className="ml-3 shrink-0 flex items-center gap-2">
                         {jaAdicionada && (
                           <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                            x{jaAdicionada.quantity}
+                            x{jaAdicionada.StockAtual}
                           </span>
                         )}
                         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 text-white opacity-0 group-hover:opacity-100 transition-opacity">
@@ -171,7 +171,7 @@ export function EANScanner({ parts, onAddPart, onRemovePart }) {
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-bold text-slate-700">Peças Instaladas ({parts.length})</span>
               <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
-                Total: €{parts.reduce((s, p) => s + (p.PVP ?? 0) * p.quantity, 0).toFixed(2)}
+                Total: €{parts.reduce((s, p) => s + (p.PVP ?? 0) * p.StockAtual, 0).toFixed(2)}
               </span>
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -181,14 +181,14 @@ export function EANScanner({ parts, onAddPart, onRemovePart }) {
                   className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-200 transition-colors"
                 >
                   <div>
-                    <div className="font-bold text-slate-900">{part.name}</div>
+                    <div className="font-bold text-slate-900">{part.Nome}</div>
                     <div className="text-xs font-mono text-slate-400 mt-0.5">
                       {part.CodigoEAN} · €{part.PVP?.toFixed(2)} /un
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="bg-blue-600 text-white px-3 py-1 rounded-lg font-bold text-sm shadow-sm">
-                      x{part.quantity}
+                      x{part.StockAtual}
                     </span>
                     <button
                       onClick={() => onRemovePart(part.CodigoEAN)}
