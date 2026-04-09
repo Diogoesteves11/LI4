@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Edit, UserX, UserCheck, Shield, User, Mail, Phone, Wrench, Loader2, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Plus, Edit, UserX, UserCheck, Shield, User, Mail, Phone, Wrench, Loader2, ArrowUp, ArrowDown, ArrowUpDown, Info, X } from "lucide-react";
 import { useFuncionarios, useCriarFuncionario, useAtualizarFuncionario } from "../../hooks/useFuncionarios";
 
 const CARGO_LABELS = {
@@ -33,6 +33,9 @@ export default function UserManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingNumero, setEditingNumero] = useState(null);
   const [formData, setFormData] = useState(FORM_EMPTY);
+  
+  // Novo estado para controlar o modal de detalhes
+  const [selectedFunc, setSelectedFunc] = useState(null);
   
   // Estado para controlo da ordenação (Standard = Nome asc)
   const [sortConfig, setSortConfig] = useState({ key: "Nome", direction: "asc" });
@@ -87,7 +90,6 @@ export default function UserManagement() {
     setEditingNumero(null);
   };
 
-  // Função para lidar com o clique nos cabeçalhos da tabela
   const handleSort = (key) => {
     let direction = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -96,18 +98,15 @@ export default function UserManagement() {
     setSortConfig({ key, direction });
   };
 
-  // Memoização da lista ordenada para não re-calcular em cada renderização
   const sortedFuncionarios = useMemo(() => {
     let sortableItems = [...funcionarios];
     sortableItems.sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
 
-      // Prevenir erros na especialidade (pode ser null)
       if (aValue === null || aValue === undefined) aValue = "";
       if (bValue === null || bValue === undefined) bValue = "";
 
-      // Ajustar ordenação booleana (Ativo: true/false)
       if (sortConfig.key === "Ativo") {
         aValue = aValue ? 1 : 0;
         bValue = bValue ? 1 : 0;
@@ -133,7 +132,6 @@ export default function UserManagement() {
 
   const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50";
 
-  // Componente auxiliar para renderizar os cabeçalhos ordenáveis com setas
   const renderSortableHeader = (label, columnKey) => {
     const isActive = sortConfig.key === columnKey;
     return (
@@ -158,7 +156,7 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-slate-900">Equipa MobiFix</h1>
@@ -336,7 +334,6 @@ export default function UserManagement() {
               <tr>
                 {renderSortableHeader("Funcionário", "Nome")}
                 {renderSortableHeader("Cargo", "Cargo")}
-                {/* O contacto não foi pedido nos requisitos de ordenação */}
                 <th className="px-6 py-4">Contacto</th>
                 {renderSortableHeader("Especialidade", "Especialidade")}
                 {renderSortableHeader("Status", "Ativo")}
@@ -344,9 +341,12 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {/* Iteramos sobre sortedFuncionarios em vez da raw list funcionarios */}
               {sortedFuncionarios.map((func) => (
-                <tr key={func.NumeroMecanografico} className="hover:bg-slate-50/50 transition-colors">
+                <tr 
+                  key={func.NumeroMecanografico} 
+                  onClick={() => setSelectedFunc(func)}
+                  className={`hover:bg-slate-50/80 transition-colors cursor-pointer ${!func.Ativo ? 'opacity-60' : ''}`}
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-xs uppercase shadow-md">
@@ -388,19 +388,21 @@ export default function UserManagement() {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <button
-                        onClick={() => handleEdit(func)}
+                        onClick={(e) => { e.stopPropagation(); handleEdit(func); }}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                        title="Editar Colaborador"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleToggleAtivo(func)}
+                        onClick={(e) => { e.stopPropagation(); handleToggleAtivo(func); }}
                         disabled={atualizarMutation.isPending}
                         className={`p-2 rounded-lg transition-all ${
                           func.Ativo
                             ? "text-slate-400 hover:text-red-600 hover:bg-red-50"
                             : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                         }`}
+                        title={func.Ativo ? "Desativar Colaborador" : "Ativar Colaborador"}
                       >
                         {func.Ativo ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </button>
@@ -412,6 +414,99 @@ export default function UserManagement() {
           </table>
         )}
       </div>
+
+      {/* Modal de Detalhes do Funcionário */}
+      {selectedFunc && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            
+            {/* Header */}
+            <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-500" />
+                Detalhes do Colaborador
+              </h3>
+              <button 
+                onClick={() => setSelectedFunc(null)} 
+                className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                
+                {/* Nome e Mecanográfico */}
+                <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-2xl uppercase shadow-md">
+                    {selectedFunc.Nome.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-xl font-black text-slate-900">{selectedFunc.Nome}</p>
+                    <p className="text-sm font-mono font-bold text-slate-500">#{selectedFunc.NumeroMecanografico}</p>
+                  </div>
+                </div>
+
+                {/* Cargo */}
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cargo</p>
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black border ${CARGO_COLORS[selectedFunc.Cargo] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                    {selectedFunc.Cargo === "ADMINISTRADOR" && <Shield className="w-3 h-3" />}
+                    {CARGO_LABELS[selectedFunc.Cargo] ?? selectedFunc.Cargo}
+                  </span>
+                </div>
+
+                {/* Estado */}
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Estado</p>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase ${selectedFunc.Ativo ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                    {selectedFunc.Ativo ? "Ativo" : "Inativo"}
+                  </span>
+                </div>
+
+                {/* Contactos */}
+                <div className="col-span-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Contactos</p>
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Mail className="w-4 h-4" /></div>
+                      {selectedFunc.Email}
+                    </div>
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                      <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Phone className="w-4 h-4" /></div>
+                      {selectedFunc.Contacto}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Especialidade */}
+                {selectedFunc.Especialidade && (
+                  <div className="col-span-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Especialidade</p>
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <Wrench className="w-4 h-4 text-slate-400" />
+                      {selectedFunc.Especialidade}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+               <button 
+                 onClick={() => setSelectedFunc(null)} 
+                 className="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors"
+               >
+                 Fechar
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

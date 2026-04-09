@@ -1,4 +1,3 @@
-/*
 namespace Backend.Controllers;
 
 using Backend.Models;
@@ -8,50 +7,69 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] 
-public class PromocaoController : ControllerBase
+[Authorize]
+public class PromocoesController : ControllerBase
 {
-    private readonly IFaturaService _faturaService;
+    private readonly IPromocaoService _promocaoService;
 
-    public FaturasController(IFaturaService faturaService)
+    public PromocoesController(IPromocaoService promocaoService)
     {
-        _faturaService = faturaService;
+        _promocaoService = promocaoService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Listar()
     {
-        var faturas = await _faturaService.GetFaturasAsync();
-        return Ok(faturas);
+        var promocoes = await _promocaoService.GetPromocoesAsync();
+        return Ok(promocoes);
     }
 
-    [HttpGet("{numero}")]
-    public async Task<IActionResult> Obter(string numero)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Obter(string id)
     {
-        var fatura = await _faturaService.GetFaturaPorNumeroAsync(numero);
-        if (fatura == null) return NotFound(new { mensagem = "Fatura não encontrada." });
-        return Ok(fatura);
+        var promocao = await _promocaoService.GetPromocaoPorIdAsync(id);
+        if (promocao == null) return NotFound(new { mensagem = "Promoção não encontrada." });
+        return Ok(promocao);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] FaturaCriacaoDto dto)
+    public async Task<IActionResult> Criar([FromBody] PromocaoCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var novaFatura = await _faturaService.CriarFaturaAsync(dto);
-        if (novaFatura == null) 
-            return BadRequest(new { mensagem = "Erro ao criar fatura. Verifique se o número já existe." });
+        var novaPromocao = await _promocaoService.CriarPromocaoAsync(dto);
+        if (novaPromocao == null)
+            return BadRequest(new { mensagem = "Erro ao criar promoção." });
 
-        return CreatedAtAction(nameof(Obter), new { numero = novaFatura.NumeroFatura }, novaFatura);
+        return CreatedAtAction(nameof(Obter), new { id = novaPromocao.PromocaoID }, novaPromocao);
     }
 
-    [HttpDelete("{numero}")]
-    public async Task<IActionResult> Eliminar(string numero)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(string id, [FromBody] PromocaoDto dto)
     {
-        var sucesso = await _faturaService.EliminarFaturaAsync(numero);
-        if (!sucesso) return NotFound(new { mensagem = "Fatura não encontrada." });
-        
+        var promocao = await _promocaoService.AtualizarPromocaoAsync(id, dto);
+        if (promocao == null) return NotFound(new { mensagem = "Promoção não encontrada." });
+        return Ok(promocao);
+    }
+
+    [HttpPatch("{id}/estado")]
+    public async Task<IActionResult> AlterarEstado(string id, [FromBody] AlterarEstadoRequest request)
+    {
+        var promocao = await _promocaoService.AlterarEstadoAsync(id, request.Ativa);
+        if (promocao == null) return NotFound(new { mensagem = "Promoção não encontrada." });
+        return Ok(promocao);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Eliminar(string id)
+    {
+        var sucesso = await _promocaoService.EliminarPromocaoAsync(id);
+        if (!sucesso) return NotFound(new { mensagem = "Promoção não encontrada." });
         return NoContent();
     }
 }
-*/
+
+public class AlterarEstadoRequest
+{
+    public bool Ativa { get; set; }
+}

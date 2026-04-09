@@ -1,15 +1,17 @@
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { 
   LayoutDashboard, 
   Package, 
   Tag, 
   Users, 
   Wrench,
-  Box 
+  Box,
+  LogOut // Ícone importado
 } from "lucide-react";
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate(); // Hook para redirecionar após o logout
 
   const navigation = [
     { name: "Dashboard", href: "/FixNManage/dashboard", icon: LayoutDashboard },
@@ -26,10 +28,18 @@ export default function AdminLayout() {
     return location.pathname.startsWith(href);
   };
 
+  // Função para tratar do processo de logout
+  const handleLogout = () => {
+    if (window.confirm("Deseja terminar a sessão?")) {
+      localStorage.removeItem("token"); // Limpa a sessão
+      navigate("/"); // Redireciona para a página de Login (ajusta a rota se necessário)
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white">
+      {/* Sidebar - Adicionado flex e flex-col para podermos empurrar elementos para baixo */}
+      <aside className="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col">
         <div className="flex items-center gap-3 p-6 border-b border-gray-800">
           <Wrench className="w-8 h-8 text-blue-400" />
           <div>
@@ -38,7 +48,8 @@ export default function AdminLayout() {
           </div>
         </div>
         
-        <nav className="p-4 space-y-2">
+        {/* Adicionado flex-1 para que os links ocupem o espaço livre e empurrem o footer */}
+        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -59,6 +70,17 @@ export default function AdminLayout() {
             );
           })}
         </nav>
+
+        {/* Rodapé da Sidebar com o Botão de Logout */}
+        <div className="p-4 border-t border-gray-800">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all font-medium"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Terminar Sessão</span>
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}

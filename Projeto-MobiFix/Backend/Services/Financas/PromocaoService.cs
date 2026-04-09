@@ -1,10 +1,8 @@
-/*
 namespace Backend.Services;
 
 using System.Net.Http.Json;
 using System.Text.Json;
 using Backend.Models;
-
 
 public class PromocaoService : IPromocaoService
 {
@@ -16,34 +14,48 @@ public class PromocaoService : IPromocaoService
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<FaturaDto>> GetPromocoesAsync()
+    public async Task<IEnumerable<PromocaoDto>> GetPromocoesAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<FaturaDto>>("api/faturas", _options) 
-               ?? Enumerable.Empty<FaturaDto>();
+        return await _httpClient.GetFromJsonAsync<IEnumerable<PromocaoDto>>("api/promocoes", _options)
+               ?? Enumerable.Empty<PromocaoDto>();
     }
 
-    public async Task<FaturaDto?> GetFaturaPorNumeroAsync(string numero)
+    public async Task<PromocaoDto?> GetPromocaoPorIdAsync(string id)
     {
-        try 
+        try
         {
-            return await _httpClient.GetFromJsonAsync<FaturaDto>($"api/faturas/{numero}", _options);
+            return await _httpClient.GetFromJsonAsync<PromocaoDto>($"api/promocoes/{id}", _options);
         }
         catch { return null; }
     }
 
-    public async Task<FaturaDto?> CriarFaturaAsync(FaturaCriacaoDto faturaDto)
+    public async Task<PromocaoDto?> CriarPromocaoAsync(PromocaoCriacaoDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/faturas", faturaDto, _options);
+        var response = await _httpClient.PostAsJsonAsync("api/promocoes", dto, _options);
         if (!response.IsSuccessStatusCode) return null;
-        
-        return await response.Content.ReadFromJsonAsync<FaturaDto>(_options);
+
+        return await response.Content.ReadFromJsonAsync<PromocaoDto>(_options);
     }
 
-    public async Task<bool> EliminarFaturaAsync(string numero)
+    public async Task<PromocaoDto?> AtualizarPromocaoAsync(string id, PromocaoDto dto)
     {
-        var response = await _httpClient.DeleteAsync($"api/faturas/{numero}");
+        var response = await _httpClient.PutAsJsonAsync($"api/promocoes/{id}", dto, _options);
+        if (!response.IsSuccessStatusCode) return null;
+
+        return await response.Content.ReadFromJsonAsync<PromocaoDto>(_options);
+    }
+
+    public async Task<PromocaoDto?> AlterarEstadoAsync(string id, bool ativa)
+    {
+        var response = await _httpClient.PatchAsJsonAsync($"api/promocoes/{id}/estado", new { ativa }, _options);
+        if (!response.IsSuccessStatusCode) return null;
+
+        return await response.Content.ReadFromJsonAsync<PromocaoDto>(_options);
+    }
+
+    public async Task<bool> EliminarPromocaoAsync(string id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/promocoes/{id}");
         return response.IsSuccessStatusCode;
     }
 }
-
-*/
