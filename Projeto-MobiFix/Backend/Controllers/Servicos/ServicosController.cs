@@ -40,4 +40,19 @@ public class ServicosController : ControllerBase
         
         return CreatedAtAction(nameof(GetPorId), new { id = novoServico.ServicoID }, novoServico);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(int id, [FromBody] ServicoDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        // Chama o serviço atualizado
+        var servicoAtualizado = await _servicoService.AtualizarServicoAsync(id, dto);
+        
+        if (servicoAtualizado == null) 
+            return BadRequest(new { mensagem = "Erro ao atualizar serviço." });
+
+        // Retorna o objeto atualizado (200 OK)
+        return Ok(servicoAtualizado);
+    }
 }

@@ -4,8 +4,8 @@ import {
   Package, ChevronDown, ChevronUp, Wrench, Loader2, AlertCircle, Euro
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
-import { useAgendas } from '../../hooks/useAgenda';
-import { useServicos } from '../../hooks/useServicos';
+import { useAgendas, useAtualizarAgenda } from '../../hooks/useAgenda';
+import { useServicos, useAtualizarServico } from '../../hooks/useServicos';
 import { useIntervencoesCatalogo } from '../../hooks/useIntervencoesCatalogo';
 
 // ── Extrai o claim "id" (NumeroMecanografico) do JWT ──────────────────────────
@@ -22,6 +22,8 @@ function getMecanicoIdFromToken() {
 
 export default function Repairs() {
   // ── Dados remotos ────────────────────────────────────────────────────────
+  const { mutateAsync: atualizarAgenda } = useAtualizarAgenda();
+  const { mutateAsync: atualizarServico } = useAtualizarServico();
   const { data: agendas  = [], isLoading: loadingAgendas,  isError: errorAgendas  } = useAgendas();
   const { data: servicos = [], isLoading: loadingServicos, isError: errorServicos  } = useServicos();
   const { data: catalogo = [], isLoading: loadingCatalogo                          } = useIntervencoesCatalogo();
@@ -67,13 +69,60 @@ export default function Repairs() {
   // { [agendaId]: Set<intervencaoId> } — IDs de intervenções já validadas
   const [concluidas, setConcluidas] = useState({});
 
-  const marcarConcluida = (agendaId, intervencaoId, descricao) => {
-    setConcluidas(prev => {
-      const set = new Set(prev[agendaId] ?? []);
-      set.add(intervencaoId);
-      return { ...prev, [agendaId]: set };
-    });
+  const marcarConcluida = async (agendaId, intervencaoId, descricao, todasIntervencoes) => {
+    // 1. Atualizar o estado local (UI)
+    const novasConcluidas = new Set(concluidas[agendaId] ?? []);
+    novasConcluidas.add(intervencaoId);
+    
+    setConcluidas(prev => ({
+      ...prev,
+      [agendaId]: novasConcluidas
+    }));
+    
     toast.success('Intervenção concluída!', { description: descricao });
+
+    // 2. Verificar se foi a última intervenção
+    if (novasConcluidas.size === todasIntervencoes.length) {
+      try {
+        // Encontrar os objetos originais completos para fazer o PUT
+        const agendaOriginal = agendas.find(a => a.AgendaID === agendaId);
+        const servicoOriginal = servicos.find(s => s.ServicoID === agendaOriginal?.ServicoID);
+
+        if (!agendaOriginal || !servicoOriginal) {
+           toast.error('Erro: Dados originais não encontrados.');
+           return;
+        }
+
+        // Criar os payloads com os novos estados
+        const payloadAgenda = { ...agendaOriginal, Estado: 'CONCLUIDO' };
+        
+        // No serviço, também atualizamos a DataConclusao se quiseres
+        const payloadServico = { 
+            ...servicoOriginal, 
+            Estado: 'FECHADO',
+            DataConclusao: new Date().toISOString()
+        };
+
+        // 3. Executar as mutações no servidor (em paralelo)
+        toast.promise(
+          Promise.all([
+            atualizarAgenda({ id: agendaId, dados: payloadAgenda }),
+            atualizarServico({ id: servicoOriginal.ServicoID, dados: payloadServico })
+          ]),
+          {
+            loading: 'A finalizar reparação no servidor...',
+            success: 'Reparação e Serviço fechados com sucesso!',
+            error: 'Erro ao fechar a reparação no servidor.'
+          }
+        );
+        
+        // Opcional: Limpar a seleção para voltar ao menu principal
+        // setSelectedAgendaId(null); 
+
+      } catch (error) {
+        console.error("Erro ao finalizar:", error);
+      }
+    }
   };
 
   const getProgress = (agendaId, intervencoes) => {
@@ -339,7 +388,12 @@ export default function Repairs() {
                           </div>
 
                           <button
-                            onClick={() => marcarConcluida(selectedRepair.agendaId, interv.id, interv.descricao)}
+                            onClick={() => marcarConcluida(
+                                selectedRepair.agendaId, 
+                                interv.id, 
+                                interv.descricao, 
+                                selectedRepair.intervencoes // Passamos o array completo
+                            )}
                             disabled={feita}
                             className={`ml-4 shrink-0 flex h-11 items-center gap-2 rounded-lg px-6 font-black transition-all active:scale-95 ${
                               feita
