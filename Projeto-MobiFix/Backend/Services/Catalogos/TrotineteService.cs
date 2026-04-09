@@ -21,11 +21,26 @@ public class TrotineteService : ITrotineteService
     public async Task<IEnumerable<TrotineteDto>> GetTrotinetesClienteAsync(string clienteNIF)
     {
         var trotinetes = await _httpClient.GetFromJsonAsync<IEnumerable<TrotineteDto>>(
-            $"api/trotinetes?NIF={clienteNIF}",
+            $"api/trotinetes?nif={clienteNIF}",
             _optionsPascalCase
         );
 
         return trotinetes ?? Enumerable.Empty<TrotineteDto>();
+    }
+
+    public async Task<TrotineteDto?> GetTrotineteNumeroSerie(string serie)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<TrotineteDto>(
+                $"api/trotinetes/{serie}",
+                _optionsPascalCase
+            );
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
     }
 
     public async Task<TrotineteDto?> CriarTrotineteAsync(string clienteNIF, TrotinetelCriacaoDto criacaoDto)

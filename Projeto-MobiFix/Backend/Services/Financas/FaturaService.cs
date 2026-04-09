@@ -21,6 +21,12 @@ public class FaturaService : IFaturaService
                ?? Enumerable.Empty<FaturaDto>();
     }
 
+    public async Task<IEnumerable<FaturaDto>> GetFaturasCliente(string id)
+    {
+        return await _httpClient.GetFromJsonAsync<IEnumerable<FaturaDto>>($"api/faturas?nif={id}", _options)
+            ?? Enumerable.Empty<FaturaDto>();
+    }
+
     public async Task<FaturaDto?> GetFaturaPorNumeroAsync(string numero)
     {
         try 
