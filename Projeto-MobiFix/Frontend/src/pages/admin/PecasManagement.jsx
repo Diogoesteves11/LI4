@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Edit, Box, Tags, DollarSign, Layers, Loader2, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Edit, Box, Tags, DollarSign, Layers, Loader2, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle, CheckCircle, XCircle, Info, X, Euro } from "lucide-react";
 import { usePecas, useCriarPeca, useAtualizarPeca, useAlterarEstadoPeca } from "../../hooks/usePecas";
 
 const CATEGORIA_COLORS = {
@@ -15,6 +15,7 @@ const FORM_EMPTY = {
   nome: "",
   categoria: "OUTROS",
   pvp: "", 
+  custoAquisicao: "", // Novo campo
   stockAtual: "", 
   descricao: "",
   ativo: true,
@@ -29,6 +30,7 @@ export default function PecasManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEan, setEditingEan] = useState(null);
   const [formData, setFormData] = useState(FORM_EMPTY);
+  const [selectedPeca, setSelectedPeca] = useState(null); // Estado para o modal de detalhes
   
   const [sortConfig, setSortConfig] = useState({ key: "Nome", direction: "asc" });
 
@@ -42,10 +44,10 @@ export default function PecasManagement() {
         Nome: formData.nome,
         Categoria: formData.categoria,
         PVP: parseFloat(formData.pvp),
+        CustoAquisicao: parseFloat(formData.custoAquisicao), // Atualizado
         StockAtual: parseInt(formData.stockAtual, 10),
         Descricao: formData.descricao,
         Ativo: formData.ativo,
-        CustoAquisicao: 0,
         StockMinimo: 5,
         PadraoReposicao: 5,
         Imagem: ""
@@ -68,6 +70,7 @@ export default function PecasManagement() {
       nome: peca.Nome,
       categoria: peca.Categoria,
       pvp: peca.PVP?.toString() || "",
+      custoAquisicao: peca.CustoAquisicao?.toString() || "", // Atualizado
       stockAtual: peca.StockAtual?.toString() || "",
       descricao: peca.Descricao ?? "",
       ativo: peca.Ativo !== false, 
@@ -174,7 +177,7 @@ export default function PecasManagement() {
   const valorEmStock = pecasAtivas.reduce((acc, curr) => acc + (curr.PVP * curr.StockAtual), 0);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-slate-900">Catálogo de Peças</h1>
@@ -251,7 +254,7 @@ export default function PecasManagement() {
               </select>
             )}
 
-            {field("Preço (€)",
+            {field("Preço Venda (€)",
               <input
                 type="number"
                 step="0.01"
@@ -259,6 +262,20 @@ export default function PecasManagement() {
                 required
                 value={formData.pvp}
                 onChange={(e) => setFormData({ ...formData, pvp: e.target.value })}
+                placeholder="0.00"
+                className={inputClass}
+              />
+            )}
+
+            {/* Novo Campo: Custo Aquisição */}
+            {field("Custo de Aquisição (€)",
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                value={formData.custoAquisicao}
+                onChange={(e) => setFormData({ ...formData, custoAquisicao: e.target.value })}
                 placeholder="0.00"
                 className={inputClass}
               />
@@ -358,7 +375,11 @@ export default function PecasManagement() {
                   const isAtivo = peca.Ativo !== false; 
                   
                   return (
-                    <tr key={peca.CodigoEAN} className={`hover:bg-slate-50/50 transition-colors ${!isAtivo ? 'opacity-60' : ''}`}>
+                    <tr 
+                      key={peca.CodigoEAN} 
+                      onClick={() => setSelectedPeca(peca)}
+                      className={`hover:bg-slate-50/80 transition-colors cursor-pointer ${!isAtivo ? 'opacity-60' : ''}`}
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 shadow-sm border ${isAtivo ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-100'}`}>
@@ -398,7 +419,7 @@ export default function PecasManagement() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => handleEdit(peca)}
+                            onClick={(e) => { e.stopPropagation(); handleEdit(peca); }}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                             title="Editar Peça"
                           >
@@ -406,7 +427,7 @@ export default function PecasManagement() {
                           </button>
                           
                           <button
-                            onClick={() => handleToggleAtivo(peca)}
+                            onClick={(e) => { e.stopPropagation(); handleToggleAtivo(peca); }}
                             disabled={alterarEstadoMutation.isPending}
                             className={`p-2 rounded-lg transition-all ${
                               isAtivo
@@ -427,6 +448,93 @@ export default function PecasManagement() {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes da Peça */}
+      {selectedPeca && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            
+            {/* Header */}
+            <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-500" />
+                Detalhes da Peça
+              </h3>
+              <button 
+                onClick={() => setSelectedPeca(null)} 
+                className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                
+                <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Nome da Peça</p>
+                  <p className="text-lg font-bold text-slate-900">{selectedPeca.Nome}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-sm font-mono font-bold text-slate-500">EAN: {selectedPeca.CodigoEAN}</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase ${selectedPeca.Ativo !== false ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                      {selectedPeca.Ativo !== false ? "Ativo" : "Inativo"}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Preço Venda (PVP)</p>
+                  <p className="text-2xl font-black text-slate-900">
+                    {Number(selectedPeca.PVP).toFixed(2)} <Euro className="w-4 h-4 inline text-slate-400 -mt-1" />
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Custo Aquisição</p>
+                  <p className="text-2xl font-black text-slate-500">
+                    {Number(selectedPeca.CustoAquisicao ?? 0).toFixed(2)} <Euro className="w-4 h-4 inline text-slate-300 -mt-1" />
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Stock Atual</p>
+                  <p className={`text-2xl font-black font-mono ${selectedPeca.StockAtual > 0 ? 'text-blue-600' : 'text-red-500'}`}>
+                    {selectedPeca.StockAtual} un.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Categoria</p>
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 mt-1 rounded-full text-xs font-black border ${CATEGORIA_COLORS[selectedPeca.Categoria] ?? CATEGORIA_COLORS.OUTROS}`}>
+                    {selectedPeca.Categoria}
+                  </span>
+                </div>
+
+                {selectedPeca.Descricao && (
+                  <div className="col-span-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Descrição</p>
+                    <p className="text-sm font-medium text-slate-700 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      {selectedPeca.Descricao}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+               <button 
+                 onClick={() => setSelectedPeca(null)} 
+                 className="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors"
+               >
+                 Fechar
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

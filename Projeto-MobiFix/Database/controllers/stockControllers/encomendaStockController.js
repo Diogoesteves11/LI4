@@ -8,7 +8,7 @@ exports.criarEncomenda = async (req, res) => {
             pecaId: req.body.PecaEAN,
             quantidade: req.body.Quantidade,
             estado: req.body.Estado, // PENDENTE
-            adminValidadorNumero: req.body.AdminValidadorNumero,
+            adminValidadorId: req.body.AdminValidadorNumero,
             dataPedido: new Date()
         });
         await novaEncomenda.save();
