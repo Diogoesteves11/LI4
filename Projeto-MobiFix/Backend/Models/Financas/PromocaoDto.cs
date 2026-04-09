@@ -1,35 +1,31 @@
-/*
 namespace Backend.Models;
 
 using System.ComponentModel.DataAnnotations;
 
-public class FaturaDto
+public class PromocaoDto
 {
-    public string PromocaoID { get; set; } = string.Empty;
+    public int PromocaoID { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public int PercentagemDesconto { get; set; }
-    public DateTime DataInicio { get; set; }
-    public DateTime DataFim { get; set; }
+    public string DataInicio { get; set; } = string.Empty;
+    public string DataFim { get; set; } = string.Empty;
     public string AdministradorNumero { get; set; } = string.Empty;
     public bool Ativa { get; set; }
     public List<string> PecasAplicaveisEANs { get; set; } = new();
 }
 
-public class PromocaoCriacaoDtos
+public class PromocaoCriacaoDto
 {
     [Required]
-    public string PromocaoID { get; set; } = string.Empty;
+    public int PromocaoID { get; set; }
     [Required]
     public string Descricao { get; set; } = string.Empty;
     [Required]
     public int PercentagemDesconto { get; set; }
-    [required]
-    public DateTime DataInicio { get; set; }
     [Required]
-    public DateTime DataInicio { get; set; }
+    public string DataInicio { get; set; } = string.Empty;
     [Required]
-    public List<string> PecasAplicaveisEANs { get; set; } = string.Empty;
-    
+    public string DataFim { get; set; } = string.Empty;
+    public string AdministradorNumero { get; set; } = "ADM001";
+    public List<string> PecasAplicaveisEANs { get; set; } = new();
 }
-
-*/
