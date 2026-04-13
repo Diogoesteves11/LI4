@@ -24,11 +24,12 @@
   {
     "_id": 1,
     "trotineteId": "SN-XIAOMI-002",
-    "estado": "EXECUCAO",
+    "estado": "CONCLUIDO",
     "dataAgendamento": "2024-03-26T10:00",
+    "dataConclusao": "2024-03-26T10:30",
     "descricaoDiagnostico": "Furo no pneu traseiro e travão perro.",
     "feedbackCliente": "Arrebantou-lhe o paneu",
-    "preco": 10.00,
+    "preco": 40.00,
     "historicoIntervencoes": [
       {
         "intervencaoCatalogoId": 1,
