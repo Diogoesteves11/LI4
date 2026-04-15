@@ -16,7 +16,9 @@ export default function Faturacao({ amount, items, onClose, onComplete }) {
     setTimeout(() => {
       setProcessing(false);
       setCompleted(true);
-      setTimeout(() => onComplete(), 2500);
+      // Mapeia para o enum aceite pelo backend (Fatura.metodoPagamento)
+      const metodoPagamento = paymentMethod === 'mbway' ? 'MBWAY' : 'MULTIBANCO';
+      setTimeout(() => onComplete({ metodoPagamento }), 2500);
     }, 1800);
   };
 

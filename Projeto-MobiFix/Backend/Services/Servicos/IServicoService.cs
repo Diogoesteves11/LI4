@@ -8,4 +8,7 @@ public interface IServicoService
     Task<ServicoDto?> ObterPorIdAsync(int id);
     Task<ServicoDto?> CriarServicoDiagnosticoAsync(ServicoCriacaoDto dto);
     Task<bool> AtualizarEstadoAsync(int id, string novoEstado);
+    Task<IEnumerable<TrotineteProntaDto>> ListarProntasAsync();
+    Task<bool> FecharServicoAsync(int id);
+    Task<LevantamentoComFaturaDto?> LevantarComFaturaAsync(int id, string metodoPagamento);
 }

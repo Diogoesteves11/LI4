@@ -44,4 +44,26 @@ public class EncomendaClienteController : ControllerBase
 
         return Created(string.Empty, encomenda);
     }
+
+    // GET api/EncomendaCliente/prontas — lista as encomendas prontas para levantamento
+    // Nota: Dependendo da tua regra de negócio, podes querer restringir isto a [Authorize(Roles = "Operador")]
+    [HttpGet("prontas")]
+    public async Task<IActionResult> ListarProntas()
+    {
+        var encomendasProntas = await _encomendaService.ListarProntasParaLevantamentoAsync();
+        return Ok(encomendasProntas);
+    }
+
+    // PUT api/EncomendaCliente/{id}/levantar — marca a encomenda como levantada
+    // Nota: Dependendo da tua regra de negócio, podes querer restringir isto a [Authorize(Roles = "Operador")]
+    [HttpPut("{id}/levantar")]
+    public async Task<IActionResult> LevantarEncomenda(int id)
+    {
+        var sucesso = await _encomendaService.MarcarComoLevantadaAsync(id);
+
+        if (!sucesso)
+            return BadRequest(new { mensagem = $"Não foi possível atualizar a encomenda {id}. Verifique se a mesma existe." });
+
+        return Ok(new { mensagem = "Encomenda marcada como levantada com sucesso." });
+    }
 }

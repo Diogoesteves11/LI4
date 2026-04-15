@@ -6,4 +6,6 @@ public interface IEncomendaClienteService
 {
     Task<EncomendaClienteDto?> CriarEncomendaAsync(string clienteNIF, EncomendaClienteCriacaoDto dto);
     Task<IEnumerable<EncomendaClienteDto>> ListarEncomendasClienteAsync(string clienteNIF);
+    Task<IEnumerable<PecaReservadaDto>> ListarProntasParaLevantamentoAsync();
+    Task<bool> MarcarComoLevantadaAsync(int id);
 }

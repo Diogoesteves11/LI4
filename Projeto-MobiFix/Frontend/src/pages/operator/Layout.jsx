@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom'; // Ajustado para react-router-dom, o padrão web
-import { ShoppingCart, Scooter, Package, Menu, ChevronLeft, Toolbox } from 'lucide-react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { ShoppingCart, Scooter, Package, Menu, ChevronLeft, Toolbox, Receipt, LogOut } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { logout } from '../../utils/auth';
 
 export default function Layout() {
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -11,7 +14,14 @@ export default function Layout() {
     { path: '/FixNSell/trotinetes-prontas', label: 'Trotinetes Prontas', icon: Scooter },
     { path:'/FixNSell/pecas-reservadas', label: 'Peças Reservadas', icon: Toolbox},
     { path: '/FixNSell/rececao-encomendas', label: 'Receção de Encomendas', icon: Package },
+    { path: '/FixNSell/faturas', label: 'Faturas', icon: Receipt },
   ];
+
+  const handleLogout = () => {
+    if (window.confirm('Deseja terminar a sessão?')) {
+      logout(queryClient);
+    }
+  };
   
   function parseJwt(token) {
     try {
@@ -96,9 +106,9 @@ export default function Layout() {
           })}
         </nav>
 
-        {/* Footer da Sidebar (Opcional - Ex: Perfil ou Logout) */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-          <div className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} p-2`}>
+        {/* Footer da Sidebar — Perfil + Logout */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 space-y-2">
+          <div className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} px-2`}>
             {sidebarOpen && (
               <div className="flex flex-col overflow-hidden animate-in fade-in">
                 <span className="text-xs font-bold text-slate-800 truncate">{nome}</span>
@@ -106,6 +116,14 @@ export default function Layout() {
               </div>
             )}
           </div>
+          <button
+            onClick={handleLogout}
+            title="Terminar sessão"
+            className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center'} py-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all font-bold cursor-pointer`}
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {sidebarOpen && <span className="text-sm">Terminar Sessão</span>}
+          </button>
         </div>
       </aside>
 

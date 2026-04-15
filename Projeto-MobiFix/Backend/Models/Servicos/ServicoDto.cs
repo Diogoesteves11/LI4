@@ -39,3 +39,27 @@ public class ServicoCriacaoDto
 
     public string? FeedbackCliente { get; set; }
 }
+
+public class LevantarTrotineteDto
+{
+    [Required]
+    public string MetodoPagamento { get; set; } = string.Empty;
+}
+
+public class LevantamentoComFaturaDto
+{
+    public FaturaDto Fatura { get; set; } = null!;
+}
+
+public class TrotineteProntaDto
+{
+    public int ServicoID { get; set; }
+    public string TrotineteNumSerie { get; set; } = string.Empty;
+    public string? Marca { get; set; }
+    public string? Modelo { get; set; }
+    public string ClienteNIF { get; set; } = string.Empty;
+    public DateTime DataAgendamento { get; set; }
+    public DateTime? DataConclusao { get; set; }
+    public decimal Preco { get; set; }
+    public string? DescricaoDiagnostico { get; set; }
+}

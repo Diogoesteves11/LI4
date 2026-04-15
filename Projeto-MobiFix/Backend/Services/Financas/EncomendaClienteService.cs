@@ -43,10 +43,52 @@ public class EncomendaClienteService : IEncomendaClienteService
     public async Task<IEnumerable<EncomendaClienteDto>> ListarEncomendasClienteAsync(string clienteNIF)
     {
         var todas = await _httpClient.GetFromJsonAsync<IEnumerable<EncomendaClienteDto>>(
-            "api/encomendas-cliente", _options
+            $"api/encomendas-cliente?clienteId={clienteNIF}", _options
         ) ?? Enumerable.Empty<EncomendaClienteDto>();
 
-        // Filtra pelo cliente autenticado
-        return todas.Where(e => e.ClienteNIF == clienteNIF);
+        return todas;
+    }
+
+    public async Task<IEnumerable<PecaReservadaDto>> ListarProntasParaLevantamentoAsync()
+    {
+        // Mongoose normaliza estado para UPPERCASE — "PRONTO PARA LEVANTAMENTO" é o default
+        var encomendasTask = _httpClient.GetFromJsonAsync<IEnumerable<EncomendaClienteDto>>(
+            "api/encomendas-cliente?estado=PRONTO PARA LEVANTAMENTO", _options);
+        var pecasTask = _httpClient.GetFromJsonAsync<IEnumerable<PecaDto>>(
+            "api/pecas", _options);
+
+        await Task.WhenAll(encomendasTask, pecasTask);
+
+        var encomendas = encomendasTask.Result ?? Enumerable.Empty<EncomendaClienteDto>();
+        var pecas = (pecasTask.Result ?? Enumerable.Empty<PecaDto>())
+            .ToDictionary(p => p.CodigoEAN, p => p);
+
+        return encomendas.Select(e => new PecaReservadaDto
+        {
+            EncomendaClienteID = e.EncomendaClienteID,
+            ClienteNIF         = e.ClienteNIF,
+            DataEncomenda      = e.DataEncomenda,
+            Estado             = e.Estado,
+            Total              = e.Total,
+            Itens              = e.Itens.Select(i =>
+            {
+                pecas.TryGetValue(i.PecaEAN, out var peca);
+                return new ItemEncomendaDetalhadoDto
+                {
+                    PecaEAN       = i.PecaEAN,
+                    Nome          = peca?.Nome,
+                    Categoria     = peca?.Categoria,
+                    Quantidade    = i.Quantidade,
+                    PrecoUnitario = peca is null ? null : peca.PVP
+                };
+            }).ToList()
+        });
+    }
+
+    public async Task<bool> MarcarComoLevantadaAsync(int id)
+    {
+        var payload = new { Estado = "LEVANTADA" };
+        var response = await _httpClient.PutAsJsonAsync($"api/encomendas-cliente/{id}", payload, _options);
+        return response.IsSuccessStatusCode;
     }
 }
