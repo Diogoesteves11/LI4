@@ -37,22 +37,37 @@ public class ServicosController : ControllerBase
     {
         var novoServico = await _servicoService.CriarServicoDiagnosticoAsync(dto);
         if (novoServico == null) return BadRequest(new { mensagem = "Erro ao criar serviço." });
-        
+
         return CreatedAtAction(nameof(GetPorId), new { id = novoServico.ServicoID }, novoServico);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Atualizar(int id, [FromBody] ServicoDto dto)
+    // GET api/servicos/prontas — trotinetes reparadas a aguardar levantamento
+    [HttpGet("prontas")]
+    public async Task<IActionResult> GetProntas()
+    {
+        var prontas = await _servicoService.ListarProntasAsync();
+        return Ok(prontas);
+    }
+
+    // PUT api/servicos/{id}/fechar — confirma levantamento (Estado=FECHADO)
+    [HttpPut("{id:int}/fechar")]
+    public async Task<IActionResult> Fechar(int id)
+    {
+        var ok = await _servicoService.FecharServicoAsync(id);
+        if (!ok) return NotFound(new { mensagem = "Serviço não encontrado ou erro ao fechar." });
+        return NoContent();
+    }
+
+    // PUT api/servicos/{id}/levantar — emite fatura do serviço + fecha (atómico)
+    [HttpPut("{id:int}/levantar")]
+    public async Task<IActionResult> LevantarComFatura(int id, [FromBody] LevantarTrotineteDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // Chama o serviço atualizado
-        var servicoAtualizado = await _servicoService.AtualizarServicoAsync(id, dto);
-        
-        if (servicoAtualizado == null) 
-            return BadRequest(new { mensagem = "Erro ao atualizar serviço." });
+        var resultado = await _servicoService.LevantarComFaturaAsync(id, dto.MetodoPagamento);
+        if (resultado is null)
+            return BadRequest(new { mensagem = "Erro ao emitir fatura/levantar trotinete." });
 
-        // Retorna o objeto atualizado (200 OK)
-        return Ok(servicoAtualizado);
+        return Ok(resultado);
     }
 }

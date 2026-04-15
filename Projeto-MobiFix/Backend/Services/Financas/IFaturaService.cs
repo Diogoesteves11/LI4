@@ -8,4 +8,5 @@ public interface IFaturaService
     Task<FaturaDto?> GetFaturaPorNumeroAsync(string numero);
     Task<FaturaDto?> CriarFaturaAsync(FaturaCriacaoDto faturaDto);
     Task<bool> EliminarFaturaAsync(string numero);
+    Task<FaturaDto?> ProcessarDevolucaoAsync(string numeroFatura, string motivo);
 }

@@ -63,7 +63,29 @@ public class FaturasController : ControllerBase
     {
         var sucesso = await _faturaService.EliminarFaturaAsync(numero);
         if (!sucesso) return NotFound(new { mensagem = "Fatura não encontrada." });
-        
+
         return NoContent();
+    }
+
+    [HttpPost("{numero}/devolucao")]
+    public async Task<IActionResult> Devolver(string numero, [FromBody] DevolucaoCriacaoDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
+        {
+            var fatura = await _faturaService.ProcessarDevolucaoAsync(numero, dto.Motivo);
+            if (fatura is null)
+                return BadRequest(new { mensagem = "Não foi possível processar a devolução." });
+            return Ok(fatura);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }

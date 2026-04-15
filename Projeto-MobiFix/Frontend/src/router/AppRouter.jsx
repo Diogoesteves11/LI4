@@ -10,6 +10,7 @@ import Layout from '../pages/operator/Layout.jsx'
 import TrotinetesProntas from '../pages/operator/TrotinetesProntasPage.jsx'
 import PecasReservadas from '../pages/operator/PecasReservadas.jsx'
 import RececaoEncomendas from '../pages/operator/RececaoEncomendasPage.jsx'
+import FaturasOperator from '../pages/operator/FaturasPage.jsx'
 import RepairsLayout from '../pages/mechanic/RepairsLayout.jsx'
 import Dashboard from '../pages/mechanic/Dashboard.jsx'
 import Repairs from '../pages/mechanic/Repairs.jsx'
@@ -79,6 +80,7 @@ export default function AppRouter() {
             <Route path="trotinetes-prontas" element={<TrotinetesProntas />} />
             <Route path="pecas-reservadas" element={<PecasReservadas />} />
             <Route path="rececao-encomendas" element={<RececaoEncomendas />} />
+            <Route path="faturas" element={<FaturasOperator />} />
             <Route index element={<VendaDireta />} />
           </Route>
         </Route>

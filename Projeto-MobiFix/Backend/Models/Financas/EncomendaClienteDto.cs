@@ -40,3 +40,22 @@ public class ItemEncomendaCriacaoDto
     [Range(typeof(decimal), "0.01", "999999.99", ErrorMessage = "O preço deve ser positivo.")]
     public decimal PrecoUnitario { get; set; }
 }
+
+public class PecaReservadaDto
+{
+    public int EncomendaClienteID { get; set; }
+    public string ClienteNIF { get; set; } = string.Empty;
+    public string DataEncomenda { get; set; } = string.Empty;
+    public string Estado { get; set; } = string.Empty;
+    public decimal Total { get; set; }
+    public List<ItemEncomendaDetalhadoDto> Itens { get; set; } = new();
+}
+
+public class ItemEncomendaDetalhadoDto
+{
+    public string PecaEAN { get; set; } = string.Empty;
+    public string? Nome { get; set; }
+    public string? Categoria { get; set; }
+    public int Quantidade { get; set; }
+    public double? PrecoUnitario { get; set; }
+}
