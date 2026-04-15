@@ -41,6 +41,17 @@ public class ServicosController : ControllerBase
         return CreatedAtAction(nameof(GetPorId), new { id = novoServico.ServicoID }, novoServico);
     }
 
+    // PUT api/servicos/{id} — atualização parcial (estado, diagnóstico, preço, histórico)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Atualizar(int id, [FromBody] ServicoAtualizacaoDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var atualizado = await _servicoService.AtualizarServicoAsync(id, dto);
+        if (atualizado is null) return NotFound(new { mensagem = "Serviço não encontrado ou erro ao atualizar." });
+        return Ok(atualizado);
+    }
+
     // GET api/servicos/prontas — trotinetes reparadas a aguardar levantamento
     [HttpGet("prontas")]
     public async Task<IActionResult> GetProntas()

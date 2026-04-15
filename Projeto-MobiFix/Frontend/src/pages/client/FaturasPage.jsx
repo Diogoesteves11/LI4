@@ -5,19 +5,8 @@ import { useFaturas } from "../../hooks/useFaturas"
 import { gerarPDFFatura } from "../../utils/PDFFatura";
 
 export default function Faturas() {
-  // 2. Usamos o hook
   const { data: faturas, isLoading, isError } = useFaturas();
 
-  // 3. Função para lidar com o download
-  const handleDownload = async (id) => {
-    try {
-      await faturaService.downloadPDF(id);
-    } catch (err) {
-      alert("Erro ao descarregar o PDF. Verifica se o ficheiro existe no servidor.");
-    }
-  };
-
-  // Cálculo do total baseado nos dados reais da API
   const totalPago = faturas?.reduce((acc, f) => acc + f.ValorTotal, 0) || 0;
 
   if (isLoading) {

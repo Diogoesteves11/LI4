@@ -7,11 +7,18 @@ using Backend.Models;
 public class VendaService : IVendaService
 {
     private readonly HttpClient _httpClient;
+    private readonly IPecaService _pecaService;
+    private readonly IEncomendaStockService _encomendaStockService;
     private static readonly JsonSerializerOptions _options = new() { PropertyNamingPolicy = null };
 
-    public VendaService(HttpClient httpClient)
+    public VendaService(
+        HttpClient httpClient,
+        IPecaService pecaService,
+        IEncomendaStockService encomendaStockService)
     {
         _httpClient = httpClient;
+        _pecaService = pecaService;
+        _encomendaStockService = encomendaStockService;
     }
 
     public async Task<IEnumerable<VendaDto>> ListarVendasAsync()
@@ -69,6 +76,56 @@ public class VendaService : IVendaService
         var fatura = await faturaResponse.Content.ReadFromJsonAsync<FaturaDto>(_options);
         if (fatura is null) return null;
 
+        // 3) Abater stock de cada peça + disparar reposição automática
+        foreach (var item in dto.ItensVenda)
+        {
+            var peca = await _pecaService.GetPecaPorEanAsync(item.PecaEAN);
+            if (peca is null) continue;
+
+            peca.StockAtual -= item.Quantidade;
+            if (peca.StockAtual < 0) peca.StockAtual = 0;
+
+            await _pecaService.AtualizarPecaAsync(item.PecaEAN, peca);
+            await VerificarEReporStockAsync(peca);
+        }
+
         return new VendaComFaturaDto { Venda = venda, Fatura = fatura };
+    }
+
+    private async Task VerificarEReporStockAsync(PecaDto peca)
+    {
+        try
+        {
+            if (peca.StockAtual > peca.StockMinimo) return;
+
+            var quantidade = peca.PadraoReposicao > 0 ? peca.PadraoReposicao : 5;
+
+            var encomendas = await _encomendaStockService.GetEncomendasAsync();
+            var jaExisteAberta = encomendas.Any(e =>
+                string.Equals(e.PecaEAN, peca.CodigoEAN, StringComparison.OrdinalIgnoreCase) &&
+                (string.Equals(e.Estado, "PENDENTE", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(e.Estado, "TRANSITO", StringComparison.OrdinalIgnoreCase)));
+
+            if (jaExisteAberta)
+            {
+                Console.WriteLine($"[AutoReposicao] Peça {peca.CodigoEAN} abaixo do mínimo mas já tem encomenda aberta — ignorado.");
+                return;
+            }
+
+            var criada = await _encomendaStockService.CriarEncomendaAsync(new EncomendaStockCriacaoDto
+            {
+                PecaEAN = peca.CodigoEAN,
+                Quantidade = quantidade,
+                AdminValidadorNumero = null
+            });
+
+            Console.WriteLine(criada is null
+                ? $"[AutoReposicao] Falha ao criar encomenda para {peca.CodigoEAN}."
+                : $"[AutoReposicao] Encomenda #{criada.EncomendaID} criada ({quantidade}x {peca.CodigoEAN}).");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AutoReposicao] Erro ao processar {peca.CodigoEAN}: {ex.Message}");
+        }
     }
 }

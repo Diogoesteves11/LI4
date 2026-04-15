@@ -1,9 +1,25 @@
-import { Calendar, Scooter, ShoppingCart, Bell, User,Wrench } from "lucide-react";
+import { Calendar, Scooter, ShoppingCart, Wrench, CheckCircle2, Clock, Hourglass } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 import BottomNav from "../../components/BottomNav";
+import { useTrotinetes } from "../../hooks/useTrotinetes";
+import { useServicos } from "../../hooks/useServicos";
 
 export default function HomeClientePage() {
   const navigate = useNavigate();
+  const { data: trotinetes = [] } = useTrotinetes();
+  const { data: servicos = [] } = useServicos();
+
+  const reparacoesAtivas = useMemo(() => {
+    if (!trotinetes.length || !servicos.length) return [];
+    const series = new Set(trotinetes.map(t => t.NumeroSerie));
+    return servicos
+      .filter(s => series.has(s.TrotineteNumSerie))
+      .filter(s => ['AGENDADO', 'EXECUCAO', 'CONCLUIDO'].includes(s.Estado))
+      .sort((a, b) => new Date(b.DataAgendamento) - new Date(a.DataAgendamento))
+      .slice(0, 3)
+      .map(s => ({ ...s, trot: trotinetes.find(t => t.NumeroSerie === s.TrotineteNumSerie) }));
+  }, [trotinetes, servicos]);
 
   const quickActions = [
     {
@@ -14,11 +30,18 @@ export default function HomeClientePage() {
       path: "/FixNRide/agendar"
     },
     {
-      label: "Catálogo de Peças", 
-      desc: "Reserve peças para levantar", 
-      icon: ShoppingCart, 
-      color: "bg-purple-100 text-purple-600", 
-      path: "/FixNRide/catalogo" 
+      label: "Minhas Reparações",
+      desc: "Acompanhar estado + histórico",
+      icon: Wrench,
+      color: "bg-emerald-100 text-emerald-600",
+      path: "/FixNRide/reparacoes"
+    },
+    {
+      label: "Catálogo de Peças",
+      desc: "Reserve peças para levantar",
+      icon: ShoppingCart,
+      color: "bg-purple-100 text-purple-600",
+      path: "/FixNRide/catalogo"
     },
   ]
 
@@ -96,54 +119,72 @@ export default function HomeClientePage() {
 
       {/* Active Repairs */}
       <section className="px-4 pb-4">
-        <h2 className="text-xs font-bold text-slate-500 mb-4 uppercase tracking-wider ml-1">
-          Reparações Ativas
-        </h2>
-        
-        <div className="space-y-4">
-          {/* Card 1 - Em Reparação */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="font-bold text-slate-900">Xiaomi Mi Pro 2</h3>
-                <p className="text-xs font-mono text-slate-400">XM2023-4567</p>
-              </div>
-              <span className="text-[10px] font-bold bg-orange-100 text-orange-700 px-2 py-1 rounded-full uppercase">
-                Em Oficina
-              </span>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-medium text-slate-600">
-                <span>Estado da Reparação</span>
-                <span className="text-orange-600">60%</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                <div 
-                  className="bg-orange-500 h-full rounded-full transition-all duration-1000" 
-                  style={{ width: "60%" }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2 - Pronta */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 border-l-4 border-l-emerald-500">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-bold text-slate-900">Segway Ninebot Max</h3>
-                <p className="text-xs font-mono text-slate-400">SG2023-8901</p>
-              </div>
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full uppercase">
-                Pronta
-              </span>
-            </div>
-            <p className="text-sm text-slate-600 mt-3 flex items-center gap-2">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              Pode levantar o seu veículo hoje.
-            </p>
-          </div>
+        <div className="flex items-center justify-between mb-4 ml-1">
+          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Reparações Ativas
+          </h2>
+          {reparacoesAtivas.length > 0 && (
+            <button
+              onClick={() => navigate('/FixNRide/reparacoes')}
+              className="text-xs font-bold text-blue-600 uppercase tracking-wider"
+            >
+              Ver todas
+            </button>
+          )}
         </div>
+
+        {reparacoesAtivas.length === 0 ? (
+          <div className="bg-white rounded-2xl p-6 text-center border border-slate-100">
+            <Scooter className="w-10 h-10 mx-auto text-slate-200 mb-2" />
+            <p className="text-slate-400 font-medium text-sm">Sem reparações em curso.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {reparacoesAtivas.map(r => {
+              const estadoMeta = {
+                AGENDADO:  { label: 'Agendado',  pct: 10,  color: 'bg-blue-100 text-blue-700',       bar: 'bg-blue-500',    icon: Hourglass },
+                EXECUCAO:  { label: 'Em Oficina', pct: 55, color: 'bg-orange-100 text-orange-700',   bar: 'bg-orange-500',  icon: Wrench },
+                CONCLUIDO: { label: 'Pronta',    pct: 100, color: 'bg-emerald-100 text-emerald-700', bar: 'bg-emerald-500', icon: CheckCircle2 },
+              }[r.Estado];
+              const Icon = estadoMeta.icon;
+              return (
+                <button
+                  key={r.ServicoID}
+                  onClick={() => navigate('/FixNRide/reparacoes')}
+                  className={`w-full text-left bg-white rounded-2xl p-5 shadow-sm border border-slate-100 active:scale-[0.99] transition-all ${
+                    r.Estado === 'CONCLUIDO' ? 'border-l-4 border-l-emerald-500' : ''
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-bold text-slate-900">
+                        {r.trot?.Marca ?? 'Trotinete'} {r.trot?.Modelo ?? ''}
+                      </h3>
+                      <p className="text-xs font-mono text-slate-400">{r.TrotineteNumSerie}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase flex items-center gap-1 ${estadoMeta.color}`}>
+                      <Icon size={11} /> {estadoMeta.label}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <span>Progresso</span>
+                      <span>{estadoMeta.pct}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div className={`${estadoMeta.bar} h-full rounded-full transition-all duration-700`} style={{ width: `${estadoMeta.pct}%` }} />
+                    </div>
+                  </div>
+                  {r.Estado === 'CONCLUIDO' && (
+                    <p className="text-xs text-emerald-600 mt-3 flex items-center gap-2 font-medium">
+                      <Clock size={12} /> Pode levantar o seu veículo.
+                    </p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <BottomNav />

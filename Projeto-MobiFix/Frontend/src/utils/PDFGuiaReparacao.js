@@ -4,11 +4,30 @@ import { jsPDF } from 'jspdf';
  * Gera um PDF profissional para o diagnóstico da trotinete
  */
 export function generateDiagnosticPDF(repair, interventions = [], parts = [], notes = '') {
+  if (!repair) {
+    console.warn('[PDF] repair vazio — ignorado.');
+    return;
+  }
+
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
   const contentWidth = pageWidth - (margin * 2);
   let y = margin;
+
+  const normIntervs = interventions.map(i => ({
+    name: i.name ?? i.Descricao ?? `Intervenção #${i.IntervencaoID ?? ''}`,
+    code: i.code ?? i.IntervencaoID ?? '—',
+    category: i.category ?? i.Especialidade ?? '—',
+    estimatedTime: Number(i.estimatedTime ?? i.TempoEstimadoMinutos ?? 0),
+    price: Number(i.price ?? i.PrecoFixoMaoDeObra ?? 0),
+  }));
+
+  const normParts = parts.map(p => ({
+    name: p.name ?? p.Nome ?? 'Peça',
+    ean: p.ean ?? p.CodigoEAN ?? '—',
+    quantity: Number(p.quantity ?? p.StockAtual ?? 1),
+  }));
 
   // --- FUNÇÕES AUXILIARES ---
   const checkPageFlow = (neededHeight) => {
@@ -55,9 +74,9 @@ export function generateDiagnosticPDF(repair, interventions = [], parts = [], no
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   const vehicleInfo = [
-    ['Matrícula/ID:', repair.vehiclePlate, 'Cliente:', repair.clientName],
-    ['Marca/Modelo:', `${repair.vehicleBrand} ${repair.vehicleModel}`, 'Prioridade:', repair.priority === 'urgent' ? 'URGENTE' : 'Normal'],
-    ['Nº Série:', repair.serialNumber || 'N/A', 'Bateria:', `${repair.batteryLevel ?? '--'}%`]
+    ['Matrícula/ID:', repair.vehiclePlate ?? '—', 'Cliente NIF:', repair.clientNif ?? repair.clientName ?? '—'],
+    ['Marca/Modelo:', `${repair.vehicleBrand ?? '—'} ${repair.vehicleModel ?? ''}`.trim(), 'Serviço:', `#${repair.servicoId ?? repair.id ?? '—'}`],
+    ['Nº Série:', repair.vehiclePlate ?? 'N/A', 'Hora:', repair.scheduledTime ?? '—'],
   ];
 
   vehicleInfo.forEach(row => {
@@ -76,35 +95,34 @@ export function generateDiagnosticPDF(repair, interventions = [], parts = [], no
   y += 5;
 
   // --- INTERVENÇÕES ---
-  if (interventions.length > 0) {
+  if (normIntervs.length > 0) {
     drawSectionHeader('Intervenções a Realizar');
-    
-    interventions.forEach((item, index) => {
+
+    normIntervs.forEach((item, index) => {
       checkPageFlow(12);
       doc.setFont('helvetica', 'bold');
       doc.text(`${index + 1}. ${item.name}`, margin, y);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${item.estimatedTime} min`, pageWidth - margin, y, { align: 'right' });
+      doc.text(`€${item.price.toFixed(2)}`, pageWidth - margin, y, { align: 'right' });
       y += 5;
       doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139); // Slate-500
-      doc.text(`Código: ${item.code} | Categoria: ${item.category}`, margin + 4, y);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Código: #${item.code} | Categoria: ${item.category}`, margin + 4, y);
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
       y += 8;
     });
 
-    const totalTime = interventions.reduce((sum, i) => sum + i.estimatedTime, 0);
+    const totalMaoObra = normIntervs.reduce((sum, i) => sum + i.price, 0);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Tempo Total Estimado: ${totalTime} minutos`, margin, y);
+    doc.text(`Total Mão de Obra: €${totalMaoObra.toFixed(2)}`, margin, y);
     y += 12;
   }
 
   // --- PEÇAS ---
-  if (parts.length > 0) {
+  if (normParts.length > 0) {
     drawSectionHeader('Peças Necessárias');
-    
-    // Cabeçalho da tabela de peças
+
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text('Descrição', margin, y);
@@ -115,10 +133,10 @@ export function generateDiagnosticPDF(repair, interventions = [], parts = [], no
     y += 6;
 
     doc.setFont('helvetica', 'normal');
-    parts.forEach(part => {
+    normParts.forEach(part => {
       checkPageFlow(8);
-      doc.text(part.name, margin, y);
-      doc.text(part.ean, margin + 80, y);
+      doc.text(String(part.name), margin, y);
+      doc.text(String(part.ean), margin + 80, y);
       doc.text(String(part.quantity), pageWidth - margin, y, { align: 'right' });
       y += 7;
     });
@@ -149,6 +167,7 @@ export function generateDiagnosticPDF(repair, interventions = [], parts = [], no
     );
   }
 
-  // Salvar
-  doc.save(`Relatorio_${repair.vehiclePlate}_${repair.id}.pdf`);
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const safePlate = String(repair.vehiclePlate ?? 'SN').replace(/[^\w-]/g, '_');
+  doc.save(`Relatorio_${safePlate}_${repair.id ?? 'X'}_${timestamp}.pdf`);
 }

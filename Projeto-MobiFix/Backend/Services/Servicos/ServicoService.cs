@@ -7,11 +7,15 @@ using Backend.Models;
 public class ServicoService : IServicoService
 {
     private readonly HttpClient _httpClient;
+    private readonly IClienteService _clienteService;
+    private readonly IEmailService _emailService;
     private static readonly JsonSerializerOptions _options = new() { PropertyNamingPolicy = null };
 
-    public ServicoService(HttpClient httpClient)
+    public ServicoService(HttpClient httpClient, IClienteService clienteService, IEmailService emailService)
     {
         _httpClient = httpClient;
+        _clienteService = clienteService;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<ServicoDto>> ListarTodosAsync()
@@ -52,6 +56,66 @@ public class ServicoService : IServicoService
         var payload = new { Estado = novoEstado };
         var response = await _httpClient.PutAsJsonAsync($"api/servicos/{id}", payload, _options);
         return response.IsSuccessStatusCode;
+    }
+
+    public async Task<ServicoDto?> AtualizarServicoAsync(int id, ServicoAtualizacaoDto dto)
+    {
+        var payload = new Dictionary<string, object?>();
+        if (dto.Estado is not null) payload["Estado"] = dto.Estado;
+        if (dto.DescricaoDiagnostico is not null) payload["DescricaoDiagnostico"] = dto.DescricaoDiagnostico;
+        if (dto.Preco is not null) payload["Preco"] = dto.Preco;
+        if (dto.DataConclusao is not null) payload["DataConclusao"] = dto.DataConclusao;
+        if (dto.HistoricoIntervencoes is not null)
+        {
+            payload["HistoricoIntervencoes"] = dto.HistoricoIntervencoes.Select(h => new
+            {
+                IntervencaoCatalogoID = h.IntervencaoCatalogoID,
+                MecanicoNumero = h.MecanicoNumero,
+                DataInicio = h.DataInicio,
+                DataFim = h.DataFim,
+                TempoGastoMinutos = h.TempoGastoMinutos,
+                PecasUtilizadas = h.PecasUtilizadas.Select(p => new
+                {
+                    PecaEAN = p.PecaEAN,
+                    Quantidade = p.Quantidade
+                })
+            });
+        }
+
+        var response = await _httpClient.PutAsJsonAsync($"api/servicos/{id}", payload, _options);
+        if (!response.IsSuccessStatusCode) return null;
+        var atualizado = await response.Content.ReadFromJsonAsync<ServicoDto>(_options);
+
+        if (string.Equals(dto.Estado, "CONCLUIDO", StringComparison.OrdinalIgnoreCase) && atualizado is not null)
+        {
+            _ = Task.Run(() => NotificarConclusaoAsync(atualizado));
+        }
+
+        return atualizado;
+    }
+
+    private async Task NotificarConclusaoAsync(ServicoDto servico)
+    {
+        try
+        {
+            var trotinete = await _httpClient.GetFromJsonAsync<TrotineteDto>(
+                $"api/trotinetes/{servico.TrotineteNumSerie}", _options);
+            if (trotinete is null || string.IsNullOrWhiteSpace(trotinete.ClienteNIF)) return;
+
+            var cliente = await _clienteService.ObterPorNifAsync(trotinete.ClienteNIF);
+            if (cliente is null || string.IsNullOrWhiteSpace(cliente.Email)) return;
+
+            await _emailService.NotificarTrotineteProntaAsync(
+                cliente.Email,
+                string.IsNullOrWhiteSpace(cliente.Nome) ? "Cliente" : cliente.Nome,
+                servico.ServicoID,
+                servico.TrotineteNumSerie,
+                servico.Preco);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ServicoService] Falha ao notificar conclusão do serviço {servico.ServicoID}: {ex.Message}");
+        }
     }
 
     public async Task<IEnumerable<TrotineteProntaDto>> ListarProntasAsync()

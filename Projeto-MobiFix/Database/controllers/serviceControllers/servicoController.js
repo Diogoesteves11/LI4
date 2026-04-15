@@ -45,11 +45,28 @@ exports.obterServico = async (req, res) => {
 
 exports.atualizarServico = async (req, res) => {
     try {
-        const atualizado = await Servico.findByIdAndUpdate(req.params.id, {
-            estado: req.body.Estado,
-            descricaoDiagnostico: req.body.DescricaoDiagnostico,
-            preco: req.body.Preco
-        }, { new: true }).lean();
+        const update = {};
+        if (req.body.Estado !== undefined) update.estado = req.body.Estado;
+        if (req.body.DescricaoDiagnostico !== undefined) update.descricaoDiagnostico = req.body.DescricaoDiagnostico;
+        if (req.body.Preco !== undefined) update.preco = req.body.Preco;
+        if (req.body.DataConclusao !== undefined) {
+            update.dataConclusao = req.body.DataConclusao ? new Date(req.body.DataConclusao) : null;
+        }
+        if (Array.isArray(req.body.HistoricoIntervencoes)) {
+            update.historicoIntervencoes = req.body.HistoricoIntervencoes.map(h => ({
+                intervencaoCatalogoId: h.IntervencaoCatalogoID,
+                mecanicoId: h.MecanicoNumero,
+                dataInicio: h.DataInicio ? new Date(h.DataInicio) : undefined,
+                dataFim: h.DataFim ? new Date(h.DataFim) : undefined,
+                tempoGastoMinutos: h.TempoGastoMinutos ?? null,
+                pecasUtilizadas: (h.PecasUtilizadas || []).map(p => ({
+                    pecaId: p.PecaEAN,
+                    quantidade: p.Quantidade
+                }))
+            }));
+        }
+
+        const atualizado = await Servico.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true }).lean();
         if (!atualizado) return res.status(404).json({ mensagem: "Não encontrado." });
         return res.status(200).json(paraServicoDto(atualizado));
     } catch (error) { return res.status(400).json({ error: error.message }); }

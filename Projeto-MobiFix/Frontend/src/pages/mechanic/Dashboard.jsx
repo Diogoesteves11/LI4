@@ -10,7 +10,7 @@ import { ScheduleRepairDialog } from '../../components/AgendamentoReparacao';
 import { toast, Toaster } from 'sonner';
 import { generateDiagnosticPDF } from '../../utils/PDFGuiaReparacao';
 import { useAgendas, useCriarAgenda, useAtualizarAgenda } from '../../hooks/useAgenda';
-import { useServicos } from '../../hooks/useServicos';
+import { useServicos, useAtualizarServico } from '../../hooks/useServicos';
 import { useBuscarTrotinete } from '../../hooks/useTrotinetes';
 
 export default function Dashboard() {
@@ -18,7 +18,8 @@ export default function Dashboard() {
   const { data: agendas,  isLoading: loadingAgendas,  isError: errorAgendas  } = useAgendas();
   const { data: servicos, isLoading: loadingServicos                          } = useServicos();
   const { mutateAsync: criarAgendamento, isPending: isSaving } = useCriarAgenda();
-  const { mutateAsync: atualizarAgendamento } = useAtualizarAgenda(); // Inicializar hook
+  const { mutateAsync: atualizarAgendamento } = useAtualizarAgenda();
+  const { mutateAsync: atualizarServico } = useAtualizarServico();
 
   // ── Lista de diagnósticos reservados ───────────────────────────────────────
   const repairs = useMemo(() => {
@@ -85,14 +86,29 @@ export default function Dashboard() {
     const payloadNovo = {
       servicoID: selectedRepair.servicoId,
       dataHoraInicio: `${scheduleData.date}T${scheduleData.time}:00`,
-      tipoSlot: 'REPARACAO',         
+      tipoSlot: 'REPARACAO',
+      mecanicoNumero: agendaOriginal?.MecanicoNumero ?? '',
+    };
+
+    const pecasPayload = parts.map(p => ({
+      PecaEAN: p.CodigoEAN,
+      Quantidade: p.StockAtual ?? 1,
+    }));
+
+    const historicoIntervencoes = selectedInterventions.map((i, idx) => ({
+      IntervencaoCatalogoID: i.IntervencaoID,
+      MecanicoNumero: agendaOriginal?.MecanicoNumero ?? '',
+      PecasUtilizadas: idx === 0 ? pecasPayload : [],
+    }));
+
+    const servicoPayload = {
+      DescricaoDiagnostico: notes,
+      HistoricoIntervencoes: historicoIntervencoes,
     };
 
     try {
-      // Executamos a atualização primeiro para "limpar" a lista visual
       await atualizarAgendamento({ id: selectedRepair.id, dados: payloadUpdate });
-      
-      // Depois criamos o agendamento da reparação propriamente dita
+      await atualizarServico({ id: selectedRepair.servicoId, dados: servicoPayload });
       await criarAgendamento(payloadNovo);
 
       toast.success('Reparação agendada e diagnóstico concluído!');
@@ -102,7 +118,7 @@ export default function Dashboard() {
     } catch (error) {
       toast.error('Erro ao processar agendamento.');
     }
-  }; 
+  };
 
   // ── Guards ─────────────────────────────────────────────────────────────────
   if (loadingAgendas || loadingServicos) return (

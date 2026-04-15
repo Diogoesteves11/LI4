@@ -10,7 +10,7 @@ const encomendaClienteSchema = new mongoose.Schema({
   estado: { 
     type: String, 
     default: 'PRONTO PARA LEVANTAMENTO',
-    enum: ['ENTREGUE', 'PRONTO PARA LEVANTAMENTO']  
+    enum: ['ENTREGUE', 'PRONTO PARA LEVANTAMENTO', 'LEVANTADA']
   },
   total: { type: Number, required: true, min: 0 },
   faturaId: { type: String, ref: 'Fatura', default: null },

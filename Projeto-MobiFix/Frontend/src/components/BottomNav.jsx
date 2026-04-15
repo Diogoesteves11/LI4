@@ -1,15 +1,16 @@
-import { Home, Scooter, ShoppingCart, FileText} from "lucide-react";
-import { useNavigate, useLocation} from "react-router-dom";
+import { Home, Scooter, Wrench, ShoppingCart, FileText } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function BottomNav() {
     const location = useLocation();
     const navigate = useNavigate();
 
     const navItems = [
-        {icon: Home, label: "Início", path: "/FixNRide/"},
-        {icon: Scooter, label: "Trotinetes", path: "/FixNRide/trotinetes"},
-        {icon: ShoppingCart, label: "Catálogo", path: "/FixNRide/catalogo"},
-        {icon: FileText, label: "Faturas", path: "/FixNRide/faturas" },
+        { icon: Home, label: "Início", path: "/FixNRide/" },
+        { icon: Scooter, label: "Trotinetes", path: "/FixNRide/trotinetes" },
+        { icon: Wrench, label: "Reparações", path: "/FixNRide/reparacoes" },
+        { icon: ShoppingCart, label: "Catálogo", path: "/FixNRide/catalogo" },
+        { icon: FileText, label: "Faturas", path: "/FixNRide/faturas" },
     ];
 
     return (

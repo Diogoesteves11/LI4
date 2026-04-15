@@ -1,25 +1,66 @@
 import { jsPDF } from "jspdf";
 
 export const gerarPDFFatura = (fatura) => {
+  if (!fatura) return;
+
   const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
 
-  // Cabeçalho
-  doc.setFontSize(20);
-  doc.text("MobiFix - Fatura", 10, 20);
-  
-  // Detalhes
+  doc.setFillColor(37, 99, 235);
+  doc.rect(0, 0, pageWidth, 36, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MobiFix — Fatura', margin, 22);
+
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
-  doc.text(`Número: ${fatura.numeroFatura}`, 10, 40);
-  doc.text(`Data: ${new Date(fatura.dataEmissao).toLocaleDateString('pt-PT')}`, 10, 50);
-  doc.text(`Método: ${fatura.metodoPagamento}`, 10, 60);
-  
-  doc.line(10, 65, 200, 65); // Linha divisória
+  doc.setFont('helvetica', 'normal');
+  let y = 52;
 
-  doc.text(`Descrição: ${fatura.servicoID ? 'Serviço #' + fatura.servicoID : 'Venda #' + fatura.vendaID}`, 10, 75);
-  
-  doc.setFontSize(14);
-  doc.text(`Total: ${fatura.valorTotal.toFixed(2)} EUR`, 10, 90);
+  const dataEmissao = fatura.DataEmissao ? new Date(fatura.DataEmissao).toLocaleString('pt-PT') : '—';
 
-  // Faz o download automático
-  doc.save(`${fatura.numeroFatura}.pdf`);
+  const rows = [
+    ['Número', fatura.NumeroFatura ?? '—'],
+    ['Data', dataEmissao],
+    ['Cliente NIF', fatura.ClienteNIF ?? '—'],
+    ['Método', fatura.MetodoPagamento ?? '—'],
+    ['Referência', fatura.ServicoID ? `Serviço #${fatura.ServicoID}` : (fatura.VendaID ? `Venda #${fatura.VendaID}` : '—')],
+  ];
+
+  rows.forEach(([label, value]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${label}:`, margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(String(value), margin + 40, y);
+    y += 9;
+  });
+
+  y += 6;
+  doc.setDrawColor(200);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 12;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  const total = Number(fatura.ValorTotal ?? 0).toFixed(2);
+  doc.text(`Total: €${total}`, margin, y);
+
+  if (Array.isArray(fatura.Devolucoes) && fatura.Devolucoes.length > 0) {
+    y += 16;
+    doc.setFontSize(12);
+    doc.setTextColor(220, 38, 38);
+    doc.text('DEVOLVIDA', margin, y);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    fatura.Devolucoes.forEach(d => {
+      y += 8;
+      doc.text(`Motivo: ${d.Motivo ?? '—'}`, margin, y);
+    });
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const safeNum = String(fatura.NumeroFatura ?? 'fatura').replace(/[^\w-]/g, '_');
+  doc.save(`Fatura_${safeNum}_${timestamp}.pdf`);
 };
