@@ -77,8 +77,10 @@ export const operatorService = {
         return response.data;
     },
 
-    levantarPecaReservada: async (id) => {
-        const response = await api.put(`/EncomendaCliente/${id}/levantar`);
-        return response.data;
+    levantarPecaReservada: async ({ id, metodoPagamento }) => {
+        const response = await api.put(`/EncomendaCliente/${id}/levantar`, {
+            MetodoPagamento: metodoPagamento,
+        });
+        return response.data; // { mensagem, fatura }
     },
 };

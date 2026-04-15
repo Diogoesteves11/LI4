@@ -3,11 +3,11 @@ import api from "./api";
 export const agendaService = {
     // Nome corrigido: era "createAgenda", o hook chamava "criarSlot"
     criarSlot: async (dados) => {
-        // Payload direto, sem wrapper { agenda: dados }
         const response = await api.post('/Agenda', {
             ServicoID: dados.servicoID,
             DataHoraInicio: dados.dataHoraInicio,
             TipoSlot: dados.tipoSlot,
+            MecanicoNumero: dados.mecanicoNumero ?? '',
         });
         return response.data;
     },

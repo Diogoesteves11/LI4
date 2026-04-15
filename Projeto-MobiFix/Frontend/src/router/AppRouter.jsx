@@ -5,6 +5,7 @@ import Trotinetes from '../pages/client/MinhasTrotinetesPage.jsx'
 import Faturas from '../pages/client/FaturasPage.jsx'
 import AgendarDiagnostico from '../pages/client/AgendarDiagnosticoPage.jsx'
 import Catalogo from '../pages/client/CatalogoPecasPage.jsx'
+import AcompanharReparacoes from '../pages/client/AcompanharReparacoesPage.jsx'
 import VendaDireta from '../pages/operator/VendaDiretaPage.jsx'
 import Layout from '../pages/operator/Layout.jsx'
 import TrotinetesProntas from '../pages/operator/TrotinetesProntasPage.jsx'
@@ -72,6 +73,7 @@ export default function AppRouter() {
           <Route path="/FixNRide/faturas" element={<Faturas/>} />
           <Route path="/FixNRide/agendar" element={<AgendarDiagnostico/>} />
           <Route path="/FixNRide/catalogo" element={<Catalogo/>} />
+          <Route path="/FixNRide/reparacoes" element={<AcompanharReparacoes/>} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['OPERADOR', 'ADMINISTRADOR']} />}>

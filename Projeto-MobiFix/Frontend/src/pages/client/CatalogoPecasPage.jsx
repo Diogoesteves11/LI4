@@ -63,17 +63,17 @@ export default function Catalogo() {
   const alterarQuantidade = (ean, delta) => {
     setCarrinho(prev =>
       prev
-        .map(i => i.peca.CodigoEan === ean ? { ...i, quantidade: i.quantidade + delta } : i)
+        .map(i => i.peca.CodigoEAN === ean ? { ...i, quantidade: i.quantidade + delta } : i)
         .filter(i => i.quantidade > 0)
     );
   };
 
   const removerDoCarrinho = (ean) => {
-    setCarrinho(prev => prev.filter(i => i.peca.CodigoEan !== ean));
+    setCarrinho(prev => prev.filter(i => i.peca.CodigoEAN !== ean));
   };
 
   const quantidadeNoCarrinho = (ean) =>
-    carrinho.find(i => i.peca.CodigoEan === ean)?.quantidade ?? 0;
+    carrinho.find(i => i.peca.CodigoEAN === ean)?.quantidade ?? 0;
 
   // ── Submeter reserva ──────────────────────────────────────────────────────
   const handleConfirmarReserva = () => {
@@ -297,7 +297,7 @@ export default function Catalogo() {
               <p className="text-center text-slate-300 font-bold py-8">O carrinho está vazio.</p>
             ) : (
               carrinho.map(({ peca, quantidade }) => (
-                <div key={peca.CodigoEan} className="flex items-center gap-4">
+                <div key={peca.CodigoEAN} className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
                     <img
                       src={`../../../${peca.Imagem}`}

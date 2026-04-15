@@ -1,18 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Package, User, CheckCircle2, ArrowRight, Box, Loader2, AlertCircle } from 'lucide-react';
+import Faturacao from '../../components/Faturacao';
 import { usePecasReservadas, useLevantarPecaReservada } from '../../hooks/useOperator';
 
 export default function PecasReservadas() {
   const { data: apiData, isLoading, isError, refetch } = usePecasReservadas();
-  const { mutateAsync: levantarPeca, isPending: isLevantando } = useLevantarPecaReservada();
+  const { mutateAsync: levantarPeca } = useLevantarPecaReservada();
 
-  const handleConfirmPickup = async (encomendaId) => {
+  const [selectedReserva, setSelectedReserva] = useState(null);
+  const [showFaturacao, setShowFaturacao] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  const handleConfirmPickup = (reserva) => {
+    setSelectedReserva(reserva);
+    setShowFaturacao(true);
+  };
+
+  const handleFaturacaoComplete = async (dadosPagamento) => {
+    if (!selectedReserva) return;
     try {
-      await levantarPeca(encomendaId);
+      setIsCompleting(true);
+      const metodoPagamento = typeof dadosPagamento === 'string'
+        ? dadosPagamento
+        : (dadosPagamento?.metodoPagamento || 'MULTIBANCO');
+
+      await levantarPeca({
+        id: selectedReserva.EncomendaClienteID,
+        metodoPagamento,
+      });
       refetch();
     } catch (err) {
       console.error('Erro ao levantar encomenda:', err);
       alert('Ocorreu um erro ao registar o levantamento.');
+    } finally {
+      setIsCompleting(false);
+      setSelectedReserva(null);
+      setShowFaturacao(false);
     }
   };
 
@@ -126,11 +149,11 @@ export default function PecasReservadas() {
                     </td>
                     <td className="px-8 py-5 text-right">
                       <button
-                        onClick={() => handleConfirmPickup(r.EncomendaClienteID)}
-                        disabled={isLevantando}
+                        onClick={() => handleConfirmPickup(r)}
+                        disabled={isCompleting}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-orange-600 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isLevantando ? 'A processar...' : 'Confirmar Levantamento'} <ArrowRight size={14} />
+                        {isCompleting ? 'A processar...' : 'Confirmar Levantamento'} <ArrowRight size={14} />
                       </button>
                     </td>
                   </tr>
@@ -140,6 +163,25 @@ export default function PecasReservadas() {
           )}
         </div>
       </div>
+
+      {showFaturacao && selectedReserva && (
+        <Faturacao
+          amount={selectedReserva.Total ?? 0}
+          clientNif={selectedReserva.ClienteNIF}
+          items={(selectedReserva.Itens ?? []).map(i => ({
+            name: `${i.Quantidade}× ${i.Nome ?? i.PecaEAN}`,
+            price: i.PrecoUnitario ?? 0,
+            quantity: i.Quantidade,
+          }))}
+          onClose={() => {
+            if (!isCompleting) {
+              setSelectedReserva(null);
+              setShowFaturacao(false);
+            }
+          }}
+          onComplete={handleFaturacaoComplete}
+        />
+      )}
     </div>
   );
 }

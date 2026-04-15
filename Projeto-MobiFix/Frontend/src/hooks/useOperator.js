@@ -99,8 +99,10 @@ export function useLevantarPecaReservada() {
     return useMutation({
         mutationFn: operatorService.levantarPecaReservada,
         onSuccess: () => {
-            // Quando levanta com sucesso, invalida a lista para forçar um refresh automático
             queryClient.invalidateQueries({ queryKey: KEY_PECAS_RESERVADAS });
+            queryClient.invalidateQueries({ queryKey: KEY_FATURAS });
+            queryClient.invalidateQueries({ queryKey: KEY_PECAS });
+            queryClient.invalidateQueries({ queryKey: KEY_ENCOMENDAS_STOCK });
         },
     });
 }

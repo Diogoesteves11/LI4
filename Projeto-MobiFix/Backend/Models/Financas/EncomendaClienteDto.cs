@@ -59,3 +59,9 @@ public class ItemEncomendaDetalhadoDto
     public int Quantidade { get; set; }
     public double? PrecoUnitario { get; set; }
 }
+
+public class LevantamentoEncomendaDto
+{
+    [Required]
+    public string MetodoPagamento { get; set; } = string.Empty;
+}

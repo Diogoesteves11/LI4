@@ -10,13 +10,25 @@ public class FaturaService : IFaturaService
     private readonly HttpClient _httpClient;
     private readonly IPecaService _pecaService;
     private readonly IVendaService _vendaService;
+    private readonly IEncomendaStockService _encomendaStockService;
+    private readonly IClienteService _clienteService;
+    private readonly IEmailService _emailService;
     private static readonly JsonSerializerOptions _options = new() { PropertyNamingPolicy = null };
 
-    public FaturaService(HttpClient httpClient, IPecaService pecaService, IVendaService vendaService)
+    public FaturaService(
+        HttpClient httpClient,
+        IPecaService pecaService,
+        IVendaService vendaService,
+        IEncomendaStockService encomendaStockService,
+        IClienteService clienteService,
+        IEmailService emailService)
     {
         _httpClient = httpClient;
         _pecaService = pecaService;
         _vendaService = vendaService;
+        _encomendaStockService = encomendaStockService;
+        _clienteService = clienteService;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<FaturaDto>> GetFaturasAsync()
@@ -64,18 +76,87 @@ public async Task<FaturaDto?> CriarFaturaAsync(FaturaCriacaoDto faturaDto)
             foreach (var item in faturaDto.ItensVenda)
             {
                 var peca = await _pecaService.GetPecaPorEanAsync(item.PecaEAN);
-                
+
                 if (peca != null)
                 {
                     peca.StockAtual -= item.Quantidade;
                     if (peca.StockAtual < 0) peca.StockAtual = 0;
 
                     await _pecaService.AtualizarPecaAsync(item.PecaEAN, peca);
+
+                    await VerificarEReporStockAsync(peca);
                 }
             }
         }
 
+        // Notificação por email (RF faturação) — best-effort, não bloqueia
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var cliente = await _clienteService.ObterPorNifAsync(faturaDto.ClienteNIF);
+                if (cliente is null || string.IsNullOrWhiteSpace(cliente.Email)) return;
+
+                var descricao = faturaDto.ServicoID.HasValue
+                    ? $"Serviço de reparação #{faturaDto.ServicoID}"
+                    : (faturaDto.VendaID.HasValue ? $"Venda #{faturaDto.VendaID}" : "Transação");
+
+                await _emailService.EnviarFaturaAsync(
+                    cliente.Email,
+                    string.IsNullOrWhiteSpace(cliente.Nome) ? "Cliente" : cliente.Nome,
+                    faturaDto.NumeroFatura,
+                    faturaDto.ValorTotal,
+                    faturaDto.MetodoPagamento,
+                    descricao);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FaturaService] Falha ao enviar email da fatura {faturaDto.NumeroFatura}: {ex.Message}");
+            }
+        });
+
         return faturaCriada;
+    }
+
+    // Após cada abate de stock, se ficar <= stockMinimo e não existir já uma
+    // encomenda em curso para aquela peça, cria automaticamente uma nova
+    // EncomendaStock com Quantidade = PadraoReposicao (estado PENDENTE).
+    private async Task VerificarEReporStockAsync(PecaDto peca)
+    {
+        try
+        {
+            if (peca.StockAtual > peca.StockMinimo) return;
+
+            var quantidade = peca.PadraoReposicao > 0 ? peca.PadraoReposicao : 5;
+
+            var encomendas = await _encomendaStockService.GetEncomendasAsync();
+            var jaExisteAberta = encomendas.Any(e =>
+                string.Equals(e.PecaEAN, peca.CodigoEAN, StringComparison.OrdinalIgnoreCase) &&
+                (string.Equals(e.Estado, "PENDENTE", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(e.Estado, "TRANSITO", StringComparison.OrdinalIgnoreCase)));
+
+            if (jaExisteAberta)
+            {
+                Console.WriteLine($"[AutoReposicao] Peça {peca.CodigoEAN} abaixo do mínimo mas já tem encomenda aberta — ignorado.");
+                return;
+            }
+
+            var criada = await _encomendaStockService.CriarEncomendaAsync(new EncomendaStockCriacaoDto
+            {
+                PecaEAN = peca.CodigoEAN,
+                Quantidade = quantidade,
+                AdminValidadorNumero = null
+            });
+
+            Console.WriteLine(criada is null
+                ? $"[AutoReposicao] Falha ao criar encomenda para {peca.CodigoEAN}."
+                : $"[AutoReposicao] Encomenda #{criada.EncomendaID} criada ({quantidade}x {peca.CodigoEAN}).");
+        }
+        catch (Exception ex)
+        {
+            // Reposição é best-effort — não deve falhar a venda se falhar.
+            Console.WriteLine($"[AutoReposicao] Erro ao processar {peca.CodigoEAN}: {ex.Message}");
+        }
     }
 
     public async Task<bool> EliminarFaturaAsync(string numero)

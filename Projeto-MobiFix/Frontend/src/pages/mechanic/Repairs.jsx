@@ -65,69 +65,95 @@ export default function Repairs() {
       });
   }, [agendas, servicos, catalogo, mecanicoId]);
 
-  // ── Estado local de progresso (substitui o context) ──────────────────────
-  // { [agendaId]: Set<intervencaoId> } — IDs de intervenções já validadas
-  const [concluidas, setConcluidas] = useState({});
+  // ── Estado local de progresso ────────────────────────────────────────────
+  // { [agendaId]: { [intervencaoId]: { dataInicio, dataFim, tempoGastoMinutos } } }
+  const [registos, setRegistos] = useState({});
+  // { [agendaId]: number }  → timestamp ISO da primeira intervenção validada
+  const [inicioPorAgenda, setInicioPorAgenda] = useState({});
+
+  const getConcluidas = (agendaId) => new Set(Object.keys(registos[agendaId] ?? {}).map(Number));
 
   const marcarConcluida = async (agendaId, intervencaoId, descricao, todasIntervencoes) => {
-    // 1. Atualizar o estado local (UI)
-    const novasConcluidas = new Set(concluidas[agendaId] ?? []);
-    novasConcluidas.add(intervencaoId);
-    
-    setConcluidas(prev => ({
-      ...prev,
-      [agendaId]: novasConcluidas
-    }));
-    
-    toast.success('Intervenção concluída!', { description: descricao });
+    const agora = new Date();
+    const agoraIso = agora.toISOString();
 
-    // 2. Verificar se foi a última intervenção
-    if (novasConcluidas.size === todasIntervencoes.length) {
-      try {
-        // Encontrar os objetos originais completos para fazer o PUT
-        const agendaOriginal = agendas.find(a => a.AgendaID === agendaId);
-        const servicoOriginal = servicos.find(s => s.ServicoID === agendaOriginal?.ServicoID);
+    // Início da reparação = primeira intervenção validada nesta agenda
+    const dataInicioRep = inicioPorAgenda[agendaId] ?? agoraIso;
+    if (!inicioPorAgenda[agendaId]) {
+      setInicioPorAgenda(prev => ({ ...prev, [agendaId]: dataInicioRep }));
+    }
 
-        if (!agendaOriginal || !servicoOriginal) {
-           toast.error('Erro: Dados originais não encontrados.');
-           return;
-        }
+    // Início desta intervenção = fim da anterior (ou início da reparação se for a 1ª)
+    const jaRegistadas = registos[agendaId] ?? {};
+    const tempos = Object.values(jaRegistadas).map(r => new Date(r.dataFim).getTime());
+    const inicioIntervencao = tempos.length > 0
+      ? new Date(Math.max(...tempos)).toISOString()
+      : dataInicioRep;
 
-        // Criar os payloads com os novos estados
-        const payloadAgenda = { ...agendaOriginal, Estado: 'CONCLUIDO' };
-        
-        // No serviço, também atualizamos a DataConclusao se quiseres
-        const payloadServico = { 
-            ...servicoOriginal, 
-            Estado: 'FECHADO',
-            DataConclusao: new Date().toISOString()
-        };
+    const tempoGastoMinutos = Math.max(
+      1,
+      Math.round((agora.getTime() - new Date(inicioIntervencao).getTime()) / 60000)
+    );
 
-        // 3. Executar as mutações no servidor (em paralelo)
-        toast.promise(
-          Promise.all([
-            atualizarAgenda({ id: agendaId, dados: payloadAgenda }),
-            atualizarServico({ id: servicoOriginal.ServicoID, dados: payloadServico })
-          ]),
-          {
-            loading: 'A finalizar reparação no servidor...',
-            success: 'Reparação e Serviço fechados com sucesso!',
-            error: 'Erro ao fechar a reparação no servidor.'
-          }
-        );
-        
-        // Opcional: Limpar a seleção para voltar ao menu principal
-        // setSelectedAgendaId(null); 
+    const novosRegistos = {
+      ...jaRegistadas,
+      [intervencaoId]: { dataInicio: inicioIntervencao, dataFim: agoraIso, tempoGastoMinutos }
+    };
 
-      } catch (error) {
-        console.error("Erro ao finalizar:", error);
+    setRegistos(prev => ({ ...prev, [agendaId]: novosRegistos }));
+    toast.success(`Intervenção concluída (${tempoGastoMinutos} min)`, { description: descricao });
+
+    // Se for a última intervenção, fecha reparação + persiste histórico
+    if (Object.keys(novosRegistos).length === todasIntervencoes.length) {
+      const agendaOriginal = agendas.find(a => a.AgendaID === agendaId);
+      const servicoOriginal = servicos.find(s => s.ServicoID === agendaOriginal?.ServicoID);
+
+      if (!agendaOriginal || !servicoOriginal) {
+        toast.error('Erro: Dados originais não encontrados.');
+        return;
       }
+
+      const precoTotal = todasIntervencoes.reduce((sum, i) => sum + (i.preco ?? 0), 0);
+
+      const historicoPayload = todasIntervencoes.map(i => {
+        const reg = novosRegistos[i.id];
+        return {
+          IntervencaoCatalogoID: i.id,
+          MecanicoNumero: mecanicoId,
+          DataInicio: reg.dataInicio,
+          DataFim: reg.dataFim,
+          TempoGastoMinutos: reg.tempoGastoMinutos,
+          PecasUtilizadas: (i.pecas ?? []).map(p => ({
+            PecaEAN: p.PecaEAN,
+            Quantidade: p.Quantidade
+          }))
+        };
+      });
+
+      const payloadServico = {
+        Estado: 'CONCLUIDO',
+        Preco: precoTotal,
+        DataConclusao: agoraIso,
+        HistoricoIntervencoes: historicoPayload
+      };
+
+      toast.promise(
+        Promise.all([
+          atualizarAgenda({ id: agendaId, dados: { ...agendaOriginal, Estado: 'CONCLUIDO' } }),
+          atualizarServico({ id: servicoOriginal.ServicoID, dados: payloadServico })
+        ]),
+        {
+          loading: 'A finalizar reparação no servidor...',
+          success: `Reparação concluída — €${precoTotal.toFixed(2)} faturáveis.`,
+          error: 'Erro ao fechar a reparação no servidor.'
+        }
+      );
     }
   };
 
   const getProgress = (agendaId, intervencoes) => {
     if (!intervencoes.length) return { completed: 0, total: 0, pct: 0 };
-    const set = concluidas[agendaId] ?? new Set();
+    const set = getConcluidas(agendaId);
     const completed = intervencoes.filter(i => set.has(i.id)).length;
     return { completed, total: intervencoes.length, pct: Math.round((completed / intervencoes.length) * 100) };
   };
@@ -262,7 +288,7 @@ export default function Repairs() {
                   {isExpanded && repair.intervencoes.length > 0 && (
                     <div className="mt-3 space-y-1 border-t border-slate-100 pt-3 animate-in fade-in slide-in-from-top-1 duration-150">
                       {repair.intervencoes.map(i => {
-                        const feita = (concluidas[repair.agendaId] ?? new Set()).has(i.id);
+                        const feita = getConcluidas(repair.agendaId).has(i.id);
                         return (
                           <div key={i.id} className={`flex items-center gap-2 text-xs font-medium ${feita ? 'text-green-600' : 'text-slate-500'}`}>
                             {feita ? <CheckCircle2 size={12} /> : <Clock size={12} className="opacity-40" />}
@@ -283,8 +309,10 @@ export default function Repairs() {
       <main className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
         {selectedRepair ? (() => {
           const concluiuTudo = getProgress(selectedRepair.agendaId, selectedRepair.intervencoes).pct === 100;
-          const set = concluidas[selectedRepair.agendaId] ?? new Set();
+          const set = getConcluidas(selectedRepair.agendaId);
+          const regs = registos[selectedRepair.agendaId] ?? {};
           const totalMaoDeObra = selectedRepair.intervencoes.reduce((s, i) => s + i.preco, 0);
+          const tempoTotalMin = Object.values(regs).reduce((s, r) => s + (r.tempoGastoMinutos ?? 0), 0);
 
           return (
             <div className="mx-auto max-w-4xl space-y-6">
@@ -312,6 +340,11 @@ export default function Repairs() {
                       <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
                         <Euro size={15} /> M.O.: €{totalMaoDeObra.toFixed(2)}
                       </span>
+                      {tempoTotalMin > 0 && (
+                        <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
+                          <Clock size={15} /> Tempo: {tempoTotalMin} min
+                        </span>
+                      )}
                     </div>
                   </div>
                   {concluiuTudo && (
@@ -373,6 +406,9 @@ export default function Repairs() {
                             <div className="flex gap-3 text-xs font-bold text-slate-400">
                               {interv.especialidade !== '—' && <span>{interv.especialidade}</span>}
                               <span className="text-emerald-600">€{interv.preco.toFixed(2)}</span>
+                              {regs[interv.id]?.tempoGastoMinutos && (
+                                <span className="text-blue-600">{regs[interv.id].tempoGastoMinutos} min</span>
+                              )}
                             </div>
 
                             {/* Peças desta intervenção */}

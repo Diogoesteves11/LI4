@@ -51,7 +51,9 @@ exports.obterEncomendaCliente = async (req, res) => {
 
 exports.atualizarEncomendaCliente = async (req, res) => {
     try {
-        const dadosAtualizados = { estado: req.body.Estado };
+        const dadosAtualizados = {};
+        if (req.body.Estado !== undefined) dadosAtualizados.estado = req.body.Estado;
+        if (req.body.FaturaNumero !== undefined) dadosAtualizados.faturaId = req.body.FaturaNumero;
         const encomenda = await EncomendaCliente.findByIdAndUpdate(req.params.id, dadosAtualizados, { new: true }).lean();
         if (!encomenda) return res.status(404).json({ mensagem: "Não encontrada." });
         return res.status(200).json(paraEncomendaClienteDto(encomenda));

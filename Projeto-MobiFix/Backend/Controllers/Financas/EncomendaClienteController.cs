@@ -37,12 +37,23 @@ public class EncomendaClienteController : ControllerBase
         var clienteNIF = User.FindFirst("id")?.Value;
         if (clienteNIF is null) return Unauthorized(new { mensagem = "Token inválido." });
 
-        var encomenda = await _encomendaService.CriarEncomendaAsync(clienteNIF, dto);
+        try
+        {
+            var encomenda = await _encomendaService.CriarEncomendaAsync(clienteNIF, dto);
 
-        if (encomenda is null)
-            return BadRequest(new { mensagem = "Não foi possível criar a reserva." });
+            if (encomenda is null)
+                return BadRequest(new { mensagem = "Não foi possível criar a reserva." });
 
-        return Created(string.Empty, encomenda);
+            return Created(string.Empty, encomenda);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 
     // GET api/EncomendaCliente/prontas — lista as encomendas prontas para levantamento
@@ -54,16 +65,24 @@ public class EncomendaClienteController : ControllerBase
         return Ok(encomendasProntas);
     }
 
-    // PUT api/EncomendaCliente/{id}/levantar — marca a encomenda como levantada
-    // Nota: Dependendo da tua regra de negócio, podes querer restringir isto a [Authorize(Roles = "Operador")]
+    // PUT api/EncomendaCliente/{id}/levantar — emite fatura, abate stock e marca como levantada
     [HttpPut("{id}/levantar")]
-    public async Task<IActionResult> LevantarEncomenda(int id)
+    public async Task<IActionResult> LevantarEncomenda(int id, [FromBody] LevantamentoEncomendaDto dto)
     {
-        var sucesso = await _encomendaService.MarcarComoLevantadaAsync(id);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        if (!sucesso)
-            return BadRequest(new { mensagem = $"Não foi possível atualizar a encomenda {id}. Verifique se a mesma existe." });
-
-        return Ok(new { mensagem = "Encomenda marcada como levantada com sucesso." });
+        try
+        {
+            var fatura = await _encomendaService.LevantarComFaturaAsync(id, dto.MetodoPagamento);
+            return Ok(new { mensagem = "Encomenda levantada e faturada.", fatura });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
     }
 }

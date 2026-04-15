@@ -40,6 +40,15 @@ public class ServicoCriacaoDto
     public string? FeedbackCliente { get; set; }
 }
 
+public class ServicoAtualizacaoDto
+{
+    public string? Estado { get; set; }
+    public string? DescricaoDiagnostico { get; set; }
+    public decimal? Preco { get; set; }
+    public DateTime? DataConclusao { get; set; }
+    public List<IntervencaoRealizadaDto>? HistoricoIntervencoes { get; set; }
+}
+
 public class LevantarTrotineteDto
 {
     [Required]

@@ -85,6 +85,8 @@ builder.Services.AddHttpClient<IEncomendaStockService, EncomendaStockService>(Co
 builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IEstatisticasService, EstatisticasService>(ConfigureDefaultClient);
 builder.Services.AddHttpClient<IVendaService, VendaService>(ConfigureDefaultClient);
+builder.Services.AddHttpClient<IClienteService, ClienteService>(ConfigureDefaultClient);
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Configuração JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
