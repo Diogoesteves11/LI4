@@ -36,14 +36,18 @@ export default function AgendarDiagnostico() {
       // PASSO 2: Criar o slot na Agenda usando o ID do serviço criado
       // Combinamos data e hora para o formato ISO que o .NET espera
       const dataHoraIso = `${selectedDate}T${selectedTime}:00`;
+      console.log(`O ID DO SERVIÇO É ESTE: ${servicoObj.ServicoID}`);
+
+        
       
       await criarAgenda.mutateAsync({
-        servicoId: servicoObj.ServicoID,
-        dataHora: dataHoraIso
+        servicoID: servicoObj.ServicoID,
+        dataHoraInicio: dataHoraIso,
+        tipoSlot: 'DIAGNOSTICO'
       });
 
       alert("Diagnóstico agendado com sucesso! O mecânico foi atribuído automaticamente.");
-      navigate("/cliente");
+      navigate("/FixNRide");
     } catch (error) {
       console.error(error);
       alert("Erro ao realizar o agendamento. Por favor, tente novamente.");

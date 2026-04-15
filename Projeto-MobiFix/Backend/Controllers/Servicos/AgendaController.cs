@@ -56,7 +56,6 @@ public class AgendaController : ControllerBase
         dto.MecanicoNumero = mecanicoEscolhido;
         
         dto.Estado ??= "AGENDADO";
-        dto.TipoSlot ??= "DIAGNOSTICO";
 
         var novoSlot = await _agendaService.CriarSlotAsync(dto);
         
@@ -66,6 +65,14 @@ public class AgendaController : ControllerBase
         return CreatedAtAction(nameof(Obter), new { id = novoSlot.AgendaID }, novoSlot);
     }
 
+   [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(int id, [FromBody] AgendaDto dto)
+    {
+        var resultado = await _agendaService.AtualizarSlotAsync(id, dto);
+        if (resultado == null) return NotFound();
+
+        return Ok(resultado); // Retornamos 200 OK com o objeto
+    } 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id)
     {

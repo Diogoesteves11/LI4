@@ -10,20 +10,11 @@
   },
   {
     "_id": 2,
-    "mecanicoId": "MEC002",
+    "mecanicoId": "MEC001",
     "servicoId": 2,
     "tipoSlot": "DIAGNOSTICO",
-    "intervencaoId": null,
-    "dataHoraInicio": "2024-03-30T14:00",
-    "estado": "RESERVADO"
-  },
-  {
-    "_id": 3,
-    "mecanicoId": "MEC001",
-    "servicoId": 3,
-    "tipoSlot": "REPARACAO",
     "intervencaoId": 2,
-    "dataHoraInicio": "2024-04-02T09:00",
+    "dataHoraInicio": "2024-03-30T14:00",
     "estado": "RESERVADO"
   }
 ]

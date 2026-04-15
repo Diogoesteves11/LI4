@@ -9,7 +9,7 @@ import { EANScanner } from '../../components/EANScanner';
 import { ScheduleRepairDialog } from '../../components/AgendamentoReparacao';
 import { toast, Toaster } from 'sonner';
 import { generateDiagnosticPDF } from '../../utils/PDFGuiaReparacao';
-import { useAgendas, useCriarAgenda } from '../../hooks/useAgenda';
+import { useAgendas, useCriarAgenda, useAtualizarAgenda } from '../../hooks/useAgenda';
 import { useServicos } from '../../hooks/useServicos';
 import { useBuscarTrotinete } from '../../hooks/useTrotinetes';
 
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const { data: agendas,  isLoading: loadingAgendas,  isError: errorAgendas  } = useAgendas();
   const { data: servicos, isLoading: loadingServicos                          } = useServicos();
   const { mutateAsync: criarAgendamento, isPending: isSaving } = useCriarAgenda();
+  const { mutateAsync: atualizarAgendamento } = useAtualizarAgenda(); // Inicializar hook
 
   // ── Lista de diagnósticos reservados ───────────────────────────────────────
   const repairs = useMemo(() => {
@@ -31,7 +32,7 @@ export default function Dashboard() {
           servicoId:     a.ServicoID,
           vehiclePlate:  s?.TrotineteNumSerie   || 'S/N',
           clientName:    s?.FeedbackCliente     || 'Cliente Registado',
-          status:        a.Estado.toLowerCase(),
+          status:        a.Estado,
           scheduledTime: new Date(a.DataHoraInicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           description:   s?.DescricaoDiagnostico || '',
         };
@@ -68,30 +69,40 @@ export default function Dashboard() {
 
   // Totais para feedback visual
   const totalMaoDeObra = selectedInterventions.reduce((s, i) => s + (i.PrecoFixoMaoDeObra ?? 0), 0);
-  const totalPecas     = parts.reduce((s, p) => s + (p.pvp ?? 0) * p.quantity, 0);
+  const totalPecas     = parts.reduce((s, p) => s + (p.PVP ?? 0) * p.StockAtual, 0);
 
   // ── Agendar Reparação — cria agenda do tipo REPARACAO ─────────────────────
   const handleScheduleRepair = async (scheduleData) => {
     if (!selectedRepair) return;
 
-    // O AgendaController.cs preenche MecanicoNumero, TipoSlot e Estado
-    // Forçamos TipoSlot = REPARACAO passando via payload extra
-    const payload = {
-      servicoID:      selectedRepair.servicoId,
+    const agendaOriginal = agendas.find(a => a.AgendaID === selectedRepair.id);
+    
+    const payloadUpdate = {
+      ...agendaOriginal,
+      Estado: 'CONCLUIDO' // O filtro no useMemo removerá este item automaticamente
+    };
+
+    const payloadNovo = {
+      servicoID: selectedRepair.servicoId,
       dataHoraInicio: `${scheduleData.date}T${scheduleData.time}:00`,
-      tipoSlot:       'REPARACAO',           // diferencia do diagnóstico
+      tipoSlot: 'REPARACAO',         
     };
 
     try {
-      await criarAgendamento(payload);
-      toast.success('Reparação agendada com sucesso!');
+      // Executamos a atualização primeiro para "limpar" a lista visual
+      await atualizarAgendamento({ id: selectedRepair.id, dados: payloadUpdate });
+      
+      // Depois criamos o agendamento da reparação propriamente dita
+      await criarAgendamento(payloadNovo);
+
+      toast.success('Reparação agendada e diagnóstico concluído!');
       setShowScheduleDialog(false);
       limparFormulario();
       setSelectedRepairId(null);
-    } catch {
-      toast.error('Erro ao gravar agendamento no servidor');
+    } catch (error) {
+      toast.error('Erro ao processar agendamento.');
     }
-  };
+  }; 
 
   // ── Guards ─────────────────────────────────────────────────────────────────
   if (loadingAgendas || loadingServicos) return (
@@ -156,9 +167,6 @@ export default function Dashboard() {
                       <User className="h-4 w-4 text-blue-200" /> {displayData.clientName}
                     </span>
                     <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
-                      <Hash className="h-4 w-4 text-blue-200" /> NIF: {displayData.clientNif}
-                    </span>
-                    <span className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
                       <Clock className="h-4 w-4 text-blue-200" /> {displayData.scheduledTime}
                     </span>
                     {displayData.emServico && (
@@ -195,13 +203,13 @@ export default function Dashboard() {
               parts={parts}
               onAddPart={(part) => {
                 setParts(prev => {
-                  const idx = prev.findIndex(p => p.ean === part.ean);
+                  const idx = prev.findIndex(p => p.CodigoEAN === part.CodigoEAN);
                   return idx >= 0
                     ? prev.map((p, i) => i === idx ? part : p)
                     : [...prev, part];
                 });
               }}
-              onRemovePart={(ean) => setParts(prev => prev.filter(p => p.ean !== ean))}
+              onRemovePart={(ean) => setParts(prev => prev.filter(p => p.CodigoEAN !== ean))}
             />
 
             {/* Relatório de diagnóstico */}
