@@ -1,0 +1,180 @@
+@startuml 02-subsistema-catalogos
+' =========================================================================
+'  Subsistema :: Catálogos  (interface iCatalogos)
+'  Fonte: Backend/{Controllers,Services,Models}/Catalogos
+'  Catálogos geridos: Peças, Trotinetes (por cliente), Intervenções padrão.
+' =========================================================================
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+title Subsistema de Catálogos  —  <<provides>> iCatalogos
+
+' =========================================================================
+'  Camada :: Models  (DTOs e tipos de transporte)
+' =========================================================================
+package "Backend.Models (Catalogos)" <<Folder>> {
+
+    class PecaDto <<DTO>> {
+        + CodigoEAN : string
+        + Descricao : string
+        + Categoria : string
+        + Nome : string
+        + StockAtual : int
+        + PVP : float
+        + CustoAquisicao : float
+        + StockMinimo : int
+        + PadraoReposicao : int
+        + Imagem : string
+        + Ativo : bool
+    }
+
+    class EstadoPecaDto <<DTO>> {
+        + Ativo : bool
+    }
+
+    class TrotineteDto <<DTO>> {
+        + NumeroSerie : string
+        + Marca : string
+        + Modelo : string
+        + ClienteNIF : string
+        + EmServico : bool
+    }
+
+    class TrotinetelCriacaoDto <<DTO>> {
+        + NumeroSerie : string  <<[Required]>>
+        + Marca : string  <<[Required]>>
+        + Modelo : string  <<[Required]>>
+    }
+
+    class IntervencaoCatalogoDto <<DTO>> {
+        + IntervencaoID : int
+        + Descricao : string
+        + PrecoFixoMaoDeObra : decimal
+        + Especialidade : string [0..1]
+    }
+
+    class IntervencaoCatalogoCriacaoDto <<DTO>> {
+        + Descricao : string  <<[Required]>>
+        + PrecoFixoMaoDeObra : decimal  <<[Range(0,∞)]>>
+        + Especialidade : string [0..1]
+    }
+}
+
+' =========================================================================
+'  Camada :: Services  (lógica de catálogo + agregação via HttpClient)
+' =========================================================================
+package "Backend.Services (Catalogos)" <<Folder>> {
+
+    interface IPecaService <<interface>> {
+        + GetTodasPecasAsync() : Task<IEnumerable<PecaDto>>
+        + GetPecaPorEanAsync(ean : string) : Task<PecaDto?>
+        + CriarPecaAsync(novaPeca : PecaDto) : Task<PecaDto?>
+        + AtualizarPecaAsync(ean : string, pecaAtualizada : PecaDto) : Task<PecaDto?>
+        + AlterarEstadoPecaAsync(ean : string, ativo : bool) : Task<PecaDto?>
+        + EliminarPecaAsync(ean : string) : Task<bool>
+    }
+
+    interface ITrotineteService <<interface>> {
+        + GetTrotinetesClienteAsync(clienteNIF : string) : Task<IEnumerable<TrotineteDto>>
+        + CriarTrotineteAsync(clienteNIF : string, dto : TrotinetelCriacaoDto) : Task<TrotineteDto?>
+        + GetTrotineteNumeroSerie(serie : string) : Task<TrotineteDto?>
+        + EliminarTrotineteAsync(clienteNIF : string, numeroSerie : string) : Task<bool>
+    }
+
+    interface IIntervencaoCatalogoService <<interface>> {
+        + ListarTodasAsync(especialidade : string?) : Task<IEnumerable<IntervencaoCatalogoDto>>
+        + ObterPorIdAsync(id : int) : Task<IntervencaoCatalogoDto?>
+        + CriarAsync(dto : IntervencaoCatalogoCriacaoDto) : Task<IntervencaoCatalogoDto?>
+        + AtualizarAsync(id : int, dto : IntervencaoCatalogoCriacaoDto) : Task<IntervencaoCatalogoDto?>
+        + EliminarAsync(id : int) : Task<bool>
+    }
+
+    class PecaService {
+        - _httpClient : HttpClient
+        --
+        + PecaService(httpClient : HttpClient)
+    }
+    class TrotineteService {
+        - _httpClient : HttpClient
+        --
+        + TrotineteService(httpClient : HttpClient)
+    }
+    class IntervencaoCatalogoService {
+        - _httpClient : HttpClient
+        --
+        + IntervencaoCatalogoService(httpClient : HttpClient)
+    }
+
+    PecaService                 .up.|> IPecaService
+    TrotineteService            .up.|> ITrotineteService
+    IntervencaoCatalogoService  .up.|> IIntervencaoCatalogoService
+}
+
+' =========================================================================
+'  Camada :: Controllers  (endpoints REST)
+' =========================================================================
+package "Backend.Controllers (Catalogos)" <<Folder>> {
+
+    class PecasController <<RestController>> {
+        - _pecaService : IPecaService
+        --
+        + Get() : Task<IActionResult>  <<GET /api/pecas>>
+        + ObterPorEan(ean) : Task<IActionResult>  <<GET /api/pecas/{ean}>>
+        + CriarPeca(novaPeca : PecaDto) : Task<IActionResult>  <<POST /api/pecas>>
+        + AtualizarPeca(ean, pecaAtualizada : PecaDto) : Task<IActionResult>  <<PUT /api/pecas/{ean}>>
+        + AlterarEstado(ean, estadoDto : EstadoPecaDto) : Task<IActionResult>  <<PATCH /api/pecas/{ean}/estado>>
+        + EliminarPeca(ean) : Task<IActionResult>  <<DELETE /api/pecas/{ean}>>
+    }
+
+    class TrotinetesController <<RestController>> {
+        - _trotineteService : ITrotineteService
+        --
+        + GetMinhasTrotinetes() : Task<IActionResult>  <<GET /api/trotinetes>>
+        + GetTrotineteByNumero(numeroSerie) : Task<IActionResult>  <<GET /api/trotinetes/{numeroSerie}>>
+        + CriarTrotinete(dto : TrotinetelCriacaoDto) : Task<IActionResult>  <<POST /api/trotinetes>>
+        + EliminarTrotinete(numeroSerie) : Task<IActionResult>  <<DELETE /api/trotinetes/{numeroSerie}>>
+    }
+
+    class IntervencoesCatalogoController <<RestController>> {
+        - _service : IIntervencaoCatalogoService
+        --
+        + Listar(especialidade : string?) : Task<IActionResult>  <<GET /api/IntervencoesCatalogo>>
+        + Obter(id : int) : Task<IActionResult>  <<GET /api/IntervencoesCatalogo/{id}>>
+        + Criar(dto : IntervencaoCatalogoCriacaoDto) : Task<IActionResult>  <<POST>>
+        + Atualizar(id : int, dto : IntervencaoCatalogoCriacaoDto) : Task<IActionResult>  <<PUT>>
+        + Eliminar(id : int) : Task<IActionResult>  <<DELETE>>
+    }
+}
+
+' =========================================================================
+'  Interface provida no diagrama de componentes  (lollipop «iCatalogos»)
+' =========================================================================
+interface "iCatalogos" as iCatalogos <<provided>>
+PecasController                   -up- iCatalogos : <<realize>>
+TrotinetesController              -up- iCatalogos : <<realize>>
+IntervencoesCatalogoController    -up- iCatalogos : <<realize>>
+
+' =========================================================================
+'  Relações
+' =========================================================================
+PecasController                ..> IPecaService                   : <<use>>  «DI»
+TrotinetesController           ..> ITrotineteService               : <<use>>  «DI»
+IntervencoesCatalogoController ..> IIntervencaoCatalogoService     : <<use>>  «DI»
+
+PecaService                    ..> PecaDto                         : <<use>>
+PecaService                    ..> EstadoPecaDto                   : <<use>>
+TrotineteService               ..> TrotineteDto                    : <<use>>
+TrotineteService               ..> TrotinetelCriacaoDto            : <<use>>
+IntervencaoCatalogoService     ..> IntervencaoCatalogoDto          : <<use>>
+IntervencaoCatalogoService     ..> IntervencaoCatalogoCriacaoDto   : <<use>>
+
+note right of IPecaService
+  **Reutilizado por**
+  iServicos, iFinancas e iStocks
+  (abate de stock em reparações,
+  vendas, reservas e reposição).
+end note
+
+@enduml

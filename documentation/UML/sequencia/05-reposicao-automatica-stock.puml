@@ -1,0 +1,68 @@
+@startuml 05-reposicao-automatica-stock
+' =========================================================================
+'  Cenário 5 — Reposição automática (RF14) desencadeada por venda direta
+' =========================================================================
+autonumber "<b>[00]"
+skinparam sequenceArrowThickness 1.2
+skinparam maxMessageSize 220
+title Venda direta + reposição automática de stock (RF14)
+
+actor "Operador" as Op
+participant "VendaDiretaPage" as UI
+participant "VendaController" as VC
+participant "VendaService" as VS
+participant "FaturaService" as FS
+participant "IPecaService" as PS
+participant "IEncomendaStockService" as ESS
+participant "Mongoose Data API" as API
+actor "Administrador" as Adm
+
+Op -> UI : Scan EAN + quantidade
+UI -> VC : POST /api/vendas/checkout\n(ItensVenda[], metodo)
+activate VC
+VC -> VS : RegistarVendaDiretaAsync(operador, dto)
+activate VS
+VS -> API : POST /api/vendas
+API --> VS : VendaDto
+
+VS -> FS : CriarFaturaAsync(dto com ItensVenda)
+activate FS
+FS -> API : POST /api/faturas
+API --> FS : FaturaDto
+
+loop para cada item
+    FS -> PS : GetPecaPorEanAsync(ean)
+    PS -> API : GET /api/pecas/{ean}
+    API --> PS : Peca (Stock=3, Mínimo=5)
+    FS -> FS : StockAtual -= Qtd  (ex: 3 - 2 = 1)
+    FS -> PS : AtualizarPecaAsync
+    FS -> FS : VerificarEReporStockAsync(peca)
+    alt StockAtual (1) ≤ StockMinimo (5)
+        FS -> API : GET /api/encomendas-stock
+        API --> FS : lista encomendas
+        alt NÃO existe encomenda em PENDENTE|TRANSITO
+            FS -> ESS : CriarEncomendaAsync(\nEAN, PadraoReposicao)
+            ESS -> API : POST /api/encomendas-stock\n(Estado=PENDENTE)
+            API --> ESS : EncomendaStockDto
+            ESS --> FS : criada
+            note right of FS
+              Registo: "[AutoReposicao] Encomenda #X
+              criada (Y× EAN)"
+            end note
+        else já existe aberta
+            FS -> FS : ignora (log)
+        end
+    end
+end
+FS --> VS : FaturaDto
+deactivate FS
+VS --> VC : VendaComFaturaDto
+deactivate VS
+VC --> UI : 200 OK
+deactivate VC
+
+... mais tarde ...
+Adm -> API : GET /api/encomendas-stock?estado=PENDENTE
+API --> Adm : lista de encomendas a validar
+
+@enduml

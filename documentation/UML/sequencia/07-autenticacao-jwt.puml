@@ -1,0 +1,44 @@
+@startuml 07-autenticacao-jwt
+' =========================================================================
+'  Cenário 7 — Login (cliente ou funcionário) com emissão de JWT (RNF5)
+' =========================================================================
+autonumber "<b>[00]"
+skinparam sequenceArrowThickness 1.2
+skinparam maxMessageSize 220
+title Autenticação e emissão de JWT (RNF5)
+
+actor "Utilizador" as U
+participant "LoginPage" as UI
+participant "AuthController" as AC
+participant "AuthService" as AS
+participant "Mongoose Data API" as API
+
+U -> UI : Introduz credenciais
+UI -> AC : POST /api/auth/login\n(email, password)
+activate AC
+AC -> AS : LoginClienteAsync(dto)\n  ou LoginFuncionarioAsync(dto)
+activate AS
+AS -> API : GET /api/clientes/by-email/{email}\n  ou /api/funcionarios/...
+API --> AS : UtilizadorDto (com PasswordHash)
+AS -> AS : BCrypt.Verify(password, hash)
+alt Credenciais válidas
+    AS -> AS : gera JWT\n(claims: id, role, exp)
+    AS --> AC : token
+    AC --> UI : 200 { token }
+    UI -> UI : guarda token no localStorage
+    UI --> U : redirect ao dashboard
+else Inválidas
+    AS --> AC : null
+    AC --> UI : 401 Unauthorized
+    UI --> U : "Credenciais incorretas"
+end
+deactivate AS
+deactivate AC
+
+== Pedidos subsequentes ==
+U  -> UI : Interação (ex: ver catálogo)
+UI -> AC : GET /api/... \nAuthorization: Bearer <token>
+AC -> AC : JwtBearer middleware valida\n(assinatura, exp, issuer)
+AC --> UI : 200 OK / 401
+
+@enduml

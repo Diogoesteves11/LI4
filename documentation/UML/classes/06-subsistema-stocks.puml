@@ -1,0 +1,99 @@
+@startuml 06-subsistema-stocks
+' =========================================================================
+'  Subsistema :: Stocks  (interface iStocks)
+'  Fonte: Backend/{Controllers,Services,Models}/Stocks
+'  Responsabilidade: encomendas de reposição (fluxo
+'  PENDENTE → APROVADA → TRANSITO → RECEBIDA | CANCELADA).
+' =========================================================================
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+title Subsistema de Stocks & Reposição  —  <<provides>> iStocks
+
+' =========================================================================
+'  Camada :: Models  (DTOs de transporte)
+' =========================================================================
+package "Backend.Models (Stocks)" <<Folder>> {
+
+    class EncomendaStockDto <<DTO>> {
+        + EncomendaID : int
+        + PecaEAN : string
+        + Quantidade : int
+        + Estado : string  <<PENDENTE | APROVADA | TRANSITO | RECEBIDA | CANCELADA>>
+        + DataPedido : string
+        + OperadorRececaoNumero : string?
+        + AdminValidadorNumero : string?
+    }
+
+    class EncomendaStockCriacaoDto <<DTO>> {
+        + PecaEAN : string  <<[Required]>>
+        + Quantidade : int  <<[Range(1,∞)]>>
+        + AdminValidadorNumero : string?
+    }
+
+    class EncomendaStockAtualizacaoDto <<DTO>> {
+        + Estado : string  <<[Required]>>
+        + OperadorRececaoNumero : string?
+    }
+}
+
+' =========================================================================
+'  Camada :: Services  (lógica de encomendas de stock)
+' =========================================================================
+package "Backend.Services (Stocks)" <<Folder>> {
+
+    interface IEncomendaStockService <<interface>> {
+        + GetEncomendasAsync() : Task<IEnumerable<EncomendaStockDto>>
+        + GetEncomendaPorIdAsync(id : int) : Task<EncomendaStockDto?>
+        + CriarEncomendaAsync(dto : EncomendaStockCriacaoDto) : Task<EncomendaStockDto?>
+        + AtualizarEncomendaAsync(id : int, dto : EncomendaStockAtualizacaoDto) : Task<EncomendaStockDto?>
+        + EliminarEncomendaAsync(id : int) : Task<bool>
+    }
+
+    class EncomendaStockService {
+        - _httpClient : HttpClient
+        --
+        + EncomendaStockService(httpClient : HttpClient)
+    }
+
+    EncomendaStockService .up.|> IEncomendaStockService
+}
+
+' =========================================================================
+'  Camada :: Controllers  (endpoints REST)
+' =========================================================================
+package "Backend.Controllers (Stocks)" <<Folder>> {
+
+    class EncomendaStockController <<RestController>> {
+        - _encomendaService : IEncomendaStockService
+        --
+        + Listar() : Task<IActionResult>  <<GET /api/Encomendas/stock>>
+        + Obter(id : int) : Task<IActionResult>  <<GET /api/Encomendas/stock/{id}>>
+        + Criar(dto : EncomendaStockCriacaoDto) : Task<IActionResult>  <<POST /api/Encomendas/stock>>
+        + Atualizar(id : int, dto : EncomendaStockAtualizacaoDto) : Task<IActionResult>  <<PUT /api/Encomendas/stock/{id}>>
+        + Eliminar(id : int) : Task<IActionResult>  <<DELETE /api/Encomendas/stock/{id}>>
+    }
+}
+
+EncomendaStockController ..> IEncomendaStockService       : «DI»
+EncomendaStockController ..> EncomendaStockCriacaoDto     : <<bind>>
+EncomendaStockController ..> EncomendaStockAtualizacaoDto : <<bind>>
+
+' =========================================================================
+'  Interface provida no diagrama de componentes  (lollipop «iStocks»)
+' =========================================================================
+interface "iStocks" as iStocks <<provided>>
+EncomendaStockController -up- iStocks : <<realize>>
+
+note right of IEncomendaStockService
+  **Consumido por iFinancas**
+  Quando uma fatura / venda direta / reserva
+  abate stock e StockAtual ≤ StockMinimo,
+  o FaturaService (ou VendaService) invoca
+  CriarEncomendaAsync(...) automaticamente
+  (RF14 — reposição automática).
+end note
+
+@enduml

@@ -1,0 +1,139 @@
+@startuml 07-subsistema-utilizadores
+' =========================================================================
+'  Subsistema :: Utilizadores  (interface iUtilizadores)
+'  Fonte: Backend/{Controllers,Services,Models}/Utilizadores
+'  Engloba: gestão de Clientes (consulta/atualização) e Funcionários
+'  (Administrador, Operador de Loja, Mecânico).
+' =========================================================================
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+title Subsistema de Utilizadores  —  <<provides>> iUtilizadores
+
+' =========================================================================
+'  Camada :: Models  (DTOs de transporte)
+' =========================================================================
+package "Backend.Models (Utilizadores)" <<Folder>> {
+
+    class ClienteDto <<DTO>> {
+        + NIF : string  <<PK>>
+        + Nome : string
+        + Telefone : string
+        + Email : string
+        + Morada : string
+        - PasswordHash : string
+    }
+
+    class FuncionarioDto <<DTO>> {
+        + NumeroMecanografico : string  <<PK>>
+        + Nome : string
+        + Email : string
+        + Contacto : string
+        + Cargo : string  <<ADMINISTRADOR | OPERADOR_LOJA | MECANICO>>
+        - PasswordHash : string
+        + Especialidade : string?
+        + Ativo : bool
+    }
+
+    class FuncionarioCriacaoDto <<DTO>> {
+        + NumeroMecanografico : string  <<[Required]>>
+        + Nome : string  <<[Required]>>
+        + Email : string  <<[Required, EmailAddress]>>
+        + Contacto : string  <<[Required, RegEx(\d{9})]>>
+        + Cargo : string  <<[Required]>>
+        + PasswordHash : string  <<[Required, MinLength(8)]>>
+        + Especialidade : string?
+        + Ativo : bool = true
+    }
+
+    class FuncionarioAtualizacaoDto <<DTO>> {
+        + Nome : string  <<[Required]>>
+        + Email : string  <<[Required, EmailAddress]>>
+        + Contacto : string  <<[Required, RegEx(\d{9})]>>
+        + Cargo : string  <<[Required]>>
+        + Especialidade : string?
+        + Ativo : bool
+    }
+}
+
+' =========================================================================
+'  Camada :: Services  (lógica de utilizadores)
+' =========================================================================
+package "Backend.Services (Utilizadores)" <<Folder>> {
+
+    interface IClienteService <<interface>> {
+        + ObterPorNifAsync(nif : string) : Task<ClienteDto?>
+    }
+
+    interface IFuncionarioService <<interface>> {
+        + CriarFuncionarioAsync(dto : FuncionarioCriacaoDto) : Task<FuncionarioDto?>
+        + ListarFuncionariosAsync() : Task<IEnumerable<FuncionarioDto>>
+        + ObterFuncionarioPorNumeroAsync(numeroMecanografico : string) : Task<FuncionarioDto?>
+        + AtualizarFuncionarioAsync(numeroMecanografico : string, dto : FuncionarioAtualizacaoDto) : Task<FuncionarioDto?>
+    }
+
+    class ClienteService {
+        - _httpClient : HttpClient
+        --
+        + ClienteService(httpClient : HttpClient)
+    }
+
+    class FuncionarioService {
+        - _httpClient : HttpClient
+        --
+        + FuncionarioService(httpClient : HttpClient)
+    }
+
+    ClienteService     .up.|> IClienteService
+    FuncionarioService .up.|> IFuncionarioService
+}
+
+' =========================================================================
+'  Camada :: Controllers  (endpoints REST)
+' =========================================================================
+package "Backend.Controllers (Utilizadores)" <<Folder>> {
+
+    class FuncionariosController <<RestController>> {
+        - _funcionarioService : IFuncionarioService
+        --
+        + CriarFuncionario(dto : FuncionarioCriacaoDto) : Task<IActionResult>  <<POST /api/funcionarios>>
+        + ListarFuncionarios() : Task<IActionResult>  <<GET /api/funcionarios>>
+        + ObterFuncionario(numeroMecanografico) : Task<IActionResult>  <<GET /api/funcionarios/{num}>>
+        + AtualizarFuncionario(numeroMecanografico, dto : FuncionarioAtualizacaoDto) : Task<IActionResult>  <<PUT /api/funcionarios/{num}>>
+    }
+}
+
+FuncionariosController ..> IFuncionarioService     : «DI»
+FuncionariosController ..> FuncionarioCriacaoDto   : <<bind>>
+FuncionariosController ..> FuncionarioAtualizacaoDto : <<bind>>
+
+ClienteService     ..> ClienteDto     : <<use>>
+FuncionarioService ..> FuncionarioDto : <<use>>
+
+' =========================================================================
+'  Interface provida no diagrama de componentes  (lollipop «iUtilizadores»)
+' =========================================================================
+interface "iUtilizadores" as iUtilizadores <<provided>>
+FuncionariosController -up- iUtilizadores : <<realize>>
+ClienteService         -up- iUtilizadores : <<realize>>
+FuncionarioService     -up- iUtilizadores : <<realize>>
+
+note right of IClienteService
+  **Consumido por iServicos e iFinancas**
+  Usado para obter o email do cliente
+  (notificações de trotinete pronta e de
+  fatura emitida) e validar existência
+  no momento da emissão de fatura.
+end note
+
+note right of IFuncionarioService
+  **Consumido por iServicos**
+  Usado pelo AgendaController para listar
+  funcionários com Cargo = "MECANICO" e
+  atribuir slots automaticamente (escolha
+  aleatória entre mecânicos disponíveis).
+end note
+
+@enduml

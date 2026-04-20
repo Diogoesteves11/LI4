@@ -1,0 +1,372 @@
+@startuml 04-subsistema-financas
+' =========================================================================
+'  Subsistema :: Finanças  (interface iFinancas)
+'  Fonte: Backend/{Controllers,Services,Models}/Financas
+'  Engloba: Faturas (+ devoluções/notas-crédito), Vendas diretas,
+'  Encomendas de cliente (reservas), Promoções e Estatísticas.
+' =========================================================================
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+title Subsistema de Finanças  —  <<provides>> iFinancas
+
+' =========================================================================
+'  Camada :: Models  (DTOs de transporte)
+' =========================================================================
+package "Backend.Models (Financas)" <<Folder>> {
+
+    class FaturaDto <<DTO>> {
+        + NumeroFatura : string
+        + ClienteNIF : string
+        + ServicoID : int [0..1]
+        + VendaID : int [0..1]
+        + ValorTotal : decimal
+        + MetodoPagamento : string
+        + DataEmissao : string?
+        + Devolucoes : List<DevolucaoDto>
+    }
+    class FaturaCriacaoDto <<DTO>> {
+        + NumeroFatura : string  <<[Required]>>
+        + ClienteNIF : string  <<[Required]>>
+        + ServicoID : int?
+        + VendaID : int?
+        + ValorTotal : decimal  <<[Range(0.01,∞)]>>
+        + MetodoPagamento : string  <<[Required]>>
+        + ItensVenda : List<ItemVendaCriacaoDto>
+    }
+    class DevolucaoDto <<DTO>> {
+        + DevolucaoID : string?
+        + DataDevolucao : string?
+        + Motivo : string
+        + NotaCredito : NotaCreditoDto [0..1]
+    }
+    class DevolucaoCriacaoDto <<DTO>> {
+        + Motivo : string  <<[Required, MinLength(3)]>>
+    }
+    class NotaCreditoDto <<DTO>> {
+        + ValorCreditado : decimal
+    }
+
+    class VendaDto <<DTO>> {
+        + VendaID : int
+        + OperadorNumero : string
+        + DataVenda : string?
+        + Total : decimal
+        + ItensVenda : List<ItemVendaDto>
+    }
+    class ItemVendaDto <<DTO>> {
+        + PecaEAN : string
+        + Quantidade : int
+    }
+    class CheckoutVendaDiretaDto <<DTO>> {
+        + NumeroFatura : string  <<[Required]>>
+        + ClienteNIF : string
+        + OperadorNumero : string?
+        + ValorTotal : decimal  <<[Range(0.01,∞)]>>
+        + MetodoPagamento : string  <<[Required]>>
+        + ItensVenda : List<ItemVendaCriacaoDto>  <<[MinLength(1)]>>
+    }
+    class ItemVendaCriacaoDto <<DTO>> {
+        + PecaEAN : string  <<[Required]>>
+        + Quantidade : int  <<[Range(1,99)]>>
+        + PrecoUnitario : decimal  <<[Range(0,999999.99)]>>
+    }
+    class VendaComFaturaDto <<DTO>> {
+        + Venda : VendaDto
+        + Fatura : FaturaDto
+    }
+
+    class EncomendaClienteDto <<DTO>> {
+        + EncomendaClienteID : int
+        + ClienteNIF : string
+        + DataEncomenda : string
+        + Estado : string
+        + Total : decimal
+        + FaturaNumero : int [0..1]
+        + Itens : List<ItemEncomendaDto>
+    }
+    class ItemEncomendaDto <<DTO>> {
+        + PecaEAN : string
+        + Quantidade : int
+    }
+    class EncomendaClienteCriacaoDto <<DTO>> {
+        + Itens : List<ItemEncomendaCriacaoDto>  <<[Required, MinLength(1)]>>
+    }
+    class ItemEncomendaCriacaoDto <<DTO>> {
+        + PecaEAN : string  <<[Required]>>
+        + Quantidade : int  <<[Range(1,99)]>>
+        + PrecoUnitario : decimal  <<[Range(0.01,999999.99)]>>
+    }
+    class PecaReservadaDto <<DTO>> {
+        + EncomendaClienteID : int
+        + ClienteNIF : string
+        + DataEncomenda : string
+        + Estado : string
+        + Total : decimal
+        + Itens : List<ItemEncomendaDetalhadoDto>
+    }
+    class ItemEncomendaDetalhadoDto <<DTO>> {
+        + PecaEAN : string
+        + Nome : string?
+        + Categoria : string?
+        + Quantidade : int
+        + PrecoUnitario : double?
+    }
+    class LevantamentoEncomendaDto <<DTO>> {
+        + MetodoPagamento : string  <<[Required]>>
+    }
+
+    class PromocaoDto <<DTO>> {
+        + PromocaoID : int
+        + Descricao : string
+        + PercentagemDesconto : int
+        + DataInicio : string
+        + DataFim : string
+        + AdministradorNumero : string
+        + Ativa : bool
+        + PecasAplicaveisEANs : List<string>
+    }
+    class PromocaoCriacaoDto <<DTO>> {
+        + PromocaoID : int  <<[Required]>>
+        + Descricao : string  <<[Required]>>
+        + PercentagemDesconto : int  <<[Required]>>
+        + DataInicio : string  <<[Required]>>
+        + DataFim : string  <<[Required]>>
+        + AdministradorNumero : string = "ADM001"
+        + PecasAplicaveisEANs : List<string>
+    }
+    class AlterarEstadoRequest <<DTO>> {
+        + Ativa : bool
+    }
+
+    class EstatisticaDto <<DTO>> {
+        + TempoMedioServicoMinutos : double
+        + FaturacaoTotal : decimal
+        + FaturacaoServicos : decimal
+        + FaturacaoVendas : decimal
+        + Movimentacao : List<Faturacao>
+        + NumeroAgendamentos : int
+        + NumeroVendas : int
+        + ServicosRealizados : int
+        + Devolucoes : List<DevolucaoDto>
+        + ValorTotalDevolucoes : decimal
+    }
+    class Faturacao <<DTO>> {
+        + Categoria : string  <<"SERVICO" | "VENDA">>
+        + Fatura : FaturaDto
+        + Valor : decimal
+    }
+
+    ' Agregações/Composições entre DTOs
+    FaturaDto         "1" o-- "0..*" DevolucaoDto
+    DevolucaoDto      "1" o-- "0..1" NotaCreditoDto
+    FaturaCriacaoDto  "1" o-- "0..*" ItemVendaCriacaoDto
+    VendaDto          "1" *-- "1..*" ItemVendaDto
+    CheckoutVendaDiretaDto "1" *-- "1..*" ItemVendaCriacaoDto
+    VendaComFaturaDto "1" --> "1" VendaDto
+    VendaComFaturaDto "1" --> "1" FaturaDto
+    EncomendaClienteDto "1" *-- "1..*" ItemEncomendaDto
+    EncomendaClienteCriacaoDto "1" *-- "1..*" ItemEncomendaCriacaoDto
+    PecaReservadaDto  "1" *-- "1..*" ItemEncomendaDetalhadoDto
+    EstatisticaDto    "1" o-- "0..*" Faturacao
+    EstatisticaDto    "1" o-- "0..*" DevolucaoDto
+    Faturacao         "1" --> "1" FaturaDto
+}
+
+' =========================================================================
+'  Camada :: Services  (lógica de negócio)
+' =========================================================================
+package "Backend.Services (Financas)" <<Folder>> {
+
+    interface IFaturaService <<interface>> {
+        + GetFaturasAsync() : Task<IEnumerable<FaturaDto>>
+        + GetFaturasCliente(id : string) : Task<IEnumerable<FaturaDto>>
+        + GetFaturaPorNumeroAsync(numero : string) : Task<FaturaDto?>
+        + CriarFaturaAsync(dto : FaturaCriacaoDto) : Task<FaturaDto?>
+        + EliminarFaturaAsync(numero : string) : Task<bool>
+        + ProcessarDevolucaoAsync(numeroFatura : string, motivo : string) : Task<FaturaDto?>
+    }
+
+    interface IVendaService <<interface>> {
+        + ListarVendasAsync() : Task<IEnumerable<VendaDto>>
+        + ObterVendaAsync(id : int) : Task<VendaDto?>
+        + RegistarVendaDiretaAsync(operadorNumero : string, dto : CheckoutVendaDiretaDto) : Task<VendaComFaturaDto?>
+    }
+
+    interface IEncomendaClienteService <<interface>> {
+        + CriarEncomendaAsync(clienteNIF : string, dto : EncomendaClienteCriacaoDto) : Task<EncomendaClienteDto?>
+        + ListarEncomendasClienteAsync(clienteNIF : string) : Task<IEnumerable<EncomendaClienteDto>>
+        + ListarProntasParaLevantamentoAsync() : Task<IEnumerable<PecaReservadaDto>>
+        + MarcarComoLevantadaAsync(id : int) : Task<bool>
+        + LevantarComFaturaAsync(id : int, metodoPagamento : string) : Task<FaturaDto?>
+    }
+
+    interface IPromocaoService <<interface>> {
+        + GetPromocoesAsync() : Task<IEnumerable<PromocaoDto>>
+        + GetPromocaoPorIdAsync(id : string) : Task<PromocaoDto?>
+        + CriarPromocaoAsync(dto : PromocaoCriacaoDto) : Task<PromocaoDto?>
+        + AtualizarPromocaoAsync(id : string, dto : PromocaoDto) : Task<PromocaoDto?>
+        + AlterarEstadoAsync(id : string, ativa : bool) : Task<PromocaoDto?>
+        + EliminarPromocaoAsync(id : string) : Task<bool>
+    }
+
+    interface IEstatisticasService <<interface>> {
+        + GetEstatisticaDiaAsync(dia : DateTime) : Task<EstatisticaDto>
+        + GetIntervaloEstatisticaAsync(inicio : DateTime, fim : DateTime) : Task<EstatisticaDto>
+        + GetEstatisticasAsync() : Task<EstatisticaDto>
+    }
+
+    ' Interfaces de outros subsistemas consumidas via DI  (declaradas como externas)
+    interface IPecaService           <<external>>
+    interface IEncomendaStockService <<external>>
+    interface IClienteService        <<external>>
+    interface IEmailService          <<external>>
+
+    class FaturaService {
+        - _httpClient : HttpClient
+        - _pecaService : IPecaService
+        - _vendaService : IVendaService
+        - _encomendaStockService : IEncomendaStockService
+        - _clienteService : IClienteService
+        - _emailService : IEmailService
+        --
+        + FaturaService(httpClient, pecaService, vendaService, \n\t\tencomendaStockService, clienteService, emailService)
+    }
+
+    class VendaService {
+        - _httpClient : HttpClient
+        - _pecaService : IPecaService
+        - _encomendaStockService : IEncomendaStockService
+        --
+        + VendaService(httpClient, pecaService, encomendaStockService)
+    }
+
+    class EncomendaClienteService {
+        - _httpClient : HttpClient
+        - _faturaService : IFaturaService
+        - _pecaService : IPecaService
+        --
+        + EncomendaClienteService(httpClient, faturaService, pecaService)
+    }
+
+    class PromocaoService {
+        - _httpClient : HttpClient
+        --
+        + PromocaoService(httpClient : HttpClient)
+    }
+
+    class EstatisticasService {
+        - _httpClient : HttpClient
+        --
+        + EstatisticasService(httpClient : HttpClient)
+    }
+
+    FaturaService            .up.|> IFaturaService
+    VendaService             .up.|> IVendaService
+    EncomendaClienteService  .up.|> IEncomendaClienteService
+    PromocaoService          .up.|> IPromocaoService
+    EstatisticasService      .up.|> IEstatisticasService
+}
+
+' Dependências reais entre serviços  (injeção de construtor)
+FaturaService            ..> IPecaService             : «DI»
+FaturaService            ..> IVendaService            : «DI»
+FaturaService            ..> IEncomendaStockService   : «DI»
+FaturaService            ..> IClienteService          : «DI»
+FaturaService            ..> IEmailService            : «DI»
+VendaService             ..> IPecaService             : «DI»
+VendaService             ..> IEncomendaStockService   : «DI»
+EncomendaClienteService  ..> IFaturaService           : «DI»
+EncomendaClienteService  ..> IPecaService             : «DI»
+
+' =========================================================================
+'  Camada :: Controllers  (endpoints REST)
+' =========================================================================
+package "Backend.Controllers (Financas)" <<Folder>> {
+
+    class FaturasController <<RestController>> {
+        - _faturaService : IFaturaService
+        --
+        + Listar() : Task<IActionResult>  <<GET /api/faturas>>
+        + ObterFaturasCliente() : Task<IActionResult>  <<GET /api/faturas/minhas>>
+        + Obter(numero) : Task<IActionResult>  <<GET /api/faturas/{numero}>>
+        + Criar(dto : FaturaCriacaoDto) : Task<IActionResult>  <<POST /api/faturas>>
+        + Eliminar(numero) : Task<IActionResult>  <<DELETE /api/faturas/{numero}>>
+        + Devolver(numero, dto : DevolucaoCriacaoDto) : Task<IActionResult>  <<POST /api/faturas/{numero}/devolucao>>
+    }
+
+    class VendasController <<RestController>> {
+        - _vendaService : IVendaService
+        --
+        + Listar() : Task<IActionResult>  <<GET /api/vendas>>
+        + Obter(id : int) : Task<IActionResult>  <<GET /api/vendas/{id}>>
+        + RegistarVendaDireta(dto : CheckoutVendaDiretaDto) : Task<IActionResult>  <<POST /api/vendas/direta>>
+    }
+
+    class EncomendaClienteController <<RestController>> {
+        - _encomendaService : IEncomendaClienteService
+        --
+        + ListarMinhasEncomendas() : Task<IActionResult>  <<GET /api/EncomendaCliente>>
+        + CriarEncomenda(dto : EncomendaClienteCriacaoDto) : Task<IActionResult>  <<POST /api/EncomendaCliente>>
+        + ListarProntas() : Task<IActionResult>  <<GET /api/EncomendaCliente/prontas>>
+        + LevantarEncomenda(id : int, dto : LevantamentoEncomendaDto) : Task<IActionResult>  <<PUT /api/EncomendaCliente/{id}/levantar>>
+    }
+
+    class PromocoesController <<RestController>> {
+        - _promocaoService : IPromocaoService
+        --
+        + Listar() : Task<IActionResult>  <<GET /api/promocoes>>
+        + Obter(id) : Task<IActionResult>  <<GET /api/promocoes/{id}>>
+        + Criar(dto : PromocaoCriacaoDto) : Task<IActionResult>  <<POST /api/promocoes>>
+        + Atualizar(id, dto : PromocaoDto) : Task<IActionResult>  <<PUT /api/promocoes/{id}>>
+        + AlterarEstado(id, req : AlterarEstadoRequest) : Task<IActionResult>  <<PATCH /api/promocoes/{id}/estado>>
+        + Eliminar(id) : Task<IActionResult>  <<DELETE /api/promocoes/{id}>>
+    }
+
+    class EstatisticasController <<RestController>> {
+        - _service : IEstatisticasService
+        --
+        + Get() : Task<ActionResult<EstatisticaDto>>  <<GET /api/estatisticas>>
+        + GetDia(dia : DateTime) : Task<ActionResult<EstatisticaDto>>  <<GET /api/estatisticas/dia>>
+        + GetIntervalo(inicio, fim : DateTime) : Task<ActionResult<EstatisticaDto>>  <<GET /api/estatisticas/intervalo>>
+    }
+}
+
+FaturasController              ..> IFaturaService            : «DI»
+VendasController               ..> IVendaService             : «DI»
+EncomendaClienteController     ..> IEncomendaClienteService  : «DI»
+PromocoesController            ..> IPromocaoService          : «DI»
+EstatisticasController         ..> IEstatisticasService      : «DI»
+
+FaturasController            ..> FaturaCriacaoDto    : <<bind>>
+FaturasController            ..> DevolucaoCriacaoDto : <<bind>>
+VendasController             ..> CheckoutVendaDiretaDto : <<bind>>
+EncomendaClienteController   ..> EncomendaClienteCriacaoDto : <<bind>>
+EncomendaClienteController   ..> LevantamentoEncomendaDto  : <<bind>>
+PromocoesController          ..> PromocaoCriacaoDto  : <<bind>>
+PromocoesController          ..> AlterarEstadoRequest : <<bind>>
+
+' =========================================================================
+'  Interface provida no diagrama de componentes  (lollipop «iFinancas»)
+' =========================================================================
+interface "iFinancas" as iFinancas <<provided>>
+FaturasController           -up- iFinancas : <<realize>>
+VendasController            -up- iFinancas : <<realize>>
+EncomendaClienteController  -up- iFinancas : <<realize>>
+PromocoesController         -up- iFinancas : <<realize>>
+EstatisticasController      -up- iFinancas : <<realize>>
+
+note right of FaturaService
+  **Emissão da fatura**
+  1) Valida cliente (iUtilizadores)
+  2) POST à Data API (MobiFixDL)
+  3) Abate stock de cada peça (iCatalogos)
+  4) Se StockAtual ≤ StockMinimo →
+     cria EncomendaStock(PENDENTE) (iStocks)
+  5) Dispara EnviarFaturaAsync(...) (iEmail)
+     fire-and-forget.
+end note
+
+@enduml

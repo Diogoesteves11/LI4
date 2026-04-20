@@ -1,0 +1,74 @@
+@startuml 03-subsistema-email
+' =========================================================================
+'  Subsistema :: Email  (interface iEmail)
+'  Fonte: Backend/Services/Email
+'  Sem models próprios — apenas serviço transversal consumido por
+'  iServicos (trotinete pronta) e iFinancas (fatura emitida).
+' =========================================================================
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam shadowing false
+hide empty members
+title Subsistema de Email  —  <<provides>> iEmail
+
+' =========================================================================
+'  Camada :: Services  (único componente)
+' =========================================================================
+package "Backend.Services (Email)" <<Folder>> {
+
+    interface IEmailService <<interface>> {
+        + EnviarAsync(para : string, assunto : string, corpoHtml : string) : Task
+        + NotificarTrotineteProntaAsync(emailCliente : string, nomeCliente : string, \n\t\tservicoId : int, trotineteNumSerie : string, valor : decimal) : Task
+        + EnviarFaturaAsync(emailCliente : string, nomeCliente : string, \n\t\tnumeroFatura : string, valor : decimal, \n\t\tmetodoPagamento : string, descricao : string?) : Task
+    }
+
+    class EmailService {
+        - _host : string
+        - _port : int
+        - _user : string
+        - _pass : string
+        - _from : string
+        - _fromName : string
+        - _enabled : bool
+        --
+        + EmailService(config : IConfiguration)
+        + EnviarAsync(para, assunto, corpoHtml) : Task
+        + NotificarTrotineteProntaAsync(...) : Task
+        + EnviarFaturaAsync(...) : Task
+        - RenderTrotineteProntaHtml(...) : string
+        - RenderFaturaHtml(...) : string
+    }
+
+    EmailService .up.|> IEmailService
+}
+
+' =========================================================================
+'  Infraestrutura externa  (bibliotecas e protocolos)
+' =========================================================================
+package "Infraestrutura" <<Cloud>> {
+    class "MailKit.Net.Smtp.SmtpClient" as SmtpClient <<library>>
+    class "MimeKit.MimeMessage"          as MimeMsg    <<library>>
+    class "SMTP Server"                  as SMTPServer <<external>>
+}
+
+EmailService ..> SmtpClient : <<use>>  ConnectAsync/AuthenticateAsync/SendAsync
+EmailService ..> MimeMsg    : <<create>>
+SmtpClient   ..> SMTPServer : <<SslOnConnect (465) | StartTls>>
+
+' =========================================================================
+'  Interface provida no diagrama de componentes  (lollipop «iEmail»)
+' =========================================================================
+interface "iEmail" as iEmail <<provided>>
+EmailService -up- iEmail : <<realize>>
+
+note right of EmailService
+  **Fire-and-forget (best-effort)**
+  Invocado em Task.Run(...) pelos
+  consumidores para não bloquear o
+  pipeline HTTP. Se SMTP não estiver
+  configurado ou falhar, é registado
+  em log e o fluxo principal continua.
+end note
+
+@enduml
