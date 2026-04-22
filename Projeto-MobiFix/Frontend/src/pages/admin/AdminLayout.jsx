@@ -18,7 +18,8 @@ export default function AdminLayout() {
     { name: "Encomendas Pendentes", href: "/FixNManage/encomendas", icon: Package },
     { name: "Promoções", href: "/FixNManage/promocoes", icon: Tag },
     { name: "Utilizadores", href: "/FixNManage/users", icon: Users },
-    { name: "Catálogo de Peças", href: "/FixNManage/pecas", icon: Box }, 
+    { name: "Catálogo de Peças", href: "/FixNManage/pecas", icon: Box },
+    { name: "Intervenções", href: "/FixNManage/intervencoes", icon: Wrench },
   ];
 
   const isActive = (href) => {

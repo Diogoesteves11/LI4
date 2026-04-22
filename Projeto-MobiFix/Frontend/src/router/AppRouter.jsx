@@ -23,6 +23,7 @@ import Promotions from '../pages/admin/Promocoes.jsx'
 import LoginPage from '../pages/staff/LoginPage.jsx'
 import AuthPage from '../pages/public/AuthPage.jsx'
 import PecasDashboard from '../pages/admin/PecasManagement.jsx'
+import IntervencoesCatalogoManagement from '../pages/admin/IntervencoesCatalogoManagement.jsx'
 
 // Extrai o payload do JWT sem biblioteca externa
 function parseJwt(token) {
@@ -102,6 +103,7 @@ export default function AppRouter() {
             <Route path="users" element={<UserManagement/>}/>
             <Route path="promocoes" element={<Promotions/>}/>
             <Route path="pecas" element={<PecasDashboard/>}/>
+            <Route path="intervencoes" element={<IntervencoesCatalogoManagement/>}/>
             <Route index element={<AdminDashboard />} />
           </Route>
         </Route>
