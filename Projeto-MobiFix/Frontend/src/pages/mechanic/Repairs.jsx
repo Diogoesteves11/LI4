@@ -24,9 +24,9 @@ export default function Repairs() {
   // ── Dados remotos ────────────────────────────────────────────────────────
   const { mutateAsync: atualizarAgenda } = useAtualizarAgenda();
   const { mutateAsync: atualizarServico } = useAtualizarServico();
-  const { data: agendas  = [], isLoading: loadingAgendas,  isError: errorAgendas  } = useAgendas();
-  const { data: servicos = [], isLoading: loadingServicos, isError: errorServicos  } = useServicos();
-  const { data: catalogo = [], isLoading: loadingCatalogo                          } = useIntervencoesCatalogo();
+  const { data: agendas = [], isLoading: loadingAgendas, isError: errorAgendas } = useAgendas();
+  const { data: servicos = [], isLoading: loadingServicos, isError: errorServicos } = useServicos();
+  const { data: catalogo = [], isLoading: loadingCatalogo } = useIntervencoesCatalogo();
 
   const mecanicoId = getMecanicoIdFromToken();
 
@@ -36,7 +36,7 @@ export default function Repairs() {
     if (!agendas.length || !servicos.length || !catalogo.length) return [];
 
     return agendas
-      .filter(a => a.TipoSlot === 'REPARACAO' && a.MecanicoNumero === mecanicoId && a.Estado === 'RESERVADO')
+      .filter(a => a.TipoSlot === 'REPARACAO' && a.Estado === 'RESERVADO')
       .map(agenda => {
         const servico = servicos.find(s => s.ServicoID === agenda.ServicoID);
 
@@ -44,22 +44,22 @@ export default function Repairs() {
         const intervencoes = (servico?.HistoricoIntervencoes ?? []).map(hiv => {
           const cat = catalogo.find(c => c.IntervencaoID === hiv.IntervencaoCatalogoID);
           return {
-            id:          hiv.IntervencaoCatalogoID,
-            descricao:   cat?.Descricao          ?? `Intervenção #${hiv.IntervencaoCatalogoID}`,
-            especialidade: cat?.Especialidade    ?? '—',
-            preco:       cat?.PrecoFixoMaoDeObra ?? 0,
-            pecas:       hiv.PecasUtilizadas     ?? [],
+            id: hiv.IntervencaoCatalogoID,
+            descricao: cat?.Descricao ?? `Intervenção #${hiv.IntervencaoCatalogoID}`,
+            especialidade: cat?.Especialidade ?? '—',
+            preco: cat?.PrecoFixoMaoDeObra ?? 0,
+            pecas: hiv.PecasUtilizadas ?? [],
           };
         });
 
         return {
-          agendaId:      agenda.AgendaID,
-          servicoId:     agenda.ServicoID,
+          agendaId: agenda.AgendaID,
+          servicoId: agenda.ServicoID,
           dataHoraInicio: agenda.DataHoraInicio,
           trotineteNumSerie: servico?.TrotineteNumSerie ?? 'S/N',
-          feedbackCliente:   servico?.FeedbackCliente  ?? '',
+          feedbackCliente: servico?.FeedbackCliente ?? '',
           descricaoDiagnostico: servico?.DescricaoDiagnostico ?? '',
-          estado:        agenda.Estado,
+          estado: agenda.Estado,
           intervencoes,
         };
       });
@@ -160,7 +160,7 @@ export default function Repairs() {
 
   // ── Seleção ───────────────────────────────────────────────────────────────
   const [selectedAgendaId, setSelectedAgendaId] = useState(null);
-  const [expandedIds, setExpandedIds]           = useState(new Set());
+  const [expandedIds, setExpandedIds] = useState(new Set());
 
   const selectedRepair = repairs.find(r => r.agendaId === selectedAgendaId);
 
@@ -178,7 +178,7 @@ export default function Repairs() {
 
   // ── Guards ────────────────────────────────────────────────────────────────
   const isLoading = loadingAgendas || loadingServicos || loadingCatalogo;
-  const isError   = errorAgendas  || errorServicos;
+  const isError = errorAgendas || errorServicos;
 
   if (isLoading) return (
     <div className="flex h-screen w-full items-center justify-center bg-slate-100">
@@ -229,7 +229,7 @@ export default function Repairs() {
             </div>
           ) : (
             repairs.map((repair) => {
-              const prog      = getProgress(repair.agendaId, repair.intervencoes);
+              const prog = getProgress(repair.agendaId, repair.intervencoes);
               const isExpanded = expandedIds.has(repair.agendaId);
               const isSelected = selectedAgendaId === repair.agendaId;
               const concluiuTudo = prog.pct === 100;
@@ -238,11 +238,10 @@ export default function Repairs() {
                 <div
                   key={repair.agendaId}
                   onClick={() => setSelectedAgendaId(repair.agendaId)}
-                  className={`cursor-pointer rounded-xl border-2 p-5 transition-all duration-200 ${
-                    isSelected
+                  className={`cursor-pointer rounded-xl border-2 p-5 transition-all duration-200 ${isSelected
                       ? 'border-green-600 bg-green-50 shadow-md'
                       : 'border-slate-200 bg-white hover:border-green-300'
-                  }`}
+                    }`}
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -390,9 +389,8 @@ export default function Repairs() {
                       return (
                         <div
                           key={interv.id}
-                          className={`flex items-center justify-between rounded-xl border-2 p-5 transition-all ${
-                            feita ? 'bg-green-50 border-green-200' : 'bg-white border-slate-100 hover:border-slate-200'
-                          }`}
+                          className={`flex items-center justify-between rounded-xl border-2 p-5 transition-all ${feita ? 'bg-green-50 border-green-200' : 'bg-white border-slate-100 hover:border-slate-200'
+                            }`}
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1">
@@ -425,14 +423,13 @@ export default function Repairs() {
 
                           <button
                             onClick={() => marcarConcluida(
-                                selectedRepair.agendaId, 
-                                interv.id, 
-                                interv.descricao, 
-                                selectedRepair.intervencoes // Passamos o array completo
+                              selectedRepair.agendaId,
+                              interv.id,
+                              interv.descricao,
+                              selectedRepair.intervencoes // Passamos o array completo
                             )}
                             disabled={feita}
-                            className={`ml-4 shrink-0 flex h-11 items-center gap-2 rounded-lg px-6 font-black transition-all active:scale-95 ${
-                              feita
+                            className={`ml-4 shrink-0 flex h-11 items-center gap-2 rounded-lg px-6 font-black transition-all active:scale-95 ${feita
                                 ? 'bg-green-100 text-green-600 cursor-not-allowed'
                                 : 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200 cursor-pointer'
                             }`}
