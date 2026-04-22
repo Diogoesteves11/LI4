@@ -7,16 +7,23 @@ export const statsService = {
     },
 
     getEstatisticasDia: async (dia) => {
-        const iso = dia instanceof Date ? dia.toISOString() : dia;
-        const response = await api.get('/Estatisticas/dia', { params: { dia: iso } });
+        // Se for um objeto Date, extraímos apenas a parte da data (YYYY-MM-DD)
+        const dataFormatada = dia instanceof Date
+            ? dia.toLocaleDateString('en-CA') // Retorna YYYY-MM-DD
+            : dia;
+
+        const response = await api.get('/Estatisticas/dia', { params: { dia: dataFormatada } });
         return response.data;
     },
 
     getEstatisticasIntervalo: async (inicio, fim) => {
-        const inicioIso = inicio instanceof Date ? inicio.toISOString() : inicio;
-        const fimIso = fim instanceof Date ? fim.toISOString() : fim;
+        const formatar = (d) => d instanceof Date ? d.toLocaleDateString('en-CA') : d;
+
         const response = await api.get('/Estatisticas/intervalo', {
-            params: { inicio: inicioIso, fim: fimIso }
+            params: {
+                inicio: formatar(inicio),
+                fim: formatar(fim)
+            }
         });
         return response.data;
     }
