@@ -17,19 +17,26 @@ export default function AdminDashboard() {
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
 
+  const formatarParaDataLocal = (dataStr) => {
+    if (!dataStr) return null;
+    const [ano, mes, dia] = dataStr.split("-").map(Number);
+    return new Date(ano, mes - 1, dia); // Meses no JS começam em 0
+  };
+
   const carregar = useCallback(async () => {
     setLoading(true);
     setErro(null);
     try {
-      let dados;
+     let dados;
       if (modo === MODO_DIA && dia) {
-        dados = await statsService.getEstatisticasDia(new Date(dia));
+        // Passamos a string "2024-03-28" diretamente, sem o "new Date()"
+        dados = await statsService.getEstatisticasDia(dia); 
       } else if (modo === MODO_INTERVALO && inicio && fim) {
-        dados = await statsService.getEstatisticasIntervalo(new Date(inicio), new Date(fim));
+        dados = await statsService.getEstatisticasIntervalo(inicio, fim);
       } else {
         dados = await statsService.getEstatisticasGlobais();
       }
-      setStats(dados);
+      setStats(dados); 
     } catch (e) {
       setErro(e.message ?? "Erro a obter estatísticas.");
     } finally {
@@ -55,9 +62,15 @@ export default function AdminDashboard() {
   };
 
   const rotuloPeriodo = (() => {
-    if (modo === MODO_DIA && dia) return `Dia ${new Date(dia).toLocaleDateString("pt-PT")}`;
-    if (modo === MODO_INTERVALO && inicio && fim)
-      return `${new Date(inicio).toLocaleDateString("pt-PT")} — ${new Date(fim).toLocaleDateString("pt-PT")}`;
+    if (modo === MODO_DIA && dia) {
+      const d = formatarParaDataLocal(dia);
+      return `Dia ${d.toLocaleDateString("pt-PT")}`;
+    }
+    if (modo === MODO_INTERVALO && inicio && fim) {
+      const i = formatarParaDataLocal(inicio);
+      const f = formatarParaDataLocal(fim);
+      return `${i.toLocaleDateString("pt-PT")} — ${f.toLocaleDateString("pt-PT")}`;
+    }
     return "All time";
   })();
 
