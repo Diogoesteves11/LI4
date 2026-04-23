@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "0ce7f86d-409a-47fb-9f70-ac53e8382f6e",
+    "_postman_id": "dff50c16-853b-4814-9a8b-b0d5b9d6c623",
     "name": "MobiFix - Data API (Testes Completos)",
     "description": "Coleção completa de testes CRUD para todas as entidades da Data API MobiFix.\nOrdem de execução recomendada: Funcionários → Clientes → Trotinetes → Peças → Intervenções Catálogo → Serviços → Agenda → Encomendas Stock → Vendas → Encomendas Cliente → Faturas → Promoções → Cleanup.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53625659",
-    "_collection_link": "https://go.postman.co/collection/53625659-0ce7f86d-409a-47fb-9f70-ac53e8382f6e?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53625659-dff50c16-853b-4814-9a8b-b0d5b9d6c623?source=collection_link"
   },
   "item": [
     {
@@ -1971,146 +1971,12 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "5. Eliminar Peça",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 200 ou 204\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pecas/{{peca_ean}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "pecas",
-                "{{peca_ean}}"
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
     {
       "name": "Módulo - Intervenções Catálogo",
       "item": [
-        {
-          "name": "1. Criar Intervenção Catálogo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 201 Created\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "if (pm.response.code === 201) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.collectionVariables.set(\"intervencao_id\", jsonData.IntervencaoID);",
-                  "",
-                  "    pm.test(\"Deve conter Descricao\", function () {",
-                  "        pm.expect(jsonData.Descricao).to.eql(\"Substituição de bateria\");",
-                  "    });",
-                  "",
-                  "    pm.test(\"PrecoFixoMaoDeObra deve ser numérico e >= 0\", function () {",
-                  "        pm.expect(jsonData.PrecoFixoMaoDeObra).to.be.a('number');",
-                  "        pm.expect(jsonData.PrecoFixoMaoDeObra).to.be.at.least(0);",
-                  "    });",
-                  "",
-                  "    pm.test(\"Deve conter Especialidade\", function () {",
-                  "        pm.expect(jsonData.Especialidade).to.eql(\"Baterias\");",
-                  "    });",
-                  "}"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"IntervencaoID\": 10,\n    \"Descricao\": \"Substituição de bateria\",\n    \"PrecoFixoMaoDeObra\": 25.00,\n    \"Especialidade\": \"Baterias\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/intervencoes-catalogo",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "intervencoes-catalogo"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "1.1 Criar Segunda Intervenção",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 201 Created\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"IntervencaoID\": 20,\n    \"Descricao\": \"Troca de pneu\",\n    \"PrecoFixoMaoDeObra\": 15.00,\n    \"Especialidade\": \"Rodas\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/intervencoes-catalogo",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "intervencoes-catalogo"
-              ]
-            }
-          },
-          "response": []
-        },
         {
           "name": "2. Listar Intervenções",
           "event": [
@@ -2158,51 +2024,6 @@
           "response": []
         },
         {
-          "name": "3. Obter Intervenção por ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Deve retornar a intervenção correta\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.IntervencaoID).to.eql(parseInt(pm.collectionVariables.get(\"intervencao_id\")));",
-                  "});",
-                  "",
-                  "pm.test(\"Deve conter todos os campos do DTO\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('IntervencaoID');",
-                  "    pm.expect(jsonData).to.have.property('Descricao');",
-                  "    pm.expect(jsonData).to.have.property('PrecoFixoMaoDeObra');",
-                  "    pm.expect(jsonData).to.have.property('Especialidade');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/intervencoes-catalogo/{{intervencao_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "intervencoes-catalogo",
-                "{{intervencao_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "3.1 Obter Intervenção Inexistente (404)",
           "event": [
             {
@@ -2229,89 +2050,6 @@
                 "api",
                 "intervencoes-catalogo",
                 "99999"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "4. Atualizar Intervenção",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Preço deve estar atualizado\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.PrecoFixoMaoDeObra).to.eql(30.00);",
-                  "});",
-                  "",
-                  "pm.test(\"Descrição deve estar atualizada\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.Descricao).to.eql(\"Substituição de bateria (Premium)\");",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"Descricao\": \"Substituição de bateria (Premium)\",\n    \"PrecoFixoMaoDeObra\": 30.00,\n    \"Especialidade\": \"Baterias\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/intervencoes-catalogo/{{intervencao_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "intervencoes-catalogo",
-                "{{intervencao_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "5. Eliminar Intervenção",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 200 ou 204\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/intervencoes-catalogo/{{intervencao_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "intervencoes-catalogo",
-                "{{intervencao_id}}"
               ]
             }
           },

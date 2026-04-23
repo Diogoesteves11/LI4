@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const verificarToken = require('../middlewares/authMiddleware');
 // Controllers para Auth do Sistema (Login)
 const funcionarioController = require('../controllers/userControllers/funcionarioController');
 const clienteController = require('../controllers/userControllers/clienteController');
@@ -31,11 +31,11 @@ const promocaoRoutes = require('./financeRoutes/promocaoRoutes');
 // ==========================================
 router.get('/auth/funcionario/:numero', funcionarioController.obterPorNumeroLogin);
 router.get('/auth/cliente/:nif', clienteController.obterPorNifSistema);
-
+router.use('/pecas', pecaRoutes);
 // ==========================================
 // 2. MIDDLEWARE GLOBAL DE AUTENTICAÇÃO (Para o futuro)
 // ==========================================
-// router.use(verificarToken);
+router.use(verificarToken);
 
 // ==========================================
 // 3. MAPEAMENTO DE ROTAS DE DADOS (CRUD)
@@ -47,7 +47,6 @@ router.use('/clientes', clienteRoutes);
 router.use('/trotinetes', trotineteRoutes);
 
 // Stocks
-router.use('/pecas', pecaRoutes);
 router.use('/encomendas-stock', encomendaStockRoutes);
 router.use('/encomendas-cliente', encomendaClienteRoutes);
 
