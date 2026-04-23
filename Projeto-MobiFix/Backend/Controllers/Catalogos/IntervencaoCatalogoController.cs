@@ -36,6 +36,7 @@ public class IntervencoesCatalogoController : ControllerBase
 
     // POST api/IntervencoesCatalogo
     [HttpPost]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Criar([FromBody] IntervencaoCatalogoCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -48,6 +49,7 @@ public class IntervencoesCatalogoController : ControllerBase
 
     // PUT api/IntervencoesCatalogo/{id}
     [HttpPut("{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] IntervencaoCatalogoCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -60,6 +62,7 @@ public class IntervencoesCatalogoController : ControllerBase
 
     // DELETE api/IntervencoesCatalogo/{id}
     [HttpDelete("{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Eliminar(int id)
     {
         var sucesso = await _service.EliminarAsync(id);

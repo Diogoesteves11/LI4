@@ -18,6 +18,7 @@ public class VendasController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Listar()
     {
         var vendas = await _vendaService.ListarVendasAsync();
@@ -25,6 +26,7 @@ public class VendasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Obter(int id)
     {
         var venda = await _vendaService.ObterVendaAsync(id);
@@ -35,6 +37,7 @@ public class VendasController : ControllerBase
     // POST api/vendas/direta — venda direta em loja: cria Venda + Fatura num único passo.
     // O operador é obtido do JWT (claim "id" = NumeroMecanografico); o campo no body é ignorado.
     [HttpPost("direta")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> RegistarVendaDireta([FromBody] CheckoutVendaDiretaDto dto)
     {
         if (!ModelState.IsValid)

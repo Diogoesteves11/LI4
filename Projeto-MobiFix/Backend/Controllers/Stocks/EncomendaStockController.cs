@@ -18,6 +18,7 @@ public class EncomendaStockController : ControllerBase
     }
 
     [HttpGet("stock")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Listar()
     {
         var encomendas = await _encomendaService.GetEncomendasAsync();
@@ -25,6 +26,7 @@ public class EncomendaStockController : ControllerBase
     }
 
     [HttpGet("stock/{id}")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Obter(int id)
     {
         var encomenda = await _encomendaService.GetEncomendaPorIdAsync(id);
@@ -33,6 +35,7 @@ public class EncomendaStockController : ControllerBase
     }
 
     [HttpPost("stock")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Criar([FromBody] EncomendaStockCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -45,6 +48,7 @@ public class EncomendaStockController : ControllerBase
     }
 
     [HttpPut("stock/{id}")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] EncomendaStockAtualizacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -55,6 +59,7 @@ public class EncomendaStockController : ControllerBase
     }
 
     [HttpDelete("stock/{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Eliminar(int id)
     {
         var sucesso = await _encomendaService.EliminarEncomendaAsync(id);

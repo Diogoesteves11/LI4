@@ -2,10 +2,12 @@ namespace Backend.Controllers;
 
 using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "ApenasAdmin")]
 public class FuncionariosController : ControllerBase
 {
     private readonly IFuncionarioService _funcionarioService;

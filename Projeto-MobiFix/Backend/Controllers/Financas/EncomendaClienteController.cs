@@ -19,6 +19,7 @@ public class EncomendaClienteController : ControllerBase
 
     // GET api/EncomendaCliente  — lista só as encomendas do cliente autenticado
     [HttpGet]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> ListarMinhasEncomendas()
     {
         var clienteNIF = User.FindFirst("id")?.Value;
@@ -30,6 +31,7 @@ public class EncomendaClienteController : ControllerBase
 
     // POST api/EncomendaCliente  — cria uma reserva para o cliente autenticado
     [HttpPost]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> CriarEncomenda([FromBody] EncomendaClienteCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -57,8 +59,8 @@ public class EncomendaClienteController : ControllerBase
     }
 
     // GET api/EncomendaCliente/prontas — lista as encomendas prontas para levantamento
-    // Nota: Dependendo da tua regra de negócio, podes querer restringir isto a [Authorize(Roles = "Operador")]
     [HttpGet("prontas")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> ListarProntas()
     {
         var encomendasProntas = await _encomendaService.ListarProntasParaLevantamentoAsync();
@@ -67,6 +69,7 @@ public class EncomendaClienteController : ControllerBase
 
     // PUT api/EncomendaCliente/{id}/levantar — emite fatura, abate stock e marca como levantada
     [HttpPut("{id}/levantar")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> LevantarEncomenda(int id, [FromBody] LevantamentoEncomendaDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

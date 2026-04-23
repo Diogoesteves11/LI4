@@ -21,6 +21,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> Listar()
     {
         var agenda = await _agendaService.ListarAgendaAsync();
@@ -28,6 +29,7 @@ public class AgendaController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> Obter(int id)
     {
         var slot = await _agendaService.ObterSlotPorIdAsync(id);
@@ -35,7 +37,9 @@ public class AgendaController : ControllerBase
         return Ok(slot);
     }
 
+    // Cliente e Staff podem criar slots (agendamento de diagnóstico)
     [HttpPost]
+    [Authorize(Policy = "TodosAutenticados")]
     public async Task<IActionResult> Criar([FromBody] AgendaCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -66,6 +70,7 @@ public class AgendaController : ControllerBase
     }
 
    [HttpPut("{id}")]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] AgendaDto dto)
     {
         var resultado = await _agendaService.AtualizarSlotAsync(id, dto);
@@ -74,6 +79,7 @@ public class AgendaController : ControllerBase
         return Ok(resultado); // Retornamos 200 OK com o objeto
     } 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Eliminar(int id)
     {
         var sucesso = await _agendaService.EliminarSlotAsync(id);

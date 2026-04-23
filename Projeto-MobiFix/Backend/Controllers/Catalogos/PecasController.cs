@@ -2,6 +2,7 @@ namespace Backend.Controllers;
 
 using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
@@ -55,6 +56,7 @@ public class PecasController : ControllerBase
 
     // POST: api/pecas
     [HttpPost]
+    [Authorize(Policy = "ApenasAdmin")]
     // CORREÇÃO AQUI: Mudou de Peca para PecaDto
     public async Task<IActionResult> CriarPeca([FromBody] PecaDto novaPeca) 
     {
@@ -74,6 +76,7 @@ public class PecasController : ControllerBase
 
     // PUT: api/pecas/{ean}
     [HttpPut("{ean}")]
+    [Authorize(Policy = "ApenasAdmin")]
     // CORREÇÃO AQUI: Mudou de Peca para PecaDto
     public async Task<IActionResult> AtualizarPeca(string ean, [FromBody] PecaDto pecaAtualizada)
     {
@@ -96,6 +99,7 @@ public class PecasController : ControllerBase
 
     // PATCH: api/pecas/{ean}/estado
     [HttpPatch("{ean}/estado")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> AlterarEstado(string ean, [FromBody] EstadoPecaDto estadoDto)
     {
         try
@@ -117,6 +121,7 @@ public class PecasController : ControllerBase
 
     // DELETE: api/pecas/{ean}
     [HttpDelete("{ean}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> EliminarPeca(string ean)
     {
         try
