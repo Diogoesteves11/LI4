@@ -134,11 +134,12 @@ export default function VendaDireta() {
         tipo: 'sucesso',
         msg: `Fatura ${resultado?.Fatura?.NumeroFatura ?? numeroFatura} emitida.`,
         faturaData: {
-          numeroFatura: resultado?.Fatura?.NumeroFatura ?? numeroFatura,
-          dataEmissao: resultado?.Fatura?.DataEmissao ?? new Date().toISOString(),
-          metodoPagamento: dto.MetodoPagamento,
-          valorTotal: dto.ValorTotal,
-          vendaID: resultado?.Venda?.VendaID ?? 'Direta'
+          NumeroFatura:    resultado?.Fatura?.NumeroFatura    ?? numeroFatura,
+          DataEmissao:     resultado?.Fatura?.DataEmissao     ?? new Date().toISOString(),
+          ClienteNIF:      resultado?.Fatura?.ClienteNIF      ?? nifFinal,
+          MetodoPagamento: resultado?.Fatura?.MetodoPagamento ?? dto.MetodoPagamento,
+          ValorTotal:      resultado?.Fatura?.ValorTotal      ?? dto.ValorTotal,
+          VendaID:         resultado?.Venda?.VendaID          ?? 'Direta',
         }
       });
       
