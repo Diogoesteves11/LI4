@@ -18,7 +18,6 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> GetTodos()
     {
         var servicos = await _servicoService.ListarTodosAsync();
@@ -26,7 +25,6 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> GetPorId(int id)
     {
         var servico = await _servicoService.ObterPorIdAsync(id);
@@ -59,7 +57,6 @@ public class ServicosController : ControllerBase
 
     // GET api/servicos/prontas — trotinetes reparadas a aguardar levantamento
     [HttpGet("prontas")]
-    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> GetProntas()
     {
         var prontas = await _servicoService.ListarProntasAsync();
