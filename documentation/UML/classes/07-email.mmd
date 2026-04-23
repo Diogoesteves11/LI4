@@ -1,0 +1,43 @@
+%% Diagrama de Classes — Subsistema de Email
+%% Backend MobiFix (ASP.NET Core 8 / C#)
+%% Referencia: Projeto-MobiFix/Backend/Services/Email
+%%
+%% Subsistema transversal (sem Controller nem DTOs proprios).
+%% E injetado por FaturaService (para enviar fatura) e ServicoService
+%% (para notificar que a trotinete esta pronta).
+%%
+%% Comunica com um servidor SMTP externo via MailKit (nao com a Data API).
+%% E o unico Service registado como Singleton no Program.cs — os outros
+%% sao AddHttpClient (lifetime scoped).
+
+classDiagram
+    direction LR
+
+    class IEmailService {
+        <<interface>>
+        +EnviarAsync(para : string, assunto : string, corpoHtml : string) Task
+        +NotificarTrotineteProntaAsync(emailCliente : string, nomeCliente : string, servicoId : int, trotineteNumSerie : string, valor : decimal) Task
+        +EnviarFaturaAsync(emailCliente : string, nomeCliente : string, numeroFatura : string, valor : decimal, metodoPagamento : string, descricao : string?) Task
+    }
+
+    class EmailService {
+        <<service>>
+        -_host : string
+        -_port : int
+        -_user : string
+        -_pass : string
+        -_from : string
+        -_fromName : string
+        -_enabled : bool
+        +EmailService(config : IConfiguration)
+        +EnviarAsync(para : string, assunto : string, corpoHtml : string) Task
+        +NotificarTrotineteProntaAsync(emailCliente : string, nomeCliente : string, servicoId : int, trotineteNumSerie : string, valor : decimal) Task
+        +EnviarFaturaAsync(emailCliente : string, nomeCliente : string, numeroFatura : string, valor : decimal, metodoPagamento : string, descricao : string?) Task
+    }
+
+    class SmtpClient {
+        <<external>>
+    }
+
+    EmailService ..|> IEmailService : realiza
+    EmailService ..>  SmtpClient    : usa MailKit
