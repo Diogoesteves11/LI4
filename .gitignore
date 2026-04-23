@@ -71,7 +71,7 @@ yarn-error.log*
 *.run.xml
 
 *.vpp.bak*
-
+*.vpp.lck*
 # =========================================
 # Ficheiros auxiliares do LaTeX
 # =========================================
