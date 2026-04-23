@@ -137,7 +137,8 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-slate-100">
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-center" richColors />
+
 
       {/* ── Sidebar ── */}
       <aside className="w-[380px] border-r-4 border-slate-200 bg-white shadow-2xl overflow-hidden flex flex-col shrink-0">
