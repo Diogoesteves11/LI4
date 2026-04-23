@@ -81,21 +81,42 @@ void ConfigureDefaultClient(HttpClient client)
     client.DefaultRequestHeaders.Add("x-api-key", internalApiKey);
 }
 
+// Permite aceder ao HttpContext dentro dos DelegatingHandlers
+builder.Services.AddHttpContextAccessor();
+
+// Handler que propaga o JWT do frontend para a Data API (todos os clientes excepto PecaService)
+builder.Services.AddTransient<JwtPropagationHandler>();
+
+// PecaService: sem propagação de JWT (endpoint /pecas é público na Data API)
 builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IFuncionarioService, FuncionarioService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IFaturaService, FaturaService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IServicoService, ServicoService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IAgendaService, AgendaService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IEncomendaClienteService, EncomendaClienteService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IPromocaoService, PromocaoService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IEncomendaStockService, EncomendaStockService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IEstatisticasService, EstatisticasService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IVendaService, VendaService>(ConfigureDefaultClient);
-builder.Services.AddHttpClient<IClienteService, ClienteService>(ConfigureDefaultClient);
+
+// Todos os outros clientes propagam o JWT do utilizador autenticado
+builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<ITrotineteService, TrotineteService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IFuncionarioService, FuncionarioService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IFaturaService, FaturaService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IIntervencaoCatalogoService, IntervencaoCatalogoService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IServicoService, ServicoService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IAgendaService, AgendaService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IEncomendaClienteService, EncomendaClienteService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IPromocaoService, PromocaoService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IEncomendaStockService, EncomendaStockService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IEstatisticasService, EstatisticasService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IVendaService, VendaService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
+builder.Services.AddHttpClient<IClienteService, ClienteService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Configuração JWT
