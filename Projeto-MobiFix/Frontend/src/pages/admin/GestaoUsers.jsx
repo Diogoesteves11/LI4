@@ -242,19 +242,27 @@ export default function UserManagement() {
               />
             )}
 
-            {field("Cargo",
+          {field("Cargo",
               <select
                 value={formData.cargo}
-                onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-                className={inputClass}
-              >
-                <option value="MECANICO">Mecânico</option>
-                <option value="OPERADOR">Operador de Loja</option>
-                <option value="ADMINISTRADOR">Administrador</option>
-              </select>
-            )}
+                onChange={(e) => {
+                  const novoCargo = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+            cargo: novoCargo,
+            // Se mudar para algo que não seja MECANICO, limpa a especialidade
+            especialidade: novoCargo === "MECANICO" ? formData.especialidade : "" 
+          });
+        }}
+        className={inputClass}
+      >
+        <option value="MECANICO">Mecânico</option>
+        <option value="OPERADOR">Operador de Loja</option>
+        <option value="ADMINISTRADOR">Administrador</option>
+      </select>
+    )} 
 
-            {field("Especialidade (opcional)",
+            {formData.cargo === "MECANICO" &&field("Especialidade (opcional)",
               <input
                 type="text"
                 value={formData.especialidade}

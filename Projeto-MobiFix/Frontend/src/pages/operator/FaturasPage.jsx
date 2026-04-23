@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Receipt, Loader2, AlertCircle, Undo2, CheckCircle2, X } from 'lucide-react';
 import { useFaturasOperator, useDevolverFatura } from '../../hooks/useOperator';
+import { gerarNotaCredito } from '../../utils/PDFNotaCredito';
 
 export default function FaturasOperatorPage() {
   const { data: faturas, isLoading, isError, refetch } = useFaturasOperator();
@@ -38,6 +39,8 @@ export default function FaturasOperatorPage() {
     try {
       setErrorMsg('');
       await devolverFatura({ numero: faturaSelecionada.NumeroFatura, motivo: trimmed });
+      // Gera e faz download do PDF da nota de crédito após confirmação
+      gerarNotaCredito(faturaSelecionada, trimmed);
       fecharModal();
     } catch (err) {
       const msg = err?.response?.data?.mensagem ?? 'Erro ao processar devolução.';
