@@ -19,6 +19,7 @@ public class TrotinetesController : ControllerBase
 
     // GET api/trotinetes  — devolve só as trotinetes do cliente autenticado
     [HttpGet]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> GetMinhasTrotinetes()
     {
         var clienteNIF = User.FindFirst("id")?.Value;
@@ -30,7 +31,9 @@ public class TrotinetesController : ControllerBase
         return Ok(trotinetes);
     }
 
+    // GET por número de série — acessível a Staff (mecânico no diagnóstico) e Admin
     [HttpGet("{numeroSerie}")]
+    [Authorize(Policy = "TodosAutenticados")]
     public async Task<IActionResult> GetTrotineteByNumero(string numeroSerie)
     {
         var trotinete = await _trotineteService.GetTrotineteNumeroSerie(numeroSerie);
@@ -39,6 +42,7 @@ public class TrotinetesController : ControllerBase
 
     // POST api/trotinetes  — regista uma nova trotinete para o cliente autenticado
     [HttpPost]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> CriarTrotinete([FromBody] TrotinetelCriacaoDto criacaoDto)
     {
         if (!ModelState.IsValid)
@@ -59,6 +63,7 @@ public class TrotinetesController : ControllerBase
 
     // DELETE api/trotinetes/{numeroSerie}  — remove uma trotinete do cliente autenticado
     [HttpDelete("{numeroSerie}")]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> EliminarTrotinete(string numeroSerie)
     {
         var clienteNIF = User.FindFirst("id")?.Value;

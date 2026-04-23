@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = "TodosAutenticados")]
 public class PromocoesController : ControllerBase
 {
     private readonly IPromocaoService _promocaoService;
@@ -33,6 +33,7 @@ public class PromocoesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Criar([FromBody] PromocaoCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -45,6 +46,7 @@ public class PromocoesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Atualizar(string id, [FromBody] PromocaoDto dto)
     {
         var promocao = await _promocaoService.AtualizarPromocaoAsync(id, dto);
@@ -53,6 +55,7 @@ public class PromocoesController : ControllerBase
     }
 
     [HttpPatch("{id}/estado")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> AlterarEstado(string id, [FromBody] AlterarEstadoRequest request)
     {
         var promocao = await _promocaoService.AlterarEstadoAsync(id, request.Ativa);
@@ -61,6 +64,7 @@ public class PromocoesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Eliminar(string id)
     {
         var sucesso = await _promocaoService.EliminarPromocaoAsync(id);

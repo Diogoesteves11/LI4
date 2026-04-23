@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = "ApenasAdmin")]
 public class EstatisticasController : ControllerBase
 {
     private readonly IEstatisticasService _service;

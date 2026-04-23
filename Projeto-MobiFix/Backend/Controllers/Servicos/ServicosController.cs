@@ -18,6 +18,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> GetTodos()
     {
         var servicos = await _servicoService.ListarTodosAsync();
@@ -25,6 +26,7 @@ public class ServicosController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> GetPorId(int id)
     {
         var servico = await _servicoService.ObterPorIdAsync(id);
@@ -32,7 +34,9 @@ public class ServicosController : ControllerBase
         return Ok(servico);
     }
 
+    // Cliente agenda diagnóstico (cria serviço)
     [HttpPost]
+    [Authorize(Policy = "TodosAutenticados")]
     public async Task<IActionResult> Criar([FromBody] ServicoCriacaoDto dto)
     {
         var novoServico = await _servicoService.CriarServicoDiagnosticoAsync(dto);
@@ -43,6 +47,7 @@ public class ServicosController : ControllerBase
 
     // PUT api/servicos/{id} — atualização parcial (estado, diagnóstico, preço, histórico)
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "AdminOuMecanico")]
     public async Task<IActionResult> Atualizar(int id, [FromBody] ServicoAtualizacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -54,6 +59,7 @@ public class ServicosController : ControllerBase
 
     // GET api/servicos/prontas — trotinetes reparadas a aguardar levantamento
     [HttpGet("prontas")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> GetProntas()
     {
         var prontas = await _servicoService.ListarProntasAsync();
@@ -62,6 +68,7 @@ public class ServicosController : ControllerBase
 
     // PUT api/servicos/{id}/fechar — confirma levantamento (Estado=FECHADO)
     [HttpPut("{id:int}/fechar")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Fechar(int id)
     {
         var ok = await _servicoService.FecharServicoAsync(id);
@@ -71,6 +78,7 @@ public class ServicosController : ControllerBase
 
     // PUT api/servicos/{id}/levantar — emite fatura do serviço + fecha (atómico)
     [HttpPut("{id:int}/levantar")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> LevantarComFatura(int id, [FromBody] LevantarTrotineteDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

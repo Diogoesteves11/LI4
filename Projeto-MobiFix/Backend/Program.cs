@@ -48,7 +48,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Políticas baseadas no claim customizado "cargo" emitido pelo AuthService
+    options.AddPolicy("ApenasCliente",    p => p.RequireClaim("cargo", "Cliente"));
+    options.AddPolicy("ApenasStaff",      p => p.RequireClaim("cargo", "ADMINISTRADOR", "MECANICO", "OPERADOR"));
+    options.AddPolicy("ApenasAdmin",      p => p.RequireClaim("cargo", "ADMINISTRADOR"));
+    options.AddPolicy("AdminOuOperador",  p => p.RequireClaim("cargo", "ADMINISTRADOR", "OPERADOR"));
+    options.AddPolicy("AdminOuMecanico",  p => p.RequireClaim("cargo", "ADMINISTRADOR", "MECANICO"));
+    options.AddPolicy("TodosAutenticados",p => p.RequireClaim("cargo",
+        "Cliente", "ADMINISTRADOR", "MECANICO", "OPERADOR"));
+});
 
 builder.Services.AddCors(options =>
 {

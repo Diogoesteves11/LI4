@@ -17,14 +17,18 @@ public class FaturasController : ControllerBase
         _faturaService = faturaService;
     }
 
+    // Admin e Operador vêem todas as faturas
     [HttpGet]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Listar()
     {
         var faturas = await _faturaService.GetFaturasAsync();
         return Ok(faturas);
     }
 
+    // Cliente vê as suas próprias faturas
     [HttpGet("minhas")]
+    [Authorize(Policy = "ApenasCliente")]
     public async Task<IActionResult> ObterFaturasCliente()
     { 
         var clienteNIF = User.FindFirst("id")?.Value;
@@ -38,7 +42,9 @@ public class FaturasController : ControllerBase
         return Ok(faturas);
     }
 
+    // Admin, Operador ou Cliente podem consultar uma fatura por número
     [HttpGet("{numero}")]
+    [Authorize(Policy = "TodosAutenticados")]
     public async Task<IActionResult> Obter(string numero)
     {
         var fatura = await _faturaService.GetFaturaPorNumeroAsync(numero);
@@ -46,7 +52,9 @@ public class FaturasController : ControllerBase
         return Ok(fatura);
     }
 
+    // Criação de fatura é feita internamente pelo servidor LN (operador/admin)
     [HttpPost]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Criar([FromBody] FaturaCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -59,6 +67,7 @@ public class FaturasController : ControllerBase
     }
 
     [HttpDelete("{numero}")]
+    [Authorize(Policy = "ApenasAdmin")]
     public async Task<IActionResult> Eliminar(string numero)
     {
         var sucesso = await _faturaService.EliminarFaturaAsync(numero);
@@ -68,6 +77,7 @@ public class FaturasController : ControllerBase
     }
 
     [HttpPost("{numero}/devolucao")]
+    [Authorize(Policy = "AdminOuOperador")]
     public async Task<IActionResult> Devolver(string numero, [FromBody] DevolucaoCriacaoDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
