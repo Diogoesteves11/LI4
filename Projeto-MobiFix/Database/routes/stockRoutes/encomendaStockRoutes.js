@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const encomendaStockController = require('../../controllers/stockControllers/encomendaStockController');
+const verificarToken = require('../../middlewares/authMiddleware');
 
-router.post('/', encomendaStockController.criarEncomenda);
-router.get('/', encomendaStockController.listarEncomendas);
-router.get('/:id', encomendaStockController.obterEncomenda);
-router.put('/:id', encomendaStockController.atualizarEncomenda);
-router.delete('/:id', encomendaStockController.eliminarEncomenda);
+router.post('/', verificarToken, encomendaStockController.criarEncomenda);
+router.get('/', verificarToken, encomendaStockController.listarEncomendas);
+router.get('/:id', verificarToken, encomendaStockController.obterEncomenda);
+router.put('/:id', verificarToken, encomendaStockController.atualizarEncomenda);
+router.delete('/:id', verificarToken, encomendaStockController.eliminarEncomenda);
 
 module.exports = router;

@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/userControllers/trotineteController')
+const verificarToken = require('../../middlewares/authMiddleware');
 
-router.get('/', controller.listarTrotinetes);
-router.get('/:numSerie', controller.obterPorNumSerie);
-router.put('/:numSerie', controller.atualizarTrotinete);
-router.post('/', controller.criarTrotinete);
-router.delete('/:numSerie', controller.eliminarTrotinete)
+router.get('/', verificarToken, controller.listarTrotinetes);
+router.get('/:numSerie', verificarToken, controller.obterPorNumSerie);
+router.put('/:numSerie', verificarToken, controller.atualizarTrotinete);
+router.post('/', verificarToken, controller.criarTrotinete);
+router.delete('/:numSerie', verificarToken, controller.eliminarTrotinete)
 
 module.exports = router;

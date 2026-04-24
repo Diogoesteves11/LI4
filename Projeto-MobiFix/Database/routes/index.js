@@ -31,11 +31,10 @@ const promocaoRoutes = require('./financeRoutes/promocaoRoutes');
 // ==========================================
 router.get('/auth/funcionario/:numero', funcionarioController.obterPorNumeroLogin);
 router.get('/auth/cliente/:nif', clienteController.obterPorNifSistema);
-router.use('/pecas', pecaRoutes);
+
 // ==========================================
 // 2. MIDDLEWARE GLOBAL DE AUTENTICAÇÃO (Para o futuro)
 // ==========================================
-router.use(verificarToken);
 
 // ==========================================
 // 3. MAPEAMENTO DE ROTAS DE DADOS (CRUD)
@@ -49,7 +48,7 @@ router.use('/trotinetes', trotineteRoutes);
 // Stocks
 router.use('/encomendas-stock', encomendaStockRoutes);
 router.use('/encomendas-cliente', encomendaClienteRoutes);
-
+router.use('/pecas', pecaRoutes);
 // Services
 router.use('/intervencoes-catalogo', intervencaoCatalogoRoutes);
 router.use('/servicos', servicoRoutes);
