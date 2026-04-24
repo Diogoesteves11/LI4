@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/serviceControllers/servicoController');
+const verificarToken = require('../../middlewares/authMiddleware')
 
-router.post('/', controller.criarServico);
-router.get('/', controller.listarServicos);
-router.get('/:id', controller.obterServico);
-router.put('/:id', controller.atualizarServico);
-router.delete('/:id', controller.eliminarServico);
+
+router.post('/',verificarToken, controller.criarServico);
+router.get('/',verificarToken, controller.listarServicos);
+router.get('/:id',verificarToken, controller.obterServico);
+router.put('/:id',verificarToken, controller.atualizarServico);
+router.delete('/:id',verificarToken, controller.eliminarServico);
 module.exports = router;
