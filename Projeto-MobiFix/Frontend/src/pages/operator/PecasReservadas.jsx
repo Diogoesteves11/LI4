@@ -68,10 +68,10 @@ export default function PecasReservadas() {
   const valorTotalStock = reservas.reduce((s, r) => s + (r.Total ?? 0), 0);
 
   return (
-    <div className="w-full animate-in fade-in duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black tracking-tight text-slate-800">Peças Reservadas</h2>
-        <p className="text-slate-500 font-medium">Artigos pagos e validados, aguardando levantamento em loja</p>
+    <div className="w-full h-full overflow-y-auto p-6 lg:p-8 animate-in fade-in duration-500">
+      <div className="mb-6">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Peças Reservadas</h2>
+        <p className="text-sm text-slate-500">Artigos pagos e validados, aguardando levantamento em loja</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -74,10 +74,10 @@ export default function FaturasOperatorPage() {
   }
 
   return (
-    <div className="w-full animate-in fade-in duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black tracking-tight text-slate-800">Faturas Emitidas</h2>
-        <p className="text-slate-500 font-medium">Histórico de faturas — processar devoluções</p>
+    <div className="w-full h-full overflow-y-auto p-6 lg:p-8 animate-in fade-in duration-500">
+      <div className="mb-6">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Faturas Emitidas</h2>
+        <p className="text-sm text-slate-500">Histórico de faturas — processar devoluções</p>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">

@@ -6,7 +6,6 @@ import {
 import { useEncomendaStock, useCriarEncomendaStock, useAtualizarEncomendaStock, useEliminarEncomendaStock } from "../../hooks/useEncomendas";
 import { usePecas } from "../../hooks/usePecas";
 
-// 1. Função para extrair o ID do JWT gerado pelo teu C#
 const getLoggedUserId = () => {
   try {
     const token = localStorage.getItem('token');
@@ -16,7 +15,6 @@ const getLoggedUserId = () => {
     const decodedJson = atob(payloadBase64);
     const payload = JSON.parse(decodedJson);
 
-    // O teu C# usa 'new Claim("id", funcionario.NumeroMecanografico)'
     return payload.id || "ADMIN_DESCONHECIDO";
   } catch (error) {
     console.error("Erro ao ler o token:", error);
@@ -32,7 +30,6 @@ export default function StockOrders() {
   const atualizarMutation = useAtualizarEncomendaStock();
   const eliminarMutation = useEliminarEncomendaStock();
 
-  // 2. Extraímos o ID para injetar nas mutations
   const userId = getLoggedUserId();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -48,11 +45,8 @@ export default function StockOrders() {
       return peca ? peca.Nome : `Peça #${ean}`;
     })(),
     quantidade: o.Quantidade || o.quantidade,
-    
-    // 3. Mapeamento corrigido (Cobre PascalCase do C# e camelCase do JSON normal)
     solicitante: o.AdminValidadorNumero || o.adminValidadorNumero || "N/A",
     receptor: o.OperadorRececaoNumero || o.operadorRececaoNumero || "N/A",
-    
     data: new Date(o.DataPedido || o.dataPedido).toLocaleDateString('pt-PT'),
     custo: (() => {
       const ean = o.PecaEAN || o.pecaEAN;
@@ -78,7 +72,6 @@ export default function StockOrders() {
   };
 
   const handleRececionada = (id) => {
-    // 4. Injeta quem fez a receção ao atualizar para RECECIONADA
     atualizarMutation.mutate({ 
       id, 
       dados: { 
@@ -90,7 +83,6 @@ export default function StockOrders() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // 5. Injeta quem é o solicitante ao criar a encomenda
     criarMutation.mutate({
       PecaEAN: formData.pecaEAN,
       Quantidade: Number(formData.quantidade),
@@ -117,12 +109,11 @@ export default function StockOrders() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 relative">
-      {/* Header */}
+    <div className="space-y-6 animate-in fade-in duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900">Encomendas de Stock</h1>
-          <p className="text-lg font-medium text-slate-500">Gestão de pedidos de reposição</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-100">Encomendas de Stock</h1>
+          <p className="text-sm font-medium text-slate-500">Gestão de pedidos de reposição</p>
         </div>
         {!isFormOpen && (
           <button
@@ -134,7 +125,6 @@ export default function StockOrders() {
         )}
       </div>
 
-      {/* Formulário de criação */}
       {isFormOpen && (
         <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-50 p-8 animate-in slide-in-from-top-4">
           <div className="flex items-center justify-between mb-6">
@@ -151,7 +141,7 @@ export default function StockOrders() {
                   required
                   value={formData.pecaEAN}
                   onChange={(e) => setFormData({ ...formData, pecaEAN: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none text-slate-900"
                 >
                   <option value="">Selecionar peça...</option>
                   {pecasDisponiveis.map(p => (
@@ -166,7 +156,7 @@ export default function StockOrders() {
                 <input
                   type="number" required min="1" value={formData.quantidade}
                   onChange={(e) => setFormData({ ...formData, quantidade: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none text-slate-900"
                 />
               </div>
             </div>
@@ -215,7 +205,6 @@ export default function StockOrders() {
         </div>
       </div>
 
-      {/* Tabela Pendentes */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="p-6 bg-slate-50 border-b border-slate-200">
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -271,7 +260,6 @@ export default function StockOrders() {
         </div>
       </div>
 
-      {/* Tabela Em Trânsito */}
       {transitOrders.length > 0 && (
         <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-200">
@@ -316,7 +304,6 @@ export default function StockOrders() {
         </div>
       )}
 
-      {/* Histórico Rececionadas */}
       {processedOrders.length > 0 && (
         <div className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden opacity-90">
           <div className="p-6 border-b border-slate-200">
@@ -357,12 +344,9 @@ export default function StockOrders() {
         </div>
       )}
 
-      {/* Modal de Detalhes da Encomenda */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            
-            {/* Header do Modal */}
             <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
               <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
                 <Info className="w-5 h-5 text-blue-500" />
@@ -375,8 +359,6 @@ export default function StockOrders() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Conteúdo do Modal */}
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                 <div>
@@ -392,13 +374,11 @@ export default function StockOrders() {
                     {selectedOrder.status}
                   </span>
                 </div>
-                
                 <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Peça Solicitada</p>
                   <p className="text-lg font-bold text-slate-900">{selectedOrder.item}</p>
                   <p className="text-sm font-mono text-slate-500 mt-1">EAN: {selectedOrder.pecaEAN}</p>
                 </div>
-
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Quantidade</p>
                   <p className="text-2xl font-black font-mono text-blue-600">{selectedOrder.quantidade} un.</p>
@@ -410,8 +390,6 @@ export default function StockOrders() {
                     {selectedOrder.custo.toFixed(2)}
                   </p>
                 </div>
-
-                {/* Secção de Logística */}
                 <div className="col-span-2 grid grid-cols-2 gap-4 mt-2 border-t border-slate-100 pt-5">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
@@ -420,8 +398,6 @@ export default function StockOrders() {
                       <p className="text-sm font-bold text-slate-700">Admin #{selectedOrder.solicitante}</p>
                       <p className="text-[10px] text-slate-400 mt-1">{selectedOrder.data}</p>
                     </div>
-
-                    {/* Mostra o receptor se a encomenda já foi rececionada */}
                     {(selectedOrder.status === 'rececionada' || selectedOrder.status === 'concluida') && (
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
@@ -431,11 +407,8 @@ export default function StockOrders() {
                       </div>
                     )}
                 </div>
-
               </div>
             </div>
-
-            {/* Footer do Modal */}
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
                <button 
                  onClick={() => setSelectedOrder(null)} 
@@ -447,7 +420,6 @@ export default function StockOrders() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
