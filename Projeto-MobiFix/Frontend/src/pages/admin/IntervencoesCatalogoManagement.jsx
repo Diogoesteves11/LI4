@@ -148,7 +148,7 @@ export default function IntervencoesCatalogoManagement() {
 
   /* ── Helpers de UI ───────────────────────────────────────────── */
   const inputClass =
-    "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50 transition-colors";
+    "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50 transition-colors text-slate-900";
 
   const field = (label, content) => (
     <div className="space-y-2">
@@ -195,10 +195,10 @@ export default function IntervencoesCatalogoManagement() {
       {/* ── Cabeçalho ─────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-100">
             Catálogo de Intervenções
           </h1>
-          <p className="text-lg font-medium text-slate-500">
+          <p className="text-sm font-medium text-slate-500">
             Gestão de serviços e preçário de mão de obra
           </p>
         </div>
@@ -240,13 +240,13 @@ export default function IntervencoesCatalogoManagement() {
             placeholder="Pesquisar por descrição ou especialidade..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-white transition-colors text-sm font-medium"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-white transition-colors text-sm font-medium text-slate-900"
           />
         </div>
         <select
           value={filtroEsp}
           onChange={(e) => setFiltroEsp(e.target.value)}
-          className="px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-white text-sm font-bold transition-colors"
+          className="px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-white text-sm font-bold transition-colors text-slate-900"
         >
           {ESPECIALIDADES.map((e) => (
             <option key={e.value} value={e.value}>{e.label}</option>

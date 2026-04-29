@@ -1,7 +1,6 @@
-import Header from "../../components/Header";
-import BottomNav from "../../components/BottomNav";
-import { FileText, Download, Loader2 } from "lucide-react";
-import { useFaturas } from "../../hooks/useFaturas"
+import ClienteLayout from "./ClienteLayout";
+import { FileText, Download, Loader2, Wallet } from "lucide-react";
+import { useFaturas } from "../../hooks/useFaturas";
 import { gerarPDFFatura } from "../../utils/PDFFatura";
 
 export default function Faturas() {
@@ -11,76 +10,87 @@ export default function Faturas() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
+      <ClienteLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </ClienteLayout>
     );
   }
 
   if (isError) {
-    return <div className="p-4 text-red-500">Erro ao carregar faturas. Tenta novamente.</div>;
+    return (
+      <ClienteLayout>
+        <div className="text-red-500 font-bold">Erro ao carregar faturas. Tente novamente.</div>
+      </ClienteLayout>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <Header title="Minhas Faturas" />
+    <ClienteLayout>
+      <div className="mb-8">
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-1">Minhas Faturas</h1>
+        <p className="text-sm text-slate-400">Histórico completo de pagamentos e faturas emitidas.</p>
+      </div>
 
-      <div className="p-4">
-        <div className="bg-blue-600 text-white rounded-lg p-4 mb-4">
-          <p className="text-sm text-blue-100 mb-1">Total Pago Acumulado</p>
-          <p className="text-3xl font-bold">€{totalPago.toFixed(2)}</p>
+      {/* Total card */}
+      <div className="bg-gradient-to-br from-blue-700 to-indigo-700 text-white rounded-2xl p-6 mb-6 shadow-lg shadow-blue-200 flex items-center gap-5">
+        <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+          <Wallet className="w-6 h-6" />
         </div>
-
-        <div className="space-y-3">
-          {faturas?.length === 0 && (
-            <p className="text-center text-gray-500 mt-10">Não foram encontradas faturas.</p>
-          )}
-
-          {faturas?.map((fatura) => (
-            <div
-              key={fatura.NumeroFatura}
-              className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-medium text-gray-900">
-                      {fatura.NumeroFatura}
-                    </h3>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                      Paga ({fatura.MetodoPagamento})
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {/* Como o DTO não tem descrição, usamos IDs ou info genérica */}
-                    {fatura.ServicoID ? `Serviço de Manutenção #${fatura.ServicoID}` : `Venda #${fatura.VendaID}`}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(fatura.DataEmissao).toLocaleDateString('pt-PT')}
-                  </p>
-                  <div className="flex items-center justify-between mt-3">
-                    <p className="text-lg font-bold text-blue-600">
-                      €{fatura.ValorTotal.toFixed(2)}
-                    </p>
-                    <button
-                      onClick={() => gerarPDFFatura(fatura)}
-                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                      title="Download PDF"
-                    >
-                      <Download className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div>
+          <p className="text-[11px] text-blue-100 font-bold uppercase tracking-wider mb-1">Total Pago Acumulado</p>
+          <p className="text-4xl font-extrabold font-mono tracking-tight">€{totalPago.toFixed(2)}</p>
+        </div>
+        <div className="ml-auto text-right">
+          <p className="text-[11px] text-blue-100 font-bold uppercase tracking-wider mb-1">Faturas</p>
+          <p className="text-2xl font-extrabold font-mono">{faturas?.length ?? 0}</p>
         </div>
       </div>
 
-      <BottomNav />
-    </div>
+      {faturas?.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
+          <FileText className="w-12 h-12 mx-auto text-slate-200 mb-3" />
+          <p className="text-slate-400 font-medium text-sm">Não foram encontradas faturas.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-bold text-slate-900">Histórico de Faturas</span>
+          </div>
+          <div className="divide-y divide-slate-50">
+            {faturas?.map((fatura) => (
+              <div key={fatura.NumeroFatura} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50/50 transition-all">
+                <div className="w-11 h-11 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-slate-900 font-mono text-sm">{fatura.NumeroFatura}</h3>
+                    <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      Paga · {fatura.MetodoPagamento}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    {fatura.ServicoID ? `Serviço de Manutenção #${fatura.ServicoID}` : `Venda #${fatura.VendaID}`}
+                    <span className="text-slate-300 mx-1.5">·</span>
+                    {new Date(fatura.DataEmissao).toLocaleDateString('pt-PT')}
+                  </p>
+                </div>
+                <p className="text-lg font-extrabold text-slate-900 font-mono">€{fatura.ValorTotal.toFixed(2)}</p>
+                <button
+                  onClick={() => gerarPDFFatura(fatura)}
+                  className="p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-all"
+                  title="Download PDF"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </ClienteLayout>
   );
 }

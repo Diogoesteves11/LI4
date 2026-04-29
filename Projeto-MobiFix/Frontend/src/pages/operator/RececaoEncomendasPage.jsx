@@ -85,10 +85,10 @@ export default function RececaoEncomendas() {
   }
 
   return (
-    <div className="w-full animate-in fade-in duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black tracking-tight text-slate-800">Receção de Encomendas</h2>
-        <p className="text-slate-500 font-medium">Apenas encomendas em trânsito podem ser conferidas e rececionadas.</p>
+    <div className="w-full h-full overflow-y-auto p-6 lg:p-8 animate-in fade-in duration-500">
+      <div className="mb-6">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Receção de Encomendas</h2>
+        <p className="text-sm text-slate-500">Apenas encomendas em trânsito podem ser conferidas e rececionadas.</p>
       </div>
 
       {feedback && (

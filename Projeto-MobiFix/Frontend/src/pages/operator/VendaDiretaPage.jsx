@@ -182,10 +182,10 @@ export default function VendaDireta() {
   }
 
   return (
-    <div className="w-full text-slate-900">
-      <header className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Venda Direta</h2>
-        <p className="text-slate-500">Gestão de ponto de venda e stock em tempo real</p>
+    <div className="w-full h-full text-slate-900 overflow-y-auto p-6 lg:p-8">
+      <header className="mb-6">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Venda</h2>
+        <p className="text-sm text-slate-500">Gestão de ponto de venda e stock em tempo real</p>
       </header>
 
       {/* BANNER DE FEEDBACK */}

@@ -1,14 +1,13 @@
 import { useState, useMemo } from 'react';
 import {
-  CheckCircle2, Clock, User, Bike,
-  Package, ChevronDown, ChevronUp, Wrench, Loader2, AlertCircle, Euro
+  CheckCircle2, Clock, Bike,
+  Package, Wrench, Loader2, AlertCircle, Euro
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { useAgendas, useAtualizarAgenda } from '../../hooks/useAgenda';
 import { useServicos, useAtualizarServico } from '../../hooks/useServicos';
 import { useIntervencoesCatalogo } from '../../hooks/useIntervencoesCatalogo';
 
-// ── Extrai o claim "id" (NumeroMecanografico) do JWT ──────────────────────────
 function getMecanicoIdFromToken() {
   try {
     const token = localStorage.getItem('token');
@@ -21,7 +20,6 @@ function getMecanicoIdFromToken() {
 }
 
 export default function Repairs() {
-  // ── Dados remotos ────────────────────────────────────────────────────────
   const { mutateAsync: atualizarAgenda } = useAtualizarAgenda();
   const { mutateAsync: atualizarServico } = useAtualizarServico();
   const { data: agendas = [], isLoading: loadingAgendas, isError: errorAgendas } = useAgendas();
@@ -30,17 +28,12 @@ export default function Repairs() {
 
   const mecanicoId = getMecanicoIdFromToken();
 
-  // ── Montar lista de reparações ───────────────────────────────────────────
-  // Agenda REPARACAO atribuída a este mecânico → cruza com serviço e catálogo
   const repairs = useMemo(() => {
     if (!agendas.length || !servicos.length || !catalogo.length) return [];
-
     return agendas
       .filter(a => a.TipoSlot === 'REPARACAO' && a.Estado === 'RESERVADO')
       .map(agenda => {
         const servico = servicos.find(s => s.ServicoID === agenda.ServicoID);
-
-        // Intervenções do serviço: cada IntervencaoCatalogoID → nome/preço do catálogo
         const intervencoes = (servico?.HistoricoIntervencoes ?? []).map(hiv => {
           const cat = catalogo.find(c => c.IntervencaoID === hiv.IntervencaoCatalogoID);
           return {
@@ -51,7 +44,6 @@ export default function Repairs() {
             pecas: hiv.PecasUtilizadas ?? [],
           };
         });
-
         return {
           agendaId: agenda.AgendaID,
           servicoId: agenda.ServicoID,
@@ -65,35 +57,27 @@ export default function Repairs() {
       });
   }, [agendas, servicos, catalogo, mecanicoId]);
 
-  // ── Estado local de progresso ────────────────────────────────────────────
-  // { [agendaId]: { [intervencaoId]: { dataInicio, dataFim, tempoGastoMinutos } } }
   const [registos, setRegistos] = useState({});
-  // { [agendaId]: number }  → timestamp ISO da primeira intervenção validada
   const [inicioPorAgenda, setInicioPorAgenda] = useState({});
+  const [activeTimer, setActiveTimer] = useState(null);
 
   const getConcluidas = (agendaId) => new Set(Object.keys(registos[agendaId] ?? {}).map(Number));
+
+  const iniciarIntervencao = (agendaId, intervencaoId) => {
+    setActiveTimer(`${agendaId}-${intervencaoId}`);
+  };
 
   const marcarConcluida = async (agendaId, intervencaoId, descricao, todasIntervencoes) => {
     const agora = new Date();
     const agoraIso = agora.toISOString();
-
-    // Início da reparação = primeira intervenção validada nesta agenda
     const dataInicioRep = inicioPorAgenda[agendaId] ?? agoraIso;
     if (!inicioPorAgenda[agendaId]) {
       setInicioPorAgenda(prev => ({ ...prev, [agendaId]: dataInicioRep }));
     }
-
-    // Início desta intervenção = fim da anterior (ou início da reparação se for a 1ª)
     const jaRegistadas = registos[agendaId] ?? {};
     const tempos = Object.values(jaRegistadas).map(r => new Date(r.dataFim).getTime());
-    const inicioIntervencao = tempos.length > 0
-      ? new Date(Math.max(...tempos)).toISOString()
-      : dataInicioRep;
-
-    const tempoGastoMinutos = Math.max(
-      1,
-      Math.round((agora.getTime() - new Date(inicioIntervencao).getTime()) / 60000)
-    );
+    const inicioIntervencao = tempos.length > 0 ? new Date(Math.max(...tempos)).toISOString() : dataInicioRep;
+    const tempoGastoMinutos = Math.max(1, Math.round((agora.getTime() - new Date(inicioIntervencao).getTime()) / 60000));
 
     const novosRegistos = {
       ...jaRegistadas,
@@ -101,20 +85,17 @@ export default function Repairs() {
     };
 
     setRegistos(prev => ({ ...prev, [agendaId]: novosRegistos }));
+    setActiveTimer(null);
     toast.success(`Intervenção concluída (${tempoGastoMinutos} min)`, { description: descricao });
 
-    // Se for a última intervenção, fecha reparação + persiste histórico
     if (Object.keys(novosRegistos).length === todasIntervencoes.length) {
       const agendaOriginal = agendas.find(a => a.AgendaID === agendaId);
       const servicoOriginal = servicos.find(s => s.ServicoID === agendaOriginal?.ServicoID);
-
       if (!agendaOriginal || !servicoOriginal) {
         toast.error('Erro: Dados originais não encontrados.');
         return;
       }
-
       const precoTotal = todasIntervencoes.reduce((sum, i) => sum + (i.preco ?? 0), 0);
-
       const historicoPayload = todasIntervencoes.map(i => {
         const reg = novosRegistos[i.id];
         return {
@@ -123,20 +104,15 @@ export default function Repairs() {
           DataInicio: reg.dataInicio,
           DataFim: reg.dataFim,
           TempoGastoMinutos: reg.tempoGastoMinutos,
-          PecasUtilizadas: (i.pecas ?? []).map(p => ({
-            PecaEAN: p.PecaEAN,
-            Quantidade: p.Quantidade
-          }))
+          PecasUtilizadas: (i.pecas ?? []).map(p => ({ PecaEAN: p.PecaEAN, Quantidade: p.Quantidade }))
         };
       });
-
       const payloadServico = {
         Estado: 'CONCLUIDO',
         Preco: precoTotal,
         DataConclusao: agoraIso,
         HistoricoIntervencoes: historicoPayload
       };
-
       toast.promise(
         Promise.all([
           atualizarAgenda({ id: agendaId, dados: { ...agendaOriginal, Estado: 'CONCLUIDO' } }),
@@ -158,46 +134,35 @@ export default function Repairs() {
     return { completed, total: intervencoes.length, pct: Math.round((completed / intervencoes.length) * 100) };
   };
 
-  // ── Seleção ───────────────────────────────────────────────────────────────
   const [selectedAgendaId, setSelectedAgendaId] = useState(null);
-  const [expandedIds, setExpandedIds] = useState(new Set());
-
   const selectedRepair = repairs.find(r => r.agendaId === selectedAgendaId);
-
-  const toggleExpand = (id) =>
-    setExpandedIds(prev => {
-      const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
-      return s;
-    });
 
   const formatHora = (iso) => {
     try { return new Date(iso).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }); }
     catch { return '--:--'; }
   };
 
-  // ── Guards ────────────────────────────────────────────────────────────────
   const isLoading = loadingAgendas || loadingServicos || loadingCatalogo;
   const isError = errorAgendas || errorServicos;
 
   if (isLoading) return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-100">
+    <div className="flex h-full items-center justify-center bg-slate-50">
       <div className="text-center">
-        <Loader2 className="mx-auto h-12 w-12 animate-spin text-green-600" />
-        <p className="mt-4 font-bold text-slate-600">A carregar a tua agenda...</p>
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-emerald-600" />
+        <p className="mt-3 font-bold text-slate-600">A carregar a sua agenda...</p>
       </div>
     </div>
   );
 
   if (isError) return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-100 p-6">
-      <div className="rounded-2xl bg-white p-8 shadow-xl text-center border-2 border-red-100">
-        <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-        <h2 className="text-xl font-bold text-slate-900">Erro de Sincronização</h2>
-        <p className="text-slate-500 mt-2">Não foi possível carregar os agendamentos.</p>
+    <div className="flex h-full items-center justify-center bg-slate-50 p-6">
+      <div className="rounded-2xl bg-white p-8 shadow-xl text-center border border-red-100">
+        <AlertCircle className="mx-auto h-10 w-10 text-red-500 mb-3" />
+        <h2 className="text-lg font-extrabold text-slate-900">Erro de Sincronização</h2>
+        <p className="text-slate-500 mt-1 text-sm">Não foi possível carregar os agendamentos.</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-6 py-2 bg-slate-900 text-white rounded-lg font-bold"
+          className="mt-5 px-5 py-2 bg-slate-900 text-white rounded-lg font-bold text-sm"
         >
           Tentar Novamente
         </button>
@@ -206,97 +171,66 @@ export default function Repairs() {
   );
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="flex h-full bg-slate-50">
       <Toaster position="top-right" richColors />
 
-      {/* ── Sidebar ── */}
-      <aside className="w-[400px] border-r-4 border-slate-300 bg-white shadow-xl flex flex-col overflow-hidden shrink-0">
-        <div className="border-b bg-gradient-to-br from-green-50 to-white p-6">
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-slate-900">
-            <Wrench className="h-7 w-7 text-green-600" />
-            Minha Oficina
-          </h2>
-          <p className="mt-1 text-slate-500 font-medium">
-            {repairs.length} reparaç{repairs.length !== 1 ? 'ões' : ''} atribuída{repairs.length !== 1 ? 's' : ''}
+      {/* Dark sidebar */}
+      <aside className="w-[340px] bg-[#0f172a] flex flex-col shrink-0">
+        <div className="px-5 py-4 border-b border-white/5">
+          <div className="flex items-center gap-2 mb-1">
+            <Wrench className="h-4 w-4 text-emerald-400" />
+            <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Minhas Reparações</h2>
+          </div>
+          <p className="text-[11px] text-slate-500 font-medium">
+            {repairs.length} {repairs.length !== 1 ? 'atribuídas' : 'atribuída'}
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {repairs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
-              <Clock className="mb-4 h-16 w-16 opacity-10" />
-              <p className="text-lg font-bold">Sem reparações atribuídas</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center text-slate-500">
+              <Clock className="mb-3 h-12 w-12 opacity-20" />
+              <p className="text-sm font-bold">Sem reparações atribuídas</p>
             </div>
           ) : (
             repairs.map((repair) => {
               const prog = getProgress(repair.agendaId, repair.intervencoes);
-              const isExpanded = expandedIds.has(repair.agendaId);
               const isSelected = selectedAgendaId === repair.agendaId;
               const concluiuTudo = prog.pct === 100;
+              const urgColor = '#3b82f6';
 
               return (
                 <div
                   key={repair.agendaId}
                   onClick={() => setSelectedAgendaId(repair.agendaId)}
-                  className={`cursor-pointer rounded-xl border-2 p-5 transition-all duration-200 ${isSelected
-                      ? 'border-green-600 bg-green-50 shadow-md'
-                      : 'border-slate-200 bg-white hover:border-green-300'
-                    }`}
+                  className={`cursor-pointer rounded-xl p-3.5 transition-all border ${
+                    isSelected
+                      ? 'bg-emerald-900/30 border-emerald-500/40'
+                      : 'bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.08]'
+                  }`}
+                  style={{ borderLeft: `3px solid ${urgColor}` }}
                 >
-                  <div className="mb-3 flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-12 w-12 flex-col items-center justify-center rounded-lg text-white ${concluiuTudo ? 'bg-green-600' : 'bg-slate-900'}`}>
-                        <span className="text-[10px] font-black text-green-300 leading-none mb-0.5">
-                          {formatHora(repair.dataHoraInicio)}
-                        </span>
-                        {concluiuTudo ? <CheckCircle2 className="h-5 w-5" /> : <Bike className="h-5 w-5" />}
-                      </div>
-                      <div>
-                        <div className="text-base font-bold text-slate-900">{repair.trotineteNumSerie}</div>
-                        <div className="text-xs text-slate-500">Serviço #{repair.servicoId}</div>
-                      </div>
+                  <div className="flex justify-between mb-2">
+                    <div>
+                      <div className="text-[13px] font-bold text-white">{repair.trotineteNumSerie}</div>
+                      <div className="text-[10px] font-mono text-slate-500 mt-0.5">Serviço #{repair.servicoId}</div>
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleExpand(repair.agendaId); }}
-                      className="rounded-full p-1.5 hover:bg-slate-100 text-slate-400 transition-colors"
-                    >
-                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
+                    <div className="text-[11px] font-bold font-mono text-slate-400">{formatHora(repair.dataHoraInicio)}</div>
                   </div>
 
-                  {/* Feedback cliente */}
-                  {repair.feedbackCliente && (
-                    <p className="text-xs text-slate-400 italic mb-3 truncate">"{repair.feedbackCliente}"</p>
-                  )}
-
-                  {/* Barra de progresso */}
-                  <div>
-                    <div className="mb-1 flex justify-between text-[10px] font-black uppercase text-slate-400">
-                      <span>{prog.completed}/{prog.total} intervenções</span>
-                      <span>{prog.pct}%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 ${concluiuTudo ? 'bg-green-600' : 'bg-blue-600'}`}
-                        style={{ width: `${prog.pct}%` }}
-                      />
-                    </div>
+                  <div className="flex justify-between text-[10px] font-semibold mb-1.5" style={{ color: concluiuTudo ? '#4ade80' : '#64748b' }}>
+                    <span>{prog.completed}/{prog.total} intervenções</span>
+                    <span>{prog.pct}%</span>
                   </div>
-
-                  {/* Preview expandido */}
-                  {isExpanded && repair.intervencoes.length > 0 && (
-                    <div className="mt-3 space-y-1 border-t border-slate-100 pt-3 animate-in fade-in slide-in-from-top-1 duration-150">
-                      {repair.intervencoes.map(i => {
-                        const feita = getConcluidas(repair.agendaId).has(i.id);
-                        return (
-                          <div key={i.id} className={`flex items-center gap-2 text-xs font-medium ${feita ? 'text-green-600' : 'text-slate-500'}`}>
-                            {feita ? <CheckCircle2 size={12} /> : <Clock size={12} className="opacity-40" />}
-                            <span className={feita ? 'line-through' : ''}>{i.descricao}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div className="h-[3px] bg-white/[0.06] rounded-full overflow-hidden">
+                    <div
+                      className="h-full transition-all duration-500 rounded-full"
+                      style={{
+                        width: `${prog.pct}%`,
+                        background: concluiuTudo ? '#4ade80' : '#3b82f6'
+                      }}
+                    />
+                  </div>
                 </div>
               );
             })
@@ -304,163 +238,189 @@ export default function Repairs() {
         </div>
       </aside>
 
-      {/* ── Painel principal ── */}
-      <main className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
+      <main className="flex-1 overflow-y-auto bg-slate-50">
         {selectedRepair ? (() => {
-          const concluiuTudo = getProgress(selectedRepair.agendaId, selectedRepair.intervencoes).pct === 100;
+          const prog = getProgress(selectedRepair.agendaId, selectedRepair.intervencoes);
+          const concluiuTudo = prog.pct === 100;
           const set = getConcluidas(selectedRepair.agendaId);
           const regs = registos[selectedRepair.agendaId] ?? {};
           const totalMaoDeObra = selectedRepair.intervencoes.reduce((s, i) => s + i.preco, 0);
           const tempoTotalMin = Object.values(regs).reduce((s, r) => s + (r.tempoGastoMinutos ?? 0), 0);
 
           return (
-            <div className="mx-auto max-w-4xl space-y-6">
-
-              {/* Header */}
-              <div className="rounded-2xl bg-gradient-to-r from-green-600 to-green-800 p-8 text-white shadow-xl">
+            <div className="mx-auto max-w-4xl p-8 space-y-5">
+              {/* Vehicle Card */}
+              <div className="rounded-3xl bg-gradient-to-br from-[#064e3b] to-[#065f46] p-7 text-white shadow-xl">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="mb-3 flex items-center gap-3">
-                      <Bike className="h-10 w-10" />
-                      <div>
-                        <h1 className="text-3xl font-black uppercase tracking-tight">Trabalho em Curso</h1>
-                        <p className="text-green-100 font-bold">
-                          Agenda #{selectedRepair.agendaId} · Serviço #{selectedRepair.servicoId}
-                        </p>
-                      </div>
+                    <div className="text-[11px] text-white/50 font-bold uppercase tracking-[0.12em] mb-1.5">
+                      Trabalho em Curso
                     </div>
-                    <div className="flex flex-wrap gap-3 text-sm font-bold mt-4">
-                      <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-                        <Bike size={15} /> {selectedRepair.trotineteNumSerie}
+                    <h1 className="text-3xl font-extrabold tracking-tight mb-3">
+                      {selectedRepair.trotineteNumSerie}
+                    </h1>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="bg-white/10 px-3 py-1 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5">
+                        <Bike size={12} /> {selectedRepair.trotineteNumSerie}
                       </span>
-                      <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-                        <Clock size={15} /> {formatHora(selectedRepair.dataHoraInicio)}
+                      <span className="bg-white/10 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <Clock size={12} /> {formatHora(selectedRepair.dataHoraInicio)}
                       </span>
-                      <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-                        <Euro size={15} /> M.O.: €{totalMaoDeObra.toFixed(2)}
+                      <span className="bg-white/10 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <Euro size={12} /> M.O. €{totalMaoDeObra.toFixed(2)}
                       </span>
-                      {tempoTotalMin > 0 && (
-                        <span className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-                          <Clock size={15} /> Tempo: {tempoTotalMin} min
-                        </span>
-                      )}
                     </div>
                   </div>
-                  {concluiuTudo && (
-                    <span className="rounded-xl bg-white/20 px-4 py-2 text-sm font-black uppercase tracking-widest border border-white/30 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> Concluído
-                    </span>
-                  )}
+                  <div className="text-right">
+                    <div className="text-[11px] text-white/50 mb-1">Progresso</div>
+                    <div className="text-3xl font-extrabold font-mono">{prog.pct}%</div>
+                    <div className="text-[11px] text-white/60">{prog.completed}/{prog.total} tarefas</div>
+                  </div>
+                </div>
+                <div className="mt-4 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-500"
+                    style={{
+                      width: `${prog.pct}%`,
+                      background: concluiuTudo ? '#4ade80' : '#34d399'
+                    }}
+                  />
                 </div>
               </div>
 
-              {/* Queixa do cliente */}
-              {selectedRepair.feedbackCliente && (
-                <div className="rounded-xl border-2 border-amber-100 bg-amber-50 p-5">
-                  <p className="text-xs font-black uppercase text-amber-600 mb-1">Queixa do Cliente</p>
-                  <p className="text-slate-700 italic">"{selectedRepair.feedbackCliente}"</p>
-                </div>
-              )}
+              {/* Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {selectedRepair.feedbackCliente && (
+                  <div className="rounded-xl bg-white border border-amber-100 border-l-[3px] border-l-amber-500 p-4">
+                    <p className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider mb-1">Queixa</p>
+                    <p className="text-xs text-slate-700 italic">"{selectedRepair.feedbackCliente}"</p>
+                  </div>
+                )}
+                {selectedRepair.descricaoDiagnostico && (
+                  <div className="rounded-xl bg-white border border-blue-100 border-l-[3px] border-l-blue-500 p-4">
+                    <p className="text-[10px] font-extrabold text-blue-700 uppercase tracking-wider mb-1">Diagnóstico</p>
+                    <p className="text-xs text-slate-700">{selectedRepair.descricaoDiagnostico}</p>
+                  </div>
+                )}
+              </div>
 
-              {/* Diagnóstico técnico */}
-              {selectedRepair.descricaoDiagnostico && (
-                <div className="rounded-xl border-2 border-blue-100 bg-blue-50 p-5">
-                  <p className="text-xs font-black uppercase text-blue-600 mb-1">Diagnóstico</p>
-                  <p className="text-slate-700">{selectedRepair.descricaoDiagnostico}</p>
-                </div>
-              )}
-
-              {/* Lista de intervenções */}
-              <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-5 flex items-center gap-2 text-xl font-black text-slate-900">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+              {/* Interventions Checklist */}
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" strokeWidth={2.5} />
                   Intervenções a Realizar
-                  <span className="ml-auto text-sm font-bold text-slate-400">
-                    {set.size}/{selectedRepair.intervencoes.length}
-                  </span>
+                  <span className="ml-auto text-xs font-bold text-slate-400">{set.size}/{selectedRepair.intervencoes.length}</span>
                 </h3>
 
                 {selectedRepair.intervencoes.length === 0 ? (
                   <p className="text-center py-8 text-slate-400 text-sm">Sem intervenções registadas neste serviço.</p>
                 ) : (
-                  <div className="space-y-3">
-                    {selectedRepair.intervencoes.map((interv) => {
+                  <div className="space-y-2.5">
+                    {selectedRepair.intervencoes.map((interv, idx) => {
                       const feita = set.has(interv.id);
+                      const isActive = activeTimer === `${selectedRepair.agendaId}-${interv.id}`;
+                      const prevsDone = selectedRepair.intervencoes.slice(0, idx).every(i => set.has(i.id));
+                      const canStart = prevsDone && !feita;
+
                       return (
                         <div
                           key={interv.id}
-                          className={`flex items-center justify-between rounded-xl border-2 p-5 transition-all ${feita ? 'bg-green-50 border-green-200' : 'bg-white border-slate-100 hover:border-slate-200'
-                            }`}
+                          className={`rounded-xl border-[1.5px] p-4 transition-all ${
+                            feita ? 'bg-emerald-50 border-emerald-200' :
+                            isActive ? 'bg-blue-50 border-blue-200' :
+                            'bg-white border-slate-100'
+                          }`}
                         >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1">
-                              <span className={`rounded px-2 py-0.5 font-mono text-[10px] font-black text-white shrink-0 ${feita ? 'bg-green-600' : 'bg-slate-800'}`}>
-                                #{interv.id}
-                              </span>
-                              <span className={`text-base font-black truncate ${feita ? 'text-green-800 line-through' : 'text-slate-900'}`}>
-                                {interv.descricao}
-                              </span>
-                            </div>
-                            <div className="flex gap-3 text-xs font-bold text-slate-400">
-                              {interv.especialidade !== '—' && <span>{interv.especialidade}</span>}
-                              <span className="text-emerald-600">€{interv.preco.toFixed(2)}</span>
-                              {regs[interv.id]?.tempoGastoMinutos && (
-                                <span className="text-blue-600">{regs[interv.id].tempoGastoMinutos} min</span>
+                          <div className="flex items-start gap-3">
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                              style={{
+                                background: feita ? '#10b981' : isActive ? '#3b82f6' : '#e2e8f0'
+                              }}
+                            >
+                              {feita ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                              ) : (
+                                <span className={`text-[11px] font-extrabold ${isActive ? 'text-white' : 'text-slate-400'}`}>{idx + 1}</span>
                               )}
                             </div>
 
-                            {/* Peças desta intervenção */}
-                            {interv.pecas.length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-1.5">
-                                {interv.pecas.map((p, idx) => (
-                                  <span key={idx} className="flex items-center gap-1 rounded-md bg-blue-50 border border-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-600">
-                                    <Package className="h-3 w-3" /> {p.PecaEAN} ×{p.Quantidade}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className={`text-sm font-bold ${feita ? 'text-emerald-800 line-through' : 'text-slate-900'}`}>
+                                    {interv.descricao}
+                                  </div>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {interv.especialidade !== '—' && (
+                                      <span className="text-[11px] text-slate-400 font-semibold">{interv.especialidade}</span>
+                                    )}
+                                    <span className="text-[11px] text-emerald-600 font-bold">€{interv.preco.toFixed(2)}</span>
+                                    {regs[interv.id]?.tempoGastoMinutos && (
+                                      <span className="text-[11px] text-blue-600 font-bold">⏱ {regs[interv.id].tempoGastoMinutos} min</span>
+                                    )}
+                                  </div>
+                                  {interv.pecas.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                      {interv.pecas.map((p, pi) => (
+                                        <span key={pi} className="bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                          <Package className="h-2.5 w-2.5" /> {p.PecaEAN} ×{p.Quantidade}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
 
-                          <button
-                            onClick={() => marcarConcluida(
-                              selectedRepair.agendaId,
-                              interv.id,
-                              interv.descricao,
-                              selectedRepair.intervencoes // Passamos o array completo
-                            )}
-                            disabled={feita}
-                            className={`ml-4 shrink-0 flex h-11 items-center gap-2 rounded-lg px-6 font-black transition-all active:scale-95 ${feita
-                                ? 'bg-green-100 text-green-600 cursor-not-allowed'
-                                : 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200 cursor-pointer'
-                            }`}
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                            {feita ? 'Feito' : 'Validar'}
-                          </button>
+                                {!feita && (
+                                  canStart ? (
+                                    isActive ? (
+                                      <button
+                                        onClick={() => marcarConcluida(selectedRepair.agendaId, interv.id, interv.descricao, selectedRepair.intervencoes)}
+                                        className="ml-3 shrink-0 px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-extrabold hover:bg-emerald-700 transition-all"
+                                      >
+                                        Concluir
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => iniciarIntervencao(selectedRepair.agendaId, interv.id)}
+                                        className="ml-3 shrink-0 px-4 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-extrabold hover:bg-blue-800 transition-all"
+                                      >
+                                        Iniciar
+                                      </button>
+                                    )
+                                  ) : (
+                                    <span className="ml-3 shrink-0 text-[11px] text-slate-400 font-semibold">Aguarda anterior</span>
+                                  )
+                                )}
+                                {feita && <span className="ml-3 shrink-0 text-[11px] text-emerald-600 font-bold">Feito</span>}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 )}
-              </div>
 
-              {/* Banner de conclusão */}
-              {concluiuTudo && (
-                <div className="rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white text-center shadow-xl animate-in fade-in duration-500">
-                  <CheckCircle2 className="h-12 w-12 mx-auto mb-3" />
-                  <h3 className="text-2xl font-black">Reparação Concluída!</h3>
-                  <p className="text-green-100 mt-1">Todas as intervenções foram validadas.</p>
-                </div>
-              )}
+                {concluiuTudo && (
+                  <div className="mt-4 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-5 text-center text-white">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2" strokeWidth={2.5} />
+                    <h3 className="text-lg font-extrabold">Reparação Concluída!</h3>
+                    <p className="text-emerald-100 text-xs mt-1">
+                      Todas as intervenções validadas · €{totalMaoDeObra.toFixed(2)} faturáveis · {tempoTotalMin} min
+                    </p>
+                  </div>
+                )}
+              </div>
 
               <div className="pb-12" />
             </div>
           );
         })() : (
-          <div className="flex h-full flex-col items-center justify-center text-slate-300 gap-4">
-            <Wrench className="h-24 w-24 opacity-20" />
-            <p className="text-xl font-bold">Selecione uma reparação na lista</p>
-            <p className="text-sm text-slate-400">{repairs.length} atribuída{repairs.length !== 1 ? 's' : ''} a ti</p>
+          <div className="flex h-full flex-col items-center justify-center text-slate-300 gap-3">
+            <Wrench className="h-16 w-16 opacity-20" />
+            <p className="text-base font-bold text-slate-400">Selecione uma reparação na fila</p>
+            <p className="text-xs font-medium text-slate-400">{repairs.length} atribuída{repairs.length !== 1 ? 's' : ''} a si</p>
           </div>
         )}
       </main>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { KeyRound, CheckCircle2 } from 'lucide-react';
 
 const ForgotPassword = ({ isOpen, onClose }) => {
   const [mecanografico, setMecanografico] = useState('');
@@ -8,8 +9,6 @@ const ForgotPassword = ({ isOpen, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aqui ligarias à tua API .NET: POST /api/auth/recover
-    console.log("Pedido de recuperação para:", mecanografico);
     setIsSubmitted(true);
   };
 
@@ -20,30 +19,40 @@ const ForgotPassword = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-slate-100">
-        
-        {/* Header Decorativo */}
-        <div className="h-2 bg-blue-600 w-full" />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md"
+      style={{ background: 'rgba(8,15,30,0.7)' }}
+    >
+      <div
+        className="rounded-3xl w-full max-w-md overflow-hidden border"
+        style={{
+          background: '#0f172a',
+          borderColor: 'rgba(255,255,255,0.08)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+        }}
+      >
+        {/* Glow accent bar */}
+        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #22d3ee, #818cf8)' }} />
 
-        <div className="p-8">
+        <div className="p-7">
           {!isSubmitted ? (
             <>
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                  </svg>
+                <div
+                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3"
+                  style={{ background: 'rgba(34,211,238,0.15)' }}
+                >
+                  <KeyRound className="w-6 h-6" style={{ color: '#22d3ee' }} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Recuperar Acesso</h2>
-                <p className="text-slate-500 mt-2 text-sm leading-relaxed">
-                  Introduza o seu <b>Número Mecanográfico</b>. Enviaremos as instruções para o seu e-mail profissional MobiFix.
+                <h2 className="text-xl font-extrabold tracking-tight text-slate-100 mb-1">Recuperar Acesso</h2>
+                <p className="text-xs leading-relaxed" style={{ color: '#94a3b8' }}>
+                  Introduza o seu <b className="text-slate-200">Número Mecanográfico</b>. Enviaremos as instruções para o seu e-mail profissional MobiFix.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-500 mb-1 ml-1">
+                  <label className="block text-[11px] font-extrabold uppercase tracking-widest mb-2" style={{ color: '#94a3b8' }}>
                     Nº Mecanográfico
                   </label>
                   <input
@@ -52,45 +61,56 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                     placeholder="Ex: 104004"
                     value={mecanografico}
                     onChange={(e) => setMecanografico(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-300"
+                    className="w-full px-4 py-3 rounded-xl border text-sm font-semibold outline-none transition-all"
+                    style={{
+                      background: 'rgba(0,0,0,0.2)',
+                      borderColor: 'rgba(255,255,255,0.08)',
+                      color: '#f1f5f9',
+                    }}
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
+                  className="w-full font-extrabold py-3 rounded-xl text-sm transition-all"
+                  style={{
+                    background: 'linear-gradient(135deg, #22d3ee, #818cf8)',
+                    color: 'white',
+                    boxShadow: '0 4px 16px rgba(34,211,238,0.3)',
+                  }}
                 >
                   Enviar Instruções
                 </button>
               </form>
             </>
           ) : (
-            /* Estado de Sucesso */
-            <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+            <div className="text-center py-3">
+              <div
+                className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3"
+                style={{ background: 'rgba(52,211,153,0.15)' }}
+              >
+                <CheckCircle2 className="w-6 h-6" style={{ color: '#34d399' }} strokeWidth={2.5} />
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">Pedido Enviado!</h2>
-              <p className="text-slate-500 mt-3 text-sm">
-                Se o número <b>{mecanografico}</b> estiver correto, receberá um link de recuperação em breve.
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-100">Pedido Enviado!</h2>
+              <p className="mt-2 text-xs" style={{ color: '#94a3b8' }}>
+                Se o número <b className="text-slate-200">{mecanografico}</b> estiver correto, receberá um link de recuperação em breve.
               </p>
               <button
                 onClick={handleClose}
-                className="mt-8 text-blue-600 font-semibold hover:text-blue-800 transition-colors"
+                className="mt-6 text-sm font-bold transition-colors"
+                style={{ color: '#22d3ee' }}
               >
                 Voltar ao Login
               </button>
             </div>
           )}
 
-          {/* Botão Cancelar (Apenas visível se não enviado) */}
           {!isSubmitted && (
-            <div className="mt-6 text-center">
+            <div className="mt-5 text-center">
               <button
                 onClick={handleClose}
-                className="text-slate-400 text-sm hover:text-slate-600 transition-colors"
+                className="text-xs font-medium transition-colors"
+                style={{ color: '#475569' }}
               >
                 Cancelar e voltar
               </button>

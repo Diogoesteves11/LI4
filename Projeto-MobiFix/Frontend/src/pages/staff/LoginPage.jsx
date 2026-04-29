@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import { User, Lock, Eye, EyeOff, Loader2 } from "lucide-react"; // Adicionei Loader2 para o loading
-import { useNavigate } from "react-router-dom"; // Para redirecionar após login
+import { useState } from "react";
+import { User, Lock, Eye, EyeOff, Loader2, Wrench } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useLoginFuncionario } from "../../hooks/useAuth";
 import ForgotPassword from "./ForgotPassword";
-import LogoFixNRide from "../../assets/fixnride_logo.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState(""); // Este é o Número Mecanográfico
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Inicializar o hook de mutação
   const { mutate, isPending } = useLoginFuncionario();
 
   function parseJwt(token) {
@@ -24,65 +22,89 @@ export default function LoginPage() {
       return null;
     }
   }
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
     mutate(
       { numeroMecanografico: username, password },
       {
-        onSuccess: (data) => {  
+        onSuccess: () => {
           const token = localStorage.getItem('token');
           const payload = parseJwt(token);
-          // Redirecionamento baseado no cargo (role) que vem da API
           const role = payload?.cargo ?? null;
-          
-          if (role === 'ADMINISTRADOR') {
-            navigate('/FixNManage/dashboard');
-          } else if (role === 'OPERADOR') {
-            navigate('/FixNSell/vendadireta');
-          } else if (role === 'MECANICO') {
-            navigate('/FixNRepair/diagnosticos');
-          } else {
-            navigate('/'); // Fallback
-          }
+          if (role === 'ADMINISTRADOR') navigate('/FixNManage/dashboard');
+          else if (role === 'OPERADOR') navigate('/FixNSell/vendadireta');
+          else if (role === 'MECANICO') navigate('/FixNRepair/diagnosticos');
+          else navigate('/');
         }
       }
     );
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-gray-800 via-gray-900 to-slate-800 p-4">
-      {/* Background Patterns (Mantidos iguais...) */}
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.05) 10px, rgba(255,255,255,.05) 20px)` }} />
-      <div className="absolute inset-0 opacity-5" style={{ backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.2) 2%, transparent 0%), radial-gradient(circle at 75px 75px, rgba(255, 255, 255, 0.2) 2%, transparent 0%)`, backgroundSize: "100px 100px" }} />
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden p-4 font-sans antialiased"
+      style={{ background: '#080f1e', color: '#f1f5f9' }}
+    >
+      {/* Dot grid background */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+      {/* Glow blobs */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(34,211,238,0.12)' }} />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(129,140,248,0.12)' }} />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl transition-all">
+      <div
+        className="relative z-10 w-full max-w-md rounded-3xl p-8 backdrop-blur-md border"
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          borderColor: 'rgba(255,255,255,0.08)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+        }}
+      >
         <div className="flex justify-center mb-6">
-          <img src={LogoFixNRide} alt="FixNRide Logo" className="h-24 w-auto block mx-auto" />
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #22d3ee, #818cf8)',
+              boxShadow: '0 0 32px rgba(34,211,238,0.4)',
+            }}
+          >
+            <Wrench className="w-7 h-7 text-white" strokeWidth={2.5} />
+          </div>
         </div>
-        
-        <header className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-800">Staff Portal</h1>
-          <p className="mt-1 text-sm text-gray-500">Introduza as suas credenciais para aceder</p>
+
+        <header className="mb-7 text-center">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-100 mb-1">
+            Fix<span style={{ color: '#22d3ee' }}>N</span>Staff
+          </h1>
+          <p className="text-xs uppercase tracking-[0.15em] font-bold" style={{ color: '#475569' }}>Staff Portal · MobiFix</p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Username / Mecanográfico */}
-          <div className="group">
-            <label htmlFor="username" className="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Username */}
+          <div>
+            <label htmlFor="username" className="block text-[11px] font-extrabold uppercase tracking-widest mb-2" style={{ color: '#94a3b8' }}>
               Número Mecanográfico
             </label>
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <User className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-              </div>
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#475569' }} />
               <input
                 type="text"
                 id="username"
                 disabled={isPending}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pr-3 pl-10 text-gray-900 outline-hidden ring-blue-500/20 transition-all focus:border-blue-500 focus:ring-4 disabled:opacity-50"
+                className="block w-full rounded-xl border py-3 pr-3 pl-11 text-sm font-semibold outline-none transition-all"
+                style={{
+                  background: 'rgba(0,0,0,0.2)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  color: '#f1f5f9',
+                }}
                 placeholder="Ex: ADM001"
                 required
               />
@@ -90,67 +112,74 @@ export default function LoginPage() {
           </div>
 
           {/* Password */}
-          <div className="group">
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600">
+          <div>
+            <label htmlFor="password" className="block text-[11px] font-extrabold uppercase tracking-widest mb-2" style={{ color: '#94a3b8' }}>
               Password
             </label>
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-              </div>
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#475569' }} />
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
                 disabled={isPending}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pr-10 pl-10 text-gray-900 outline-hidden ring-blue-500/20 transition-all focus:border-blue-500 focus:ring-4 disabled:opacity-50"
+                className="block w-full rounded-xl border py-3 pr-11 pl-11 text-sm font-semibold outline-none transition-all"
+                style={{
+                  background: 'rgba(0,0,0,0.2)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  color: '#f1f5f9',
+                }}
                 placeholder="••••••••"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-hidden"
+                className="absolute inset-y-0 right-0 flex items-center pr-3.5"
+                style={{ color: '#475569' }}
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           <div className="flex justify-end">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setModalOpen(true)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors cursor-pointer"
+              className="text-xs font-bold transition-colors"
+              style={{ color: '#22d3ee' }}
             >
               Esqueceu a password?
             </button>
           </div>
 
-          {/* Login Button com Loading State */}
           <button
             type="submit"
             disabled={isPending}
-            className="w-full flex items-center justify-center gap-2 cursor-pointer rounded-lg bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg active:scale-[0.98] disabled:bg-blue-400 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition-all"
+            style={{
+              background: isPending ? 'rgba(34,211,238,0.3)' : 'linear-gradient(135deg, #22d3ee, #818cf8)',
+              color: 'white',
+              cursor: isPending ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 16px rgba(34,211,238,0.3)',
+            }}
           >
             {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                A entrar...
-              </>
+              <><Loader2 className="h-4 w-4 animate-spin" /> A entrar...</>
             ) : (
               "Entrar no Dashboard"
             )}
           </button>
         </form>
 
-        <footer className="mt-8 text-center">
-          <p className="text-xs text-gray-400 uppercase tracking-widest">
+        <footer className="mt-7 text-center">
+          <p className="text-[10px] uppercase tracking-[0.15em] font-bold" style={{ color: '#475569' }}>
             © {new Date().getFullYear()} MobiFix Lda
           </p>
         </footer>
-        
+
         <ForgotPassword isOpen={modalOpen} onClose={() => setModalOpen(false)} />
       </div>
     </div>

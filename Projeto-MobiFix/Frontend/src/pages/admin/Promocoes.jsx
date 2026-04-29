@@ -165,7 +165,7 @@ export default function Promotions() {
                 <input
                   type="text" required value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none text-slate-900"
                 />
               </div>
               <div className="space-y-2">
@@ -173,7 +173,7 @@ export default function Promotions() {
                 <input
                   type="number" required min="1" max="100" value={formData.desconto}
                   onChange={(e) => setFormData({ ...formData, desconto: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none text-slate-900"
                 />
               </div>
               <div className="space-y-2">
@@ -182,7 +182,7 @@ export default function Promotions() {
                   type="date" required value={formData.dataInicio}
                   disabled={!!editingId}
                   onChange={(e) => setFormData({ ...formData, dataInicio: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none disabled:opacity-50 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
@@ -190,7 +190,7 @@ export default function Promotions() {
                 <input
                   type="date" required value={formData.dataFim}
                   onChange={(e) => setFormData({ ...formData, dataFim: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-blue-500 outline-none text-slate-900"
                 />
               </div>
             </div>

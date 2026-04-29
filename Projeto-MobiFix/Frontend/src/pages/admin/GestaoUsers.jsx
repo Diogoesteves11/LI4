@@ -130,7 +130,7 @@ export default function UserManagement() {
     </div>
   );
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50";
+  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50 text-slate-900";
 
   const renderSortableHeader = (label, columnKey) => {
     const isActive = sortConfig.key === columnKey;
