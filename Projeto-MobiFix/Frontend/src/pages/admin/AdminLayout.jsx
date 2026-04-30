@@ -57,8 +57,36 @@ export default function AdminLayout() {
   return (
     <div
       className="min-h-screen flex font-sans antialiased relative overflow-hidden"
-      style={{ background: BG, color: '#f1f5f9' }}
+      // Alterado color para text-white e adicionado colorScheme: dark
+      style={{ background: BG, color: '#f8fafc', colorScheme: 'dark' }}
     >
+      <style>
+        {`
+          /* Para Chrome, Edge, Safari */
+          .admin-scrollbar::-webkit-scrollbar {
+            width: 10px;
+          }
+          .admin-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .admin-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid #080f1e;
+          }
+          .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 211, 238, 0.5);
+          }
+
+          /* Para Firefox */
+          .admin-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+            color-scheme: dark; /* Força o Firefox a não usar a barra branca padrão */
+          }
+        `}
+      </style>
+
       {/* Dot-grid background */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
@@ -101,7 +129,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2.5 py-3.5 flex flex-col gap-0.5 overflow-y-auto">
+        <nav className="flex-1 px-2.5 py-3.5 flex flex-col gap-0.5 overflow-y-auto admin-scrollbar">
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -160,7 +188,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto p-8 relative z-10">
+      <main className="flex-1 overflow-y-auto p-8 relative z-10 bg-[#080f1e] text-white admin-scrollbar">
         <div className="max-w-[1400px] mx-auto">
           <Outlet />
         </div>
