@@ -9,9 +9,9 @@ const CARGO_LABELS = {
 };
 
 const CARGO_COLORS = {
-  ADMINISTRADOR: "bg-purple-100 text-purple-700 border-purple-200",
-  MECANICO: "bg-blue-100 text-blue-700 border-blue-200",
-  OPERADOR: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  ADMINISTRADOR: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  MECANICO: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  OPERADOR: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
 };
 
 const FORM_EMPTY = {
@@ -125,30 +125,30 @@ export default function UserManagement() {
 
   const field = (label, content) => (
     <div className="space-y-2">
-      <label className="text-xs font-black uppercase text-slate-500">{label}</label>
+      <label className="text-xs font-black uppercase text-slate-400">{label}</label>
       {content}
     </div>
   );
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-100 outline-none focus:border-blue-500 bg-slate-50 text-slate-900";
+  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-700 bg-slate-900 outline-none focus:border-cyan-500 text-white transition-colors";
 
   const renderSortableHeader = (label, columnKey) => {
     const isActive = sortConfig.key === columnKey;
     return (
       <th 
-        className="px-6 py-4 cursor-pointer hover:bg-slate-100 transition-colors group select-none"
+        className="px-6 py-4 cursor-pointer hover:bg-slate-700/50 transition-colors group select-none"
         onClick={() => handleSort(columnKey)}
       >
         <div className="flex items-center gap-2">
           {label}
           {isActive ? (
             sortConfig.direction === "asc" ? (
-              <ArrowUp className="w-3 h-3 text-blue-600" />
+              <ArrowUp className="w-3 h-3 text-cyan-400" />
             ) : (
-              <ArrowDown className="w-3 h-3 text-blue-600" />
+              <ArrowDown className="w-3 h-3 text-cyan-400" />
             )
           ) : (
-            <ArrowUpDown className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowUpDown className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
           )}
         </div>
       </th>
@@ -159,12 +159,12 @@ export default function UserManagement() {
     <div className="space-y-8 animate-in fade-in duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-100">Equipa MobiFix</h1>
-          <p className="text-lg font-medium text-slate-500">Gestão de colaboradores e permissões de acesso</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">Equipa MobiFix</h1>
+          <p className="text-lg font-medium text-slate-400">Gestão de colaboradores e permissões de acesso</p>
         </div>
         <button
           onClick={() => setIsFormOpen(true)}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-500 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
         >
           <Plus className="w-5 h-5" /> Adicionar Funcionário
         </button>
@@ -173,18 +173,18 @@ export default function UserManagement() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: "Total", value: funcionarios.length, icon: User, color: "blue" },
-          { label: "Ativos", value: funcionarios.filter((f) => f.Ativo).length, icon: UserCheck, color: "emerald" },
-          { label: "Inativos", value: funcionarios.filter((f) => !f.Ativo).length, icon: UserX, color: "red" },
+          { label: "Total", value: funcionarios.length, icon: User, colors: "bg-cyan-500/20 text-cyan-400" },
+          { label: "Ativos", value: funcionarios.filter((f) => f.Ativo).length, icon: UserCheck, colors: "bg-emerald-500/20 text-emerald-400" },
+          { label: "Inativos", value: funcionarios.filter((f) => !f.Ativo).length, icon: UserX, colors: "bg-red-500/20 text-red-400" },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-2xl p-6 border-2 border-slate-100 shadow-sm">
+          <div key={stat.label} className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className={`bg-${stat.color}-100 p-3 rounded-xl`}>
-                <stat.icon className={`w-7 h-7 text-${stat.color}-600`} />
+              <div className={`p-3 rounded-xl ${stat.colors.split(' ')[0]}`}>
+                <stat.icon className={`w-7 h-7 ${stat.colors.split(' ')[1]}`} />
               </div>
               <div>
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">{stat.label}</p>
-                <p className="text-3xl font-black text-slate-900">{stat.value}</p>
+                <p className="text-3xl font-black text-white">{stat.value}</p>
               </div>
             </div>
           </div>
@@ -193,8 +193,8 @@ export default function UserManagement() {
 
       {/* Form */}
       {isFormOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-500/20 p-8 animate-in slide-in-from-top-4">
-          <h2 className="text-2xl font-black text-slate-900 mb-6">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-8 animate-in slide-in-from-top-4">
+          <h2 className="text-2xl font-black text-white mb-6">
             {editingNumero ? "Atualizar Colaborador" : "Registar Colaborador"}
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -242,27 +242,27 @@ export default function UserManagement() {
               />
             )}
 
-          {field("Cargo",
+            {field("Cargo",
               <select
                 value={formData.cargo}
                 onChange={(e) => {
                   const novoCargo = e.target.value;
                   setFormData({ 
                     ...formData, 
-            cargo: novoCargo,
-            // Se mudar para algo que não seja MECANICO, limpa a especialidade
-            especialidade: novoCargo === "MECANICO" ? formData.especialidade : "" 
-          });
-        }}
-        className={inputClass}
-      >
-        <option value="MECANICO">Mecânico</option>
-        <option value="OPERADOR">Operador de Loja</option>
-        <option value="ADMINISTRADOR">Administrador</option>
-      </select>
-    )} 
+                    cargo: novoCargo,
+                    // Se mudar para algo que não seja MECANICO, limpa a especialidade
+                    especialidade: novoCargo === "MECANICO" ? formData.especialidade : "" 
+                  });
+                }}
+                className={inputClass}
+              >
+                <option value="MECANICO">Mecânico</option>
+                <option value="OPERADOR">Operador de Loja</option>
+                <option value="ADMINISTRADOR">Administrador</option>
+              </select>
+            )} 
 
-            {formData.cargo === "MECANICO" &&field("Especialidade (opcional)",
+            {formData.cargo === "MECANICO" && field("Especialidade (opcional)",
               <input
                 type="text"
                 value={formData.especialidade}
@@ -286,28 +286,28 @@ export default function UserManagement() {
 
             {editingNumero && (
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase text-slate-500">Estado</label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-slate-100 bg-slate-50">
+                <label className="text-xs font-black uppercase text-slate-400">Estado</label>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-slate-700 bg-slate-900 transition-colors">
                   <input
                     type="checkbox"
                     id="ativo"
                     checked={formData.ativo}
                     onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
-                    className="w-4 h-4 accent-blue-600"
+                    className="w-4 h-4 accent-cyan-500 cursor-pointer"
                   />
-                  <label htmlFor="ativo" className="text-sm font-bold text-slate-700 cursor-pointer">
+                  <label htmlFor="ativo" className="text-sm font-bold text-slate-300 cursor-pointer">
                     Colaborador ativo
                   </label>
                 </div>
               </div>
             )}
 
-            <div className="md:col-span-2 flex gap-3 pt-4">
+            <div className="md:col-span-2 flex gap-3 pt-4 border-t border-slate-700 mt-2">
               <button
                 type="submit"
                 disabled={isPending}
-                className={`flex items-center gap-2 px-8 py-3 text-white font-black rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-all ${
-                  isPending ? "bg-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                className={`flex items-center gap-2 px-8 py-3 text-white font-black rounded-xl active:scale-95 transition-all ${
+                  isPending ? "bg-slate-700 text-slate-400 cursor-not-allowed" : "bg-cyan-600 hover:bg-cyan-500 shadow-lg shadow-cyan-500/20"
                 }`}
               >
                 {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -316,7 +316,7 @@ export default function UserManagement() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-8 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all"
+                className="px-8 py-3 bg-slate-700 text-slate-300 font-bold rounded-xl hover:bg-slate-600 transition-all"
               >
                 Cancelar
               </button>
@@ -326,117 +326,119 @@ export default function UserManagement() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+      <div className="bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center gap-3 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 py-20 text-cyan-400">
             <Loader2 className="w-6 h-6 animate-spin" />
             <span className="font-bold">A carregar colaboradores...</span>
           </div>
         ) : isError ? (
-          <div className="py-20 text-center text-red-500 font-bold">
+          <div className="py-20 text-center text-red-400 font-bold">
             Erro ao carregar funcionários. Verifica a ligação à API.
           </div>
         ) : (
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-400">
-              <tr>
-                {renderSortableHeader("Funcionário", "Nome")}
-                {renderSortableHeader("Cargo", "Cargo")}
-                <th className="px-6 py-4">Contacto</th>
-                {renderSortableHeader("Especialidade", "Especialidade")}
-                {renderSortableHeader("Status", "Ativo")}
-                <th className="px-6 py-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {sortedFuncionarios.map((func) => (
-                <tr 
-                  key={func.NumeroMecanografico} 
-                  onClick={() => setSelectedFunc(func)}
-                  className={`hover:bg-slate-50/80 transition-colors cursor-pointer ${!func.Ativo ? 'opacity-60' : ''}`}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-xs uppercase shadow-md">
-                        {func.Nome.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900">{func.Nome}</div>
-                        <div className="text-xs text-slate-500 flex items-center gap-1">
-                          <Mail className="w-3 h-3" /> {func.Email}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-900/50 border-b border-slate-700 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <tr>
+                  {renderSortableHeader("Funcionário", "Nome")}
+                  {renderSortableHeader("Cargo", "Cargo")}
+                  <th className="px-6 py-4">Contacto</th>
+                  {renderSortableHeader("Especialidade", "Especialidade")}
+                  {renderSortableHeader("Status", "Ativo")}
+                  <th className="px-6 py-4 text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {sortedFuncionarios.map((func) => (
+                  <tr 
+                    key={func.NumeroMecanografico} 
+                    onClick={() => setSelectedFunc(func)}
+                    className={`hover:bg-slate-700/50 transition-colors cursor-pointer ${!func.Ativo ? 'opacity-60' : ''}`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-600 to-cyan-400 flex items-center justify-center text-slate-900 font-black text-xs uppercase shadow-md">
+                          {func.Nome.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-bold text-white">{func.Nome}</div>
+                          <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Mail className="w-3 h-3" /> {func.Email}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black border ${CARGO_COLORS[func.Cargo] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
-                      {func.Cargo === "ADMINISTRADOR" && <Shield className="w-3 h-3" />}
-                      {CARGO_LABELS[func.Cargo] ?? func.Cargo}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 font-medium">
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-slate-300" /> {func.Contacto}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    {func.Especialidade ? (
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black border ${CARGO_COLORS[func.Cargo] ?? "bg-slate-800 text-slate-400 border-slate-600"}`}>
+                        {func.Cargo === "ADMINISTRADOR" && <Shield className="w-3 h-3" />}
+                        {CARGO_LABELS[func.Cargo] ?? func.Cargo}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-300 font-medium">
                       <div className="flex items-center gap-2">
-                        <Wrench className="w-4 h-4 text-slate-300" /> {func.Especialidade}
+                        <Phone className="w-4 h-4 text-slate-500" /> {func.Contacto}
                       </div>
-                    ) : (
-                      <span className="text-slate-300">—</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${func.Ativo ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400"}`}>
-                      {func.Ativo ? "● Ativo" : "○ Inativo"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleEdit(func); }}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                        title="Editar Colaborador"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleToggleAtivo(func); }}
-                        disabled={atualizarMutation.isPending}
-                        className={`p-2 rounded-lg transition-all ${
-                          func.Ativo
-                            ? "text-slate-400 hover:text-red-600 hover:bg-red-50"
-                            : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
-                        }`}
-                        title={func.Ativo ? "Desativar Colaborador" : "Ativar Colaborador"}
-                      >
-                        {func.Ativo ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-400">
+                      {func.Especialidade ? (
+                        <div className="flex items-center gap-2">
+                          <Wrench className="w-4 h-4 text-slate-500" /> {func.Especialidade}
+                        </div>
+                      ) : (
+                        <span className="text-slate-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${func.Ativo ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-slate-500/10 text-slate-400 border-slate-500/20"}`}>
+                        {func.Ativo ? "● Ativo" : "○ Inativo"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleEdit(func); }}
+                          className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all"
+                          title="Editar Colaborador"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleToggleAtivo(func); }}
+                          disabled={atualizarMutation.isPending}
+                          className={`p-2 rounded-lg transition-all ${
+                            func.Ativo
+                              ? "text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                              : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                          }`}
+                          title={func.Ativo ? "Desativar Colaborador" : "Ativar Colaborador"}
+                        >
+                          {func.Ativo ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Modal de Detalhes do Funcionário */}
       {selectedFunc && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-700 animate-in zoom-in-95 duration-200">
             
             {/* Header */}
-            <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-500" />
+            <div className="p-6 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+              <h3 className="text-xl font-black text-white flex items-center gap-2">
+                <Info className="w-5 h-5 text-cyan-400" />
                 Detalhes do Colaborador
               </h3>
               <button 
                 onClick={() => setSelectedFunc(null)} 
-                className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+                className="p-2 hover:bg-slate-700 rounded-full text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -447,20 +449,20 @@ export default function UserManagement() {
               <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                 
                 {/* Nome e Mecanográfico */}
-                <div className="col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center text-white font-black text-2xl uppercase shadow-md">
+                <div className="col-span-2 p-4 bg-slate-900/50 rounded-2xl border border-slate-700 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-600 to-cyan-400 flex items-center justify-center text-slate-900 font-black text-2xl uppercase shadow-md">
                     {selectedFunc.Nome.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-xl font-black text-slate-900">{selectedFunc.Nome}</p>
-                    <p className="text-sm font-mono font-bold text-slate-500">#{selectedFunc.NumeroMecanografico}</p>
+                    <p className="text-xl font-black text-white">{selectedFunc.Nome}</p>
+                    <p className="text-sm font-mono font-bold text-slate-400">#{selectedFunc.NumeroMecanografico}</p>
                   </div>
                 </div>
 
                 {/* Cargo */}
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cargo</p>
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black border ${CARGO_COLORS[selectedFunc.Cargo] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black border ${CARGO_COLORS[selectedFunc.Cargo] ?? "bg-slate-800 text-slate-400 border-slate-600"}`}>
                     {selectedFunc.Cargo === "ADMINISTRADOR" && <Shield className="w-3 h-3" />}
                     {CARGO_LABELS[selectedFunc.Cargo] ?? selectedFunc.Cargo}
                   </span>
@@ -469,7 +471,7 @@ export default function UserManagement() {
                 {/* Estado */}
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Estado</p>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase ${selectedFunc.Ativo ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase border ${selectedFunc.Ativo ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
                     {selectedFunc.Ativo ? "Ativo" : "Inativo"}
                   </span>
                 </div>
@@ -478,12 +480,12 @@ export default function UserManagement() {
                 <div className="col-span-2">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Contactos</p>
                   <div className="space-y-2 mt-2">
-                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Mail className="w-4 h-4" /></div>
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-300">
+                      <div className="p-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg"><Mail className="w-4 h-4" /></div>
                       {selectedFunc.Email}
                     </div>
-                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-                      <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Phone className="w-4 h-4" /></div>
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-300">
+                      <div className="p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg"><Phone className="w-4 h-4" /></div>
                       {selectedFunc.Contacto}
                     </div>
                   </div>
@@ -493,8 +495,8 @@ export default function UserManagement() {
                 {selectedFunc.Especialidade && (
                   <div className="col-span-2">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Especialidade</p>
-                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                      <Wrench className="w-4 h-4 text-slate-400" />
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-300 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
+                      <Wrench className="w-4 h-4 text-slate-500" />
                       {selectedFunc.Especialidade}
                     </div>
                   </div>
@@ -503,10 +505,10 @@ export default function UserManagement() {
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="p-4 bg-slate-900/50 border-t border-slate-700 flex justify-end">
                <button 
                  onClick={() => setSelectedFunc(null)} 
-                 className="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors"
+                 className="px-6 py-2.5 bg-slate-700 text-slate-200 font-bold rounded-xl hover:bg-slate-600 transition-colors"
                >
                  Fechar
                </button>
