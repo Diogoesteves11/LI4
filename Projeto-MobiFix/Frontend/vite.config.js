@@ -9,6 +9,14 @@ export default defineConfig({
     },
     host: true,
     port: 3000,
+    allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://ln:5001',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   }, 
   plugins: [react(), tailwindcss()],
 })
