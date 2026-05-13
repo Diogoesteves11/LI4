@@ -1,5 +1,6 @@
 namespace Backend.Services;
 
+using Backend.Controllers;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -7,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// DelegatingHandler que lê o token JWT do HttpContext atual (enviado pelo frontend)
-/// e o propaga no header Authorization de cada pedido HTTP feito à Data API.
-/// Deve ser registado em todos os HttpClients excepto o do PecaService.
+/// DelegatingHandler que lê o token JWT do HttpContext atual (header Authorization
+/// ou cookie httpOnly) e o propaga no header Authorization de cada pedido HTTP
+/// feito à Data API. Deve ser registado em todos os HttpClients excepto o do PecaService.
 /// </summary>
 public class JwtPropagationHandler : DelegatingHandler
 {
@@ -28,13 +29,21 @@ public class JwtPropagationHandler : DelegatingHandler
 
         if (httpContext is not null)
         {
-            // Lê o header Authorization do pedido original vindo do frontend
-            var authHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
+            string? token = null;
 
+            var authHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
             if (!string.IsNullOrEmpty(authHeader) &&
                 authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                var token = authHeader["Bearer ".Length..].Trim();
+                token = authHeader["Bearer ".Length..].Trim();
+            }
+            else if (httpContext.Request.Cookies.TryGetValue(AuthController.AuthCookieName, out var cookieToken))
+            {
+                token = cookieToken;
+            }
+
+            if (!string.IsNullOrEmpty(token))
+            {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
         }

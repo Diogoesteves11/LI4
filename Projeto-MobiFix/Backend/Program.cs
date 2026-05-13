@@ -1,5 +1,7 @@
 using DotNetEnv;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Backend.Controllers;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -66,9 +68,13 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
+
+// Registo da white/black list de tokens (singleton — partilhada por todos os pedidos)
+builder.Services.AddSingleton<ITokenListService, TokenListService>();
 
 var dataApiUrl = builder.Configuration["DATA_API_URL"]
                  ?? throw new Exception("DATA_API_URL não definida");
@@ -136,6 +142,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            // Permite autenticar via cookie httpOnly quando o header Authorization
+            // não está presente — sem mexer em controllers ou clients.
+            OnMessageReceived = context =>
+            {
+                if (string.IsNullOrEmpty(context.Token) &&
+                    context.Request.Cookies.TryGetValue(AuthController.AuthCookieName, out var cookieToken))
+                {
+                    context.Token = cookieToken;
+                }
+                return Task.CompletedTask;
+            },
+
+            // Rejeita tokens que tenham sido revogados ou que não estejam na whitelist.
+            OnTokenValidated = context =>
+            {
+                var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+                var tokenList = context.HttpContext.RequestServices.GetRequiredService<ITokenListService>();
+                if (string.IsNullOrEmpty(jti) || !tokenList.IsAllowed(jti))
+                    context.Fail("Token revogado ou não reconhecido.");
+                return Task.CompletedTask;
+            }
         };
     });
 
