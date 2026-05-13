@@ -82,6 +82,7 @@ public class AuthService: IAuthService
 
         var claims = new[]
         {
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("id", funcionario.NumeroMecanografico),
             new Claim("nome", funcionario.Nome),
             new Claim("cargo", funcionario.Cargo)
@@ -109,6 +110,7 @@ public class AuthService: IAuthService
  
         var claims = new[]
         {
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("id", cliente.NIF),
             new Claim("nome", cliente.Nome),
             new Claim("email", cliente.Email),
