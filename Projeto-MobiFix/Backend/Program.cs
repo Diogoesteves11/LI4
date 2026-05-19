@@ -93,8 +93,9 @@ builder.Services.AddHttpContextAccessor();
 // Handler que propaga o JWT do frontend para a Data API (todos os clientes excepto PecaService)
 builder.Services.AddTransient<JwtPropagationHandler>();
 
-// PecaService: sem propagação de JWT (endpoint /pecas é público na Data API)
-builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient);
+// PecaService: GET /pecas é público, mas POST/PUT/PATCH exigem JWT — propaga o token
+builder.Services.AddHttpClient<IPecaService, PecaService>(ConfigureDefaultClient)
+    .AddHttpMessageHandler<JwtPropagationHandler>();
 
 // Todos os outros clientes propagam o JWT do utilizador autenticado
 builder.Services.AddHttpClient<IAuthService, AuthService>(ConfigureDefaultClient)
