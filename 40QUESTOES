@@ -1,0 +1,117 @@
+Li o relatório completo do Fix'n'Ride. Aqui estão 40 questões que o professor pode colocar na apresentação de sexta:
+
+---
+
+## 🏗️ Arquitetura e Decisões Técnicas
+
+1. **Por que razão separaram a Data API (Node.js) da Lógica de Negócios (ASP.NET Core) em dois servidores distintos? Que problemas resolvem com isso?**
+
+2. **A INTERNAL_API_KEY protege a comunicação entre o servidor LN e a Data API. Mas e se esse segredo fosse comprometido? Como melhorariam essa segurança?**
+
+3. **Porquê escolheram o MongoDB em vez de uma base de dados relacional como o PostgreSQL? Quando esta escolha poderia ser um problema?**
+
+4. **Expliquem a diferença entre Embedding e Referencing no MongoDB. Deem um exemplo concreto de cada um no vosso modelo de dados e justifiquem a decisão.**
+
+5. **O caminho crítico do projeto passa pela camada de Lógica de Negócios. O que acontece ao frontend se a camada LN atrasar?**
+
+6. **Como funciona o mecanismo de lista branca (whitelist) de tokens JWT? Por que não simplesmente deixar o token expirar naturalmente?**
+
+---
+
+## 🔒 Segurança
+
+7. **No relatório identificam o armazenamento do JWT no localStorage como uma vulnerabilidade XSS. Como mitigaram isso e qual é a solução ideal?**
+
+8. **O modelo RBAC é verificado no frontend pelo ProtectedRoute e no backend pelo `[Authorize]`. O que acontece se alguém contornar a verificação do frontend?**
+
+9. **As passwords são guardadas com BCrypt. O que é o "fator de custo" e que valor escolheram? Porque é que esse valor importa?**
+
+10. **O logout revoga o token na lista negra. O que acontece se o servidor reiniciar? Os tokens revogados continuam revogados?**
+
+---
+
+## 📊 Base de Dados e Dados
+
+11. **O serviço `Servico` tem intervenções aninhadas em dois níveis. Quantos documentos MongoDB são lidos para obter o estado completo de uma reparação?**
+
+12. **Uma `Fatura` guarda devoluções como subdocumentos embutidos. Qual é o impacto disso se uma fatura tiver muitas devoluções ao longo do tempo?**
+
+13. **O script `init.sh` cria índices automaticamente. Que índices criaram e porquê esses e não outros?**
+
+14. **Se dois mecânicos tentarem registar a mesma peça (pelo EAN) em simultâneo em serviços diferentes, o que acontece ao stock? O sistema garante atomicidade?**
+
+---
+
+## ⚙️ Implementação e Código
+
+15. **O `ServicoService` executa o levantamento de trotinete em quatro passos coordenados. Se o passo 3 (criação da fatura) falhar, o que acontece ao serviço? Há rollback?**
+
+16. **Usaram `Task.WhenAll` em `EncomendaClienteService`. Expliquem o que faz e porque é melhor do que chamadas sequenciais.**
+
+17. **O `staleTime` do TanStack Query é diferente por domínio (1ms para peças, 5 minutos para faturas). Como determinaram estes valores?**
+
+18. **Identificaram o code smell `parseJwt` duplicado em 5 ficheiros. Como surgiu esse problema e como o corrigiram?**
+
+19. **O gerador de IDs de faturas usa um valor aleatório. Mencionam `Random.Shared.Next` como geração insegura. O que seria mais seguro e porquê?**
+
+20. **O frontend usa cookies HttpOnly depois de migrarem do localStorage. Que alterações foram necessárias no servidor .NET para suportar essa mudança?**
+
+---
+
+## 🧪 Testes e Qualidade
+
+21. **Optaram por não fazer testes unitários na Data API. Justifiquem tecnicamente essa decisão e em que módulo do .NET reconhecem que os testes unitários seriam mais valiosos.**
+
+22. **Nos testes de stress, a 50 VUs tiveram uma taxa de erro inferior a 2%. O que causou esses erros e como os resolveriam?**
+
+23. **O P99 a 50 VUs aproxima-se de 1,8 segundos, próximo do limite do RNF-01. O que fariam para melhorar este valor?**
+
+24. **A coleção Postman testa a Data API diretamente, bypassando a camada de Lógica de Negócios. Que riscos isso implica e como cobriram os endpoints do LN?**
+
+25. **Segundo a ISO/IEC 25010, a fiabilidade foi classificada como "moderada". Que melhorias concretas elevariam essa classificação?**
+
+---
+
+## 🤖 Uso de IA no Desenvolvimento
+
+26. **Usaram Claude Sonnet 4.6, GPT-4o e Antigravity. Para que tarefas serviu cada ferramenta e porque não usaram só uma?**
+
+27. **A IA propôs normalização excessiva nos Schemas Mongoose (referências externas em vez de subdocumentos). Como identificaram e corrigiram esse problema?**
+
+28. **Mencionam "alucinações" no código gerado pela IA. Deem um exemplo concreto de uma alucinação que causou um bug no Fix'n'Ride.**
+
+29. **A estratégia de "sessões de módulo" contorna a limitação da janela de contexto. O que acontecia concreto quando tentavam implementar um módulo completo numa sessão só?**
+
+30. **Afirmam que a IA reduziu 40-50% o tempo de implementação. Como chegaram a essa estimativa?**
+
+---
+
+## 📋 Engenharia de Requisitos
+
+31. **Identificaram 22 requisitos funcionais e 5 não funcionais. Como garantiram que não ficaram requisitos importantes por levantar?**
+
+32. **O stakeholder "Cliente" não usa o sistema de gestão diretamente. Como recolheram os seus requisitos se não fizeram entrevistas com ele?**
+
+33. **O requisito RF-4 (reserva de peças) implica que quando o stock mínimo é atingido após uma reserva, é criada uma encomenda automática. Este requisito emergiu de qual entrevista e como foi refinado?**
+
+34. **Há um cenário de conflito potencial: um cliente reserva uma peça online ao mesmo tempo que um mecânico a utiliza numa reparação. O sistema trata este caso? Estava nos requisitos?**
+
+---
+
+## 🌐 Frontend e UX
+
+35. **O módulo do cliente é mobile-first com bottom navigation. O módulo do operador tem sidebar lateral. Como decidiram a linguagem visual de cada portal?**
+
+36. **O Figma AI gerou wireframes iniciais a partir de prompts. Deem um exemplo de uma diferença significativa entre o wireframe gerado e o mockup final aprovado pela equipa.**
+
+37. **Usaram React Router v6 com rotas aninhadas e `Outlet`. Expliquem como o `ProtectedRoute` funciona nesta estrutura — o que acontece quando o token expira a meio de uma sessão?**
+
+---
+
+## 🔮 Trabalho Futuro e Visão Crítica
+
+38. **Identificaram a ausência de retry inter-serviços como limitação de fiabilidade. Como implementariam esse mecanismo sem tornar o código mais complexo?**
+
+39. **O sistema não tem refresh token. O que acontece a um mecânico que está a meio de uma reparação quando as 8 horas expiram?**
+
+40. **Se a MobiFix crescer e precisar de suportar múltiplas oficinas, que mudanças arquiteturais seriam necessárias? A arquitetura atual suporta esse crescimento?**
