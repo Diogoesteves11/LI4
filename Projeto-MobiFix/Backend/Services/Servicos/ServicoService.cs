@@ -9,13 +9,22 @@ public class ServicoService : IServicoService
     private readonly HttpClient _httpClient;
     private readonly IClienteService _clienteService;
     private readonly IEmailService _emailService;
+    private readonly IFaturaService _faturaService;
+    private readonly IPecaService _pecaService;
     private static readonly JsonSerializerOptions _options = new() { PropertyNamingPolicy = null };
 
-    public ServicoService(HttpClient httpClient, IClienteService clienteService, IEmailService emailService)
+    public ServicoService(
+        HttpClient httpClient,
+        IClienteService clienteService,
+        IEmailService emailService,
+        IFaturaService faturaService,
+        IPecaService pecaService)
     {
         _httpClient = httpClient;
         _clienteService = clienteService;
         _emailService = emailService;
+        _faturaService = faturaService;
+        _pecaService = pecaService;
     }
 
     public async Task<IEnumerable<ServicoDto>> ListarTodosAsync()
@@ -128,14 +137,51 @@ public class ServicoService : IServicoService
 
         await Task.WhenAll(servicosTask, trotinetesTask);
 
-        var servicos   = servicosTask.Result   ?? Enumerable.Empty<ServicoDto>();
+        var servicos   = (servicosTask.Result ?? Enumerable.Empty<ServicoDto>()).ToList();
         var trotinetes = (trotinetesTask.Result ?? Enumerable.Empty<TrotineteDto>())
             .ToDictionary(t => t.NumeroSerie, t => t);
 
-        return servicos.Select(s =>
+        // Cache de peças para evitar pedidos repetidos quando vários serviços
+        // partilham a mesma referência.
+        var cachePecas = new Dictionary<string, PecaDto?>(StringComparer.OrdinalIgnoreCase);
+
+        async Task<PecaDto?> ObterPecaAsync(string ean)
+        {
+            if (cachePecas.TryGetValue(ean, out var cached)) return cached;
+            var peca = await _pecaService.GetPecaPorEanAsync(ean);
+            cachePecas[ean] = peca;
+            return peca;
+        }
+
+        var resultado = new List<TrotineteProntaDto>(servicos.Count);
+        foreach (var s in servicos)
         {
             trotinetes.TryGetValue(s.TrotineteNumSerie, out var trot);
-            return new TrotineteProntaDto
+
+            var pecasAgregadas = s.HistoricoIntervencoes
+                .SelectMany(h => h.PecasUtilizadas)
+                .Where(p => !string.IsNullOrWhiteSpace(p.PecaEAN) && p.Quantidade > 0)
+                .GroupBy(p => p.PecaEAN)
+                .Select(g => new { PecaEAN = g.Key, Quantidade = g.Sum(x => x.Quantidade) });
+
+            var pecasItens = new List<PecaFaturacaoDto>();
+            decimal totalPecas = 0m;
+            foreach (var p in pecasAgregadas)
+            {
+                var peca = await ObterPecaAsync(p.PecaEAN);
+                if (peca is null) continue;
+                var precoUnit = (decimal)peca.PVP;
+                totalPecas += precoUnit * p.Quantidade;
+                pecasItens.Add(new PecaFaturacaoDto
+                {
+                    PecaEAN       = peca.CodigoEAN,
+                    Nome          = peca.Nome,
+                    Quantidade    = p.Quantidade,
+                    PrecoUnitario = precoUnit
+                });
+            }
+
+            resultado.Add(new TrotineteProntaDto
             {
                 ServicoID            = s.ServicoID,
                 TrotineteNumSerie    = s.TrotineteNumSerie,
@@ -145,9 +191,15 @@ public class ServicoService : IServicoService
                 DataAgendamento      = s.DataAgendamento,
                 DataConclusao        = s.DataConclusao,
                 Preco                = s.Preco,
-                DescricaoDiagnostico = s.DescricaoDiagnostico
-            };
-        });
+                DescricaoDiagnostico = s.DescricaoDiagnostico,
+                MaoDeObra            = s.Preco,
+                TotalPecas           = totalPecas,
+                TotalFinal           = s.Preco + totalPecas,
+                Pecas                = pecasItens
+            });
+        }
+
+        return resultado;
     }
 
     public async Task<bool> FecharServicoAsync(int id)
@@ -171,23 +223,49 @@ public class ServicoService : IServicoService
         var nif = string.IsNullOrWhiteSpace(trotinete.ClienteNIF) ? "000000000" : trotinete.ClienteNIF;
         var numeroFatura = $"FT-{Random.Shared.Next(100000, 999999)}";
 
-        // 2) criar a Fatura ligada ao Serviço
-        var faturaPayload = new
+        // 2) agregar as peças utilizadas em todas as intervenções (o Preco do
+        //    serviço apenas reflete a mão de obra — as peças têm de ser
+        //    faturadas e abatidas ao stock no levantamento).
+        var pecasAgregadas = servico.HistoricoIntervencoes
+            .SelectMany(h => h.PecasUtilizadas)
+            .Where(p => !string.IsNullOrWhiteSpace(p.PecaEAN) && p.Quantidade > 0)
+            .GroupBy(p => p.PecaEAN)
+            .Select(g => new { PecaEAN = g.Key, Quantidade = g.Sum(x => x.Quantidade) })
+            .ToList();
+
+        var itensVenda = new List<ItemVendaCriacaoDto>();
+        decimal totalPecas = 0m;
+
+        foreach (var item in pecasAgregadas)
+        {
+            var peca = await _pecaService.GetPecaPorEanAsync(item.PecaEAN);
+            if (peca is null) continue;
+
+            var precoUnitario = (decimal)peca.PVP;
+            totalPecas += precoUnitario * item.Quantidade;
+
+            itensVenda.Add(new ItemVendaCriacaoDto
+            {
+                PecaEAN = item.PecaEAN,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = precoUnitario
+            });
+        }
+
+        // 3) emitir a Fatura via FaturaService (trata do abate de stock,
+        //    reposição automática e envio de email).
+        var fatura = await _faturaService.CriarFaturaAsync(new FaturaCriacaoDto
         {
             NumeroFatura    = numeroFatura,
             ClienteNIF      = nif,
-            ServicoID       = (int?)servico.ServicoID,
-            ValorTotal      = servico.Preco,
-            MetodoPagamento = metodoPagamento
-        };
-
-        var faturaResponse = await _httpClient.PostAsJsonAsync("api/faturas", faturaPayload, _options);
-        if (!faturaResponse.IsSuccessStatusCode) return null;
-
-        var fatura = await faturaResponse.Content.ReadFromJsonAsync<FaturaDto>(_options);
+            ServicoID       = servico.ServicoID,
+            ValorTotal      = servico.Preco + totalPecas,
+            MetodoPagamento = metodoPagamento,
+            ItensVenda      = itensVenda
+        });
         if (fatura is null) return null;
 
-        // 3) fechar o serviço (estado final = FECHADO)
+        // 4) fechar o serviço (estado final = FECHADO)
         var fechado = await FecharServicoAsync(id);
         if (!fechado) return null;
 

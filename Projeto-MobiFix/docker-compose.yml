@@ -18,6 +18,8 @@ services:
       - mongodb
     ports:
       - "${DATA_API_PORT}:3001"
+    volumes:
+      - data_api_uploads:/usr/src/app/uploads
     environment:
       - MONGO_URI=mongodb://mongodb:27017/fixnride_db
       - DATA_API_PORT=3001
@@ -63,3 +65,4 @@ services:
 
 volumes:
   mongodb_data:
+  data_api_uploads:

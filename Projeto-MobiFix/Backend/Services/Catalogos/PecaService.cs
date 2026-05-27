@@ -1,5 +1,8 @@
 namespace Backend.Services;
 
+using System.IO;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Backend.Models;
@@ -81,5 +84,36 @@ public class PecaService : IPecaService
     {
         var response = await _httpClient.DeleteAsync($"api/pecas/{ean}");
         return response.IsSuccessStatusCode;
+    }
+
+    public async Task<PecaDto?> UploadImagemAsync(string ean, Stream conteudo, string contentType)
+    {
+        using var content = new StreamContent(conteudo);
+        content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+
+        var response = await _httpClient.PostAsync($"api/pecas/{Uri.EscapeDataString(ean)}/imagem", content);
+        if (!response.IsSuccessStatusCode) return null;
+
+        return await response.Content.ReadFromJsonAsync<PecaDto>(_optionsPascalCase);
+    }
+
+    public async Task<(Stream Conteudo, string ContentType)?> ObterImagemAsync(string ean)
+    {
+        var response = await _httpClient.GetAsync(
+            $"api/pecas/{Uri.EscapeDataString(ean)}/imagem",
+            HttpCompletionOption.ResponseHeadersRead);
+
+        if (!response.IsSuccessStatusCode) return null;
+
+        var stream = await response.Content.ReadAsStreamAsync();
+        var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+        return (stream, contentType);
+    }
+
+    public async Task<PecaDto?> EliminarImagemAsync(string ean)
+    {
+        var response = await _httpClient.DeleteAsync($"api/pecas/{Uri.EscapeDataString(ean)}/imagem");
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadFromJsonAsync<PecaDto>(_optionsPascalCase);
     }
 }

@@ -93,7 +93,7 @@ export default function TrotinetesProntas() {
         />
         <KpiCard
           label="Total a Receber"
-          value={`€${readyTrotinetes.reduce((s, t) => s + (t.Preco ?? 0), 0).toFixed(2)}`}
+          value={`€${readyTrotinetes.reduce((s, t) => s + (t.TotalFinal ?? t.Preco ?? 0), 0).toFixed(2)}`}
           icon={<Euro className="h-8 w-8" />}
           color="slate"
         />
@@ -153,9 +153,16 @@ export default function TrotinetesProntas() {
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <span className="text-sm font-bold text-red-600 tabular-nums">
-                        €{Number(t.Preco ?? 0).toFixed(2)}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-red-600 tabular-nums">
+                          €{Number(t.TotalFinal ?? t.Preco ?? 0).toFixed(2)}
+                        </span>
+                        {Number(t.TotalPecas ?? 0) > 0 && (
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            Mão de obra €{Number(t.MaoDeObra ?? t.Preco ?? 0).toFixed(2)} + Peças €{Number(t.TotalPecas).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-8 py-5 text-right">
                       <button
@@ -174,27 +181,41 @@ export default function TrotinetesProntas() {
         </div>
       </div>
 
-      {showFaturacao && selectedTrotinete && (
-        <Faturacao
-          amount={selectedTrotinete.Preco ?? 0}
-          // Passamos dados extra para o componente de faturação, se ele suportar, 
-          // para poder associar a fatura ao NIF correto
-          clientNif={selectedTrotinete.ClienteNIF} 
-          serviceId={selectedTrotinete.ServicoID}
-          items={[{
-            name: `Serviço Reparação: ${selectedTrotinete.Marca} ${selectedTrotinete.Modelo} (SN: ${selectedTrotinete.TrotineteNumSerie})`,
-            price: selectedTrotinete.Preco ?? 0,
+      {showFaturacao && selectedTrotinete && (() => {
+        const maoDeObra = Number(selectedTrotinete.MaoDeObra ?? selectedTrotinete.Preco ?? 0);
+        const pecasItems = (selectedTrotinete.Pecas ?? []).map(p => ({
+          name: `Peça: ${p.Nome} (${p.PecaEAN})`,
+          price: Number(p.PrecoUnitario ?? 0),
+          quantity: Number(p.Quantidade ?? 1),
+        }));
+        const items = [
+          {
+            name: `Mão de obra — ${selectedTrotinete.Marca ?? ''} ${selectedTrotinete.Modelo ?? ''} (SN: ${selectedTrotinete.TrotineteNumSerie})`,
+            price: maoDeObra,
             quantity: 1,
-          }]}
-          onClose={() => {
-            if(!isCompleting) {
-              setSelectedTrotinete(null);
-              setShowFaturacao(false);
-            }
-          }}
-          onComplete={handleFaturacaoComplete}
-        />
-      )}
+          },
+          ...pecasItems,
+        ];
+        const totalFinal = Number(
+          selectedTrotinete.TotalFinal
+          ?? items.reduce((s, i) => s + i.price * i.quantity, 0)
+        );
+        return (
+          <Faturacao
+            amount={totalFinal}
+            clientNif={selectedTrotinete.ClienteNIF}
+            serviceId={selectedTrotinete.ServicoID}
+            items={items}
+            onClose={() => {
+              if (!isCompleting) {
+                setSelectedTrotinete(null);
+                setShowFaturacao(false);
+              }
+            }}
+            onComplete={handleFaturacaoComplete}
+          />
+        );
+      })()}
     </div>
   );
 }

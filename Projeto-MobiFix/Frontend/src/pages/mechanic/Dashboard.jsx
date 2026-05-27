@@ -84,6 +84,7 @@ export default function Dashboard() {
       PecasUtilizadas: idx === 0 ? pecasPayload : [],
     }));
     const servicoPayload = {
+      Estado: 'EXECUCAO',
       DescricaoDiagnostico: notes,
       HistoricoIntervencoes: historicoIntervencoes,
     };
