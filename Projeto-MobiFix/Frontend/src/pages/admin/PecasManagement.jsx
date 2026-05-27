@@ -1,6 +1,10 @@
-import { useState, useMemo } from "react";
-import { Plus, Edit, Box, Tags, DollarSign, Layers, Loader2, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle, CheckCircle, XCircle, Info, X, Euro } from "lucide-react";
-import { usePecas, useCriarPeca, useAtualizarPeca, useAlterarEstadoPeca } from "../../hooks/usePecas";
+import { useState, useMemo, useRef } from "react";
+import { Plus, Edit, Box, Tags, DollarSign, Layers, Loader2, ArrowUp, ArrowDown, ArrowUpDown, AlertCircle, CheckCircle, XCircle, Info, X, Euro, ImageIcon, Upload, Trash2 } from "lucide-react";
+import { usePecas, useCriarPeca, useAtualizarPeca, useAlterarEstadoPeca, useUploadImagemPeca, useEliminarImagemPeca } from "../../hooks/usePecas";
+import { pecaService } from "../../services/pecaService";
+
+const TIPOS_IMAGEM_ACEITES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const TAMANHO_MAX_IMAGEM = 5 * 1024 * 1024; // 5 MB
 
 const CATEGORIA_COLORS = {
   BATERIAS: "bg-purple-500/10 text-purple-400 border-purple-500/20",
@@ -14,9 +18,11 @@ const FORM_EMPTY = {
   ean: "",
   nome: "",
   categoria: "OUTROS",
-  pvp: "", 
-  custoAquisicao: "", 
-  stockAtual: "", 
+  pvp: "",
+  custoAquisicao: "",
+  stockAtual: "",
+  stockMinimo: "5",
+  padraoReposicao: "5",
   descricao: "",
   ativo: true,
 };
@@ -26,19 +32,107 @@ export default function PecasManagement() {
   const criarMutation = useCriarPeca();
   const atualizarMutation = useAtualizarPeca();
   const alterarEstadoMutation = useAlterarEstadoPeca();
+  const uploadImagemMutation = useUploadImagemPeca();
+  const eliminarImagemMutation = useEliminarImagemPeca();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEan, setEditingEan] = useState(null);
   const [formData, setFormData] = useState(FORM_EMPTY);
-  const [selectedPeca, setSelectedPeca] = useState(null); 
-  
+  const [selectedPeca, setSelectedPeca] = useState(null);
+  const [imagemPreview, setImagemPreview] = useState(null);
+  const [imagemErro, setImagemErro] = useState(null);
+  const [uploadingEan, setUploadingEan] = useState(null);
+  const [imagemCacheBuster, setImagemCacheBuster] = useState({});
+  const inputFicheiroRef = useRef(null);
+  const inputLinhaRef = useRef(null);
+
   const [sortConfig, setSortConfig] = useState({ key: "Nome", direction: "asc" });
 
   const isPending = criarMutation.isPending || atualizarMutation.isPending || alterarEstadoMutation.isPending;
 
+  const tocouImagem = (ean) => imagemCacheBuster[ean] ?? null;
+
+  const validarFicheiroImagem = (file) => {
+    if (!file) return "Nenhum ficheiro selecionado.";
+    if (!TIPOS_IMAGEM_ACEITES.includes(file.type)) {
+      return "Tipo não suportado. Use JPG, PNG, WEBP ou GIF.";
+    }
+    if (file.size > TAMANHO_MAX_IMAGEM) {
+      return "A imagem excede o limite de 5 MB.";
+    }
+    return null;
+  };
+
+  const handleSelecionarImagemFormulario = (e) => {
+    const file = e.target.files?.[0];
+    setImagemErro(null);
+    if (!file) {
+      setImagemPreview(null);
+      return;
+    }
+    const erro = validarFicheiroImagem(file);
+    if (erro) {
+      setImagemErro(erro);
+      e.target.value = "";
+      setImagemPreview(null);
+      return;
+    }
+    if (!editingEan) {
+      setImagemErro("Grave a peça primeiro para poder anexar uma imagem.");
+      e.target.value = "";
+      return;
+    }
+    setImagemPreview(URL.createObjectURL(file));
+    uploadImagemMutation.mutate(
+      { ean: editingEan, file },
+      {
+        onSuccess: () => {
+          setImagemCacheBuster(prev => ({ ...prev, [editingEan]: Date.now() }));
+          setImagemErro(null);
+        },
+        onError: (err) => {
+          setImagemErro(err?.response?.data?.error || "Falha ao carregar imagem.");
+          setImagemPreview(null);
+        },
+      }
+    );
+    e.target.value = "";
+  };
+
+  const handleEliminarImagemFormulario = () => {
+    if (!editingEan) return;
+    eliminarImagemMutation.mutate(editingEan, {
+      onSuccess: () => {
+        setImagemPreview(null);
+        setImagemCacheBuster(prev => ({ ...prev, [editingEan]: Date.now() }));
+      },
+    });
+  };
+
+  const handleUploadLinha = (peca, file) => {
+    setImagemErro(null);
+    const erro = validarFicheiroImagem(file);
+    if (erro) {
+      alert(erro);
+      return;
+    }
+    setUploadingEan(peca.CodigoEAN);
+    uploadImagemMutation.mutate(
+      { ean: peca.CodigoEAN, file },
+      {
+        onSettled: () => setUploadingEan(null),
+        onSuccess: () => {
+          setImagemCacheBuster(prev => ({ ...prev, [peca.CodigoEAN]: Date.now() }));
+        },
+      }
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    const stockMinimoParsed = parseInt(formData.stockMinimo, 10);
+    const padraoReposicaoParsed = parseInt(formData.padraoReposicao, 10);
     const payload = {
         CodigoEAN: formData.ean,
         Nome: formData.nome,
@@ -48,8 +142,8 @@ export default function PecasManagement() {
         StockAtual: parseInt(formData.stockAtual, 10),
         Descricao: formData.descricao,
         Ativo: formData.ativo,
-        StockMinimo: 5,
-        PadraoReposicao: 5,
+        StockMinimo: Number.isFinite(stockMinimoParsed) ? stockMinimoParsed : 5,
+        PadraoReposicao: Number.isFinite(padraoReposicaoParsed) ? padraoReposicaoParsed : 5,
         Imagem: ""
     };
 
@@ -64,46 +158,35 @@ export default function PecasManagement() {
   };
 
   const handleEdit = (peca) => {
-    setEditingEan(peca.CodigoEAN); 
+    setEditingEan(peca.CodigoEAN);
     setFormData({
-      ean: peca.CodigoEAN, 
+      ean: peca.CodigoEAN,
       nome: peca.Nome,
       categoria: peca.Categoria,
       pvp: peca.PVP?.toString() || "",
-      custoAquisicao: peca.CustoAquisicao?.toString() || "", 
+      custoAquisicao: peca.CustoAquisicao?.toString() || "",
       stockAtual: peca.StockAtual?.toString() || "",
+      stockMinimo: (peca.StockMinimo ?? 5).toString(),
+      padraoReposicao: (peca.PadraoReposicao ?? 5).toString(),
       descricao: peca.Descricao ?? "",
-      ativo: peca.Ativo !== false, 
+      ativo: peca.Ativo !== false,
     });
+    setImagemPreview(null);
+    setImagemErro(null);
     setIsFormOpen(true);
   };
 
  const handleToggleAtivo = (peca) => {
-    const payload = {
-        CodigoEAN: peca.CodigoEAN,
-        Nome: peca.Nome,
-        Categoria: peca.Categoria,
-        PVP: peca.PVP,
-        StockAtual: peca.StockAtual,
-        Descricao: peca.Descricao ?? "",
-        Ativo: !peca.Ativo, 
-        
-        CustoAquisicao: peca.CustoAquisicao ?? 0,
-        StockMinimo: peca.StockMinimo ?? 5,
-        PadraoReposicao: peca.PadraoReposicao ?? 5,
-        Imagem: peca.Imagem ?? ""
-    };
-
-    atualizarMutation.mutate({ 
-        ean: peca.CodigoEAN, 
-        dados: payload 
-    });
+    // Toggle apenas o estado — não tocar nos restantes campos (evita corromper imagem ao desativar)
+    alterarEstadoMutation.mutate({ ean: peca.CodigoEAN, ativo: !peca.Ativo });
   };
 
   const handleCancel = () => {
     setFormData(FORM_EMPTY);
     setIsFormOpen(false);
     setEditingEan(null);
+    setImagemPreview(null);
+    setImagemErro(null);
   };
 
   const handleSort = (key) => {
@@ -178,6 +261,21 @@ export default function PecasManagement() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 relative">
+      <input
+        type="file"
+        ref={inputLinhaRef}
+        accept={TIPOS_IMAGEM_ACEITES.join(',')}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          const ean = inputLinhaRef.current?.getAttribute('data-ean');
+          e.target.value = "";
+          if (file && ean) {
+            const peca = pecas.find(p => p.CodigoEAN === ean);
+            if (peca) handleUploadLinha(peca, file);
+          }
+        }}
+      />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Catálogo de Peças</h1>
@@ -292,7 +390,33 @@ export default function PecasManagement() {
                 className={inputClass}
               />
             )}
-            
+
+            {field("Stock Mínimo",
+              <input
+                type="number"
+                min="0"
+                step="1"
+                required
+                value={formData.stockMinimo}
+                onChange={(e) => setFormData({ ...formData, stockMinimo: e.target.value })}
+                placeholder="Limiar para reposição"
+                className={inputClass}
+              />
+            )}
+
+            {field("Padrão de Reposição",
+              <input
+                type="number"
+                min="1"
+                step="1"
+                required
+                value={formData.padraoReposicao}
+                onChange={(e) => setFormData({ ...formData, padraoReposicao: e.target.value })}
+                placeholder="Qtd. a encomendar"
+                className={inputClass}
+              />
+            )}
+
             {editingEan && (
               <div className="space-y-2 lg:col-span-1">
                 <label className="text-xs font-black uppercase text-slate-400">Estado no Catálogo</label>
@@ -321,6 +445,71 @@ export default function PecasManagement() {
                   className={inputClass + " resize-none"}
                 />
               )}
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-3">
+              <label className="text-xs font-black uppercase text-slate-400 block mb-2">Imagem da Peça</label>
+              <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-slate-700 bg-slate-900">
+                <div className="w-24 h-24 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                  {editingEan && pecas.find(p => p.CodigoEAN === editingEan)?.Imagem ? (
+                    <img
+                      src={imagemPreview ?? pecaService.urlImagem(editingEan, tocouImagem(editingEan))}
+                      alt="Pré-visualização"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : imagemPreview ? (
+                    <img src={imagemPreview} alt="Pré-visualização" className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-slate-600" />
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <input
+                    type="file"
+                    ref={inputFicheiroRef}
+                    accept={TIPOS_IMAGEM_ACEITES.join(',')}
+                    onChange={handleSelecionarImagemFormulario}
+                    className="hidden"
+                  />
+                  {!editingEan ? (
+                    <p className="text-xs text-slate-400 font-medium">
+                      Guarde a peça primeiro. Depois poderá anexar uma imagem ao editá-la.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => inputFicheiroRef.current?.click()}
+                        disabled={uploadImagemMutation.isPending}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs disabled:opacity-50"
+                      >
+                        {uploadImagemMutation.isPending
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <Upload className="w-4 h-4" />}
+                        {uploadImagemMutation.isPending ? "A carregar..." : "Carregar Imagem"}
+                      </button>
+                      {pecas.find(p => p.CodigoEAN === editingEan)?.Imagem && (
+                        <button
+                          type="button"
+                          onClick={handleEliminarImagemFormulario}
+                          disabled={eliminarImagemMutation.isPending}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 font-bold text-xs disabled:opacity-50"
+                        >
+                          <Trash2 className="w-4 h-4" /> Remover
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    JPG, PNG, WEBP ou GIF · máximo 5 MB.
+                  </p>
+                  {imagemErro && (
+                    <p className="text-[11px] text-red-400 font-bold">{imagemErro}</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="md:col-span-2 lg:col-span-3 flex gap-3 pt-4 border-t border-slate-700 mt-2">
@@ -381,8 +570,17 @@ export default function PecasManagement() {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 shadow-sm border ${isAtivo ? 'bg-slate-900 border-slate-700' : 'bg-slate-800 border-slate-700'}`}>
-                            <Box className="w-5 h-5" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 shadow-sm border overflow-hidden ${isAtivo ? 'bg-slate-900 border-slate-700' : 'bg-slate-800 border-slate-700'}`}>
+                            {peca.Imagem ? (
+                              <img
+                                src={pecaService.urlImagem(peca.CodigoEAN, tocouImagem(peca.CodigoEAN))}
+                                alt={peca.Nome}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.replaceWith(Object.assign(document.createElement('span'), { className: 'text-slate-500 text-[10px] font-bold', textContent: 'N/D' })); }}
+                              />
+                            ) : (
+                              <Box className="w-5 h-5" />
+                            )}
                           </div>
                           <div>
                             <div className="font-bold text-white">{peca.Nome}</div>
@@ -418,13 +616,28 @@ export default function PecasManagement() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              inputLinhaRef.current?.setAttribute('data-ean', peca.CodigoEAN);
+                              inputLinhaRef.current?.click();
+                            }}
+                            disabled={uploadImagemMutation.isPending && uploadingEan === peca.CodigoEAN}
+                            className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all disabled:opacity-50"
+                            title={peca.Imagem ? "Substituir imagem" : "Carregar imagem"}
+                          >
+                            {uploadImagemMutation.isPending && uploadingEan === peca.CodigoEAN
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <ImageIcon className="w-4 h-4" />}
+                          </button>
+
+                          <button
                             onClick={(e) => { e.stopPropagation(); handleEdit(peca); }}
                             className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all"
                             title="Editar Peça"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          
+
                           <button
                             onClick={(e) => { e.stopPropagation(); handleToggleAtivo(peca); }}
                             disabled={alterarEstadoMutation.isPending}
@@ -469,8 +682,18 @@ export default function PecasManagement() {
 
             {/* Content */}
             <div className="p-6 space-y-6">
+              {selectedPeca.Imagem && (
+                <div className="w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
+                  <img
+                    src={pecaService.urlImagem(selectedPeca.CodigoEAN, tocouImagem(selectedPeca.CodigoEAN))}
+                    alt={selectedPeca.Nome}
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                
+
                 <div className="col-span-2 p-4 bg-slate-900/50 rounded-2xl border border-slate-700">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Nome da Peça</p>
                   <p className="text-lg font-bold text-white">{selectedPeca.Nome}</p>
@@ -500,6 +723,20 @@ export default function PecasManagement() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Stock Atual</p>
                   <p className={`text-2xl font-black font-mono ${selectedPeca.StockAtual > 0 ? 'text-cyan-400' : 'text-red-400'}`}>
                     {selectedPeca.StockAtual} un.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Stock Mínimo</p>
+                  <p className="text-2xl font-black font-mono text-slate-300">
+                    {selectedPeca.StockMinimo ?? 5} un.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Padrão Reposição</p>
+                  <p className="text-2xl font-black font-mono text-slate-300">
+                    {selectedPeca.PadraoReposicao ?? 5} un.
                   </p>
                 </div>
 

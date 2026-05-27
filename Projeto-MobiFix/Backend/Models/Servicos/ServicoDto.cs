@@ -71,4 +71,19 @@ public class TrotineteProntaDto
     public DateTime? DataConclusao { get; set; }
     public decimal Preco { get; set; }
     public string? DescricaoDiagnostico { get; set; }
+
+    // Mão de obra (= Preco do serviço) e detalhe das peças usadas
+    // permitem ao operador ver o discriminado no checkout.
+    public decimal MaoDeObra { get; set; }
+    public decimal TotalPecas { get; set; }
+    public decimal TotalFinal { get; set; }
+    public List<PecaFaturacaoDto> Pecas { get; set; } = new();
+}
+
+public class PecaFaturacaoDto
+{
+    public string PecaEAN { get; set; } = string.Empty;
+    public string Nome { get; set; } = string.Empty;
+    public int Quantidade { get; set; }
+    public decimal PrecoUnitario { get; set; }
 }

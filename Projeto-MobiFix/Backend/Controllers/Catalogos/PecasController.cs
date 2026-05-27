@@ -3,7 +3,10 @@ namespace Backend.Controllers;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System;
 
@@ -127,13 +130,85 @@ public class PecasController : ControllerBase
         try
         {
             var sucesso = await _pecaService.EliminarPecaAsync(ean);
-            
-            if (!sucesso) 
+
+            if (!sucesso)
             {
                 return NotFound(new { mensagem = "Peça não encontrada." });
             }
-            
+
             return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    private static readonly HashSet<string> MimeImagensAceites = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+    };
+
+    // GET: api/pecas/{ean}/imagem — devolve o binário da imagem (público)
+    [HttpGet("{ean}/imagem")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ObterImagem(string ean)
+    {
+        try
+        {
+            var resultado = await _pecaService.ObterImagemAsync(ean);
+            if (resultado is null) return NotFound(new { mensagem = "Imagem não encontrada." });
+
+            Response.Headers["Cache-Control"] = "public, max-age=300";
+            return File(resultado.Value.Conteudo, resultado.Value.ContentType);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // POST: api/pecas/{ean}/imagem — upload via multipart/form-data (campo "ficheiro")
+    [HttpPost("{ean}/imagem")]
+    [Authorize(Policy = "ApenasAdmin")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadImagem(string ean, IFormFile? ficheiro)
+    {
+        if (ficheiro is null || ficheiro.Length == 0)
+            return BadRequest(new { error = "Ficheiro não fornecido." });
+
+        var contentType = ficheiro.ContentType?.ToLowerInvariant() ?? string.Empty;
+        if (!MimeImagensAceites.Contains(contentType))
+            return StatusCode(StatusCodes.Status415UnsupportedMediaType,
+                new { error = $"Tipo de imagem não suportado: {contentType}." });
+
+        try
+        {
+            await using var stream = ficheiro.OpenReadStream();
+            var atualizada = await _pecaService.UploadImagemAsync(ean, stream, contentType);
+            if (atualizada is null)
+                return BadRequest(new { error = "Não foi possível guardar a imagem." });
+
+            return Ok(atualizada);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // DELETE: api/pecas/{ean}/imagem — remove a imagem associada
+    [HttpDelete("{ean}/imagem")]
+    [Authorize(Policy = "ApenasAdmin")]
+    public async Task<IActionResult> EliminarImagem(string ean)
+    {
+        try
+        {
+            var atualizada = await _pecaService.EliminarImagemAsync(ean);
+            if (atualizada is null)
+                return NotFound(new { mensagem = "Peça não encontrada." });
+
+            return Ok(atualizada);
         }
         catch (Exception ex)
         {

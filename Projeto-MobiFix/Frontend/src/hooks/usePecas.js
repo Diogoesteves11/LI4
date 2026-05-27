@@ -42,3 +42,25 @@ export function useAlterarEstadoPeca() {
         },
     });
 }
+
+// Hook para upload da imagem da peça
+export function useUploadImagemPeca() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ ean, file }) => pecaService.uploadImagem(ean, file),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pecas'] });
+        },
+    });
+}
+
+// Hook para eliminar a imagem da peça
+export function useEliminarImagemPeca() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (ean) => pecaService.eliminarImagem(ean),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pecas'] });
+        },
+    });
+}

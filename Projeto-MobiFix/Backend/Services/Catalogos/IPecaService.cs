@@ -12,4 +12,7 @@ public interface IPecaService
     Task<PecaDto?> AtualizarPecaAsync(string ean, PecaDto pecaAtualizada);
     Task<PecaDto?> AlterarEstadoPecaAsync(string ean, bool ativo);
     Task<bool> EliminarPecaAsync(string ean);
+    Task<PecaDto?> UploadImagemAsync(string ean, Stream conteudo, string contentType);
+    Task<(Stream Conteudo, string ContentType)?> ObterImagemAsync(string ean);
+    Task<PecaDto?> EliminarImagemAsync(string ean);
 }
